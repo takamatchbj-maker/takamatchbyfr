@@ -144,62 +144,75 @@ window.TM_SHELL = true;
     return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   };
 })();
-
 /* ============================================================
    Navigation entre les pages
    Chaque page envoie ses demandes (« ouvrir l'inscription »,
    « inscription terminée », « déconnexion »…) par un message.
-   Ce routeur les reçoit et ouvre la bonne page en transmettant
-   ce qu'il faut (rôle choisi, compte créé, petit message).
+   Ce routeur les reçoit et ouvre la bonne page.
 
-   ⚠ Prototype : les comptes sont gardés dans CE navigateur
-   (localStorage). Ils ne sont pas partagés entre appareils ni
-   visibles par l'équipe tant qu'il n'y a pas de vraie base de
-   données côté serveur.
+   Les comptes vivent dans la base Supabase (js/supabase.js) :
+   app.html charge le profil de la personne connectée et renvoie
+   vers la connexion s'il n'y a pas de session.
+   app.html?demo=1 ouvre le compte de démonstration.
    ============================================================ */
 (function(){
   'use strict';
   var PAGE = document.documentElement.getAttribute('data-page') || 'site';
   var URL_OF = {site:'index.html', onb:'inscription.html', app:'app.html'};
 
-  function readJSON(store, key, fallback){
-    try{ var v = JSON.parse(store.getItem(key)); return v == null ? fallback : v; }catch(e){ return fallback; }
-  }
-  function writeJSON(store, key, value){
-    try{ store.setItem(key, JSON.stringify(value)); return true; }catch(e){ return false; }
-  }
-  function drop(store, key){ try{ store.removeItem(key); }catch(e){} }
-  var LS = (function(){ try{ return window.localStorage; }catch(e){ return null; } })();
   var SS = (function(){ try{ return window.sessionStorage; }catch(e){ return null; } })();
-  var mem = {};  /* si le stockage est bloqué (navigation privée stricte) */
-  var memStore = {getItem:function(k){ return k in mem ? mem[k] : null; }, setItem:function(k, v){ mem[k] = String(v); }, removeItem:function(k){ delete mem[k]; }};
-  LS = LS || memStore; SS = SS || memStore;
-
-  /* Comptes créés dans ce navigateur, par e-mail. */
-  function accounts(){ return readJSON(LS, 'tm-accounts', {}); }
-  function saveAccounts(a){
-    if(!writeJSON(LS, 'tm-accounts', a)){
-      /* Trop lourd (photo) : on retente sans les photos. */
-      Object.keys(a).forEach(function(k){ var x = a[k]; if(x.onb) x.onb.photo = ''; if(x.tool) x.tool.photo = ''; });
-      writeJSON(LS, 'tm-accounts', a);
-    }
-  }
+  var mem = {};
+  SS = SS || {getItem:function(k){ return k in mem ? mem[k] : null; }, setItem:function(k, v){ mem[k] = String(v); }, removeItem:function(k){ delete mem[k]; }};
+  function take(key){ var v = null; try{ v = JSON.parse(SS.getItem(key)); }catch(e){} try{ SS.removeItem(key); }catch(e){} return v; }
+  function put(key, v){ try{ SS.setItem(key, JSON.stringify(v)); }catch(e){} }
 
   function send(msg){ window.postMessage(Object.assign({tm:1}, msg), /^https?:$/.test(location.protocol) ? location.origin : '*'); }
-  function goTo(page, replace){
-    var url = URL_OF[page];
+  function goTo(page, replace, query){
+    var url = URL_OF[page] + (query || '');
     if(replace) location.replace(url); else location.href = url;
   }
-  function flash(msg){ writeJSON(SS, 'tm-flash', msg); }
+  var DEMO = {kind:'demo', email:'', view:'accueil', welcome:'Bienvenue dans le compte de démonstration.'};
+
+  /* Profil de la base → format attendu par l'outil. */
+  function toOnb(me){
+    var p = me.profile || {}, i = me.identity || {}, v = me.priv || {}, pr = (me.projects || [])[0] || {};
+    var ph = String(v.phone || '').trim(), sp = ph.indexOf(' ');
+    var dial = ph.charAt(0) === '+' && sp > 0 ? ph.slice(0, sp) : '';
+    return {
+      first:i.first_name || '', last:i.last_name || '', handle:p.handle || '', city:p.city || '',
+      sex:i.sex === 'n' ? 'np' : (i.sex || 'np'), phone:dial ? ph.slice(sp + 1) : ph, dial:dial, cc:p.country || '',
+      photo:p.photo_url || '', role:p.primary_role || 'tal',
+      skills:p.skills || [], sectors:p.sectors || [], level:p.level || '', diploma:p.diploma || '', status:p.status || '',
+      pace:p.pace || 'serieux', bio:p.bio || '', portfolio:p.portfolio_url || '', portfolioTitle:p.portfolio_title || '',
+      perso:{skills:p.skills || [], level:p.level || '', bio:p.bio || '', portfolio:p.portfolio_url || ''},
+      project:{title:pr.title || '', sectors:pr.sectors || [], seeking:pr.seeking || [], hook:pr.hook || '', vision:pr.vision || '',
+        traction:pr.traction || '', challenges:pr.challenges || '', link:pr.link || '', offer:pr.offer || 'equity', cover:pr.cover_url || ''},
+      projIconGlyph:pr.glyph || '💡'
+    };
+  }
+
+  async function startApp(){
+    var q = new URLSearchParams(location.search);
+    if(q.get('demo') === '1' || !window.TMDB){ send({type:'account', acc:DEMO}); return; }
+    var s = null;
+    try{ s = await TMDB.ensure(); }catch(e){}
+    if(!s){ goTo('onb', true, '?mode=login'); return; }
+    var me;
+    try{ me = await TMDB.loadMe(); }
+    catch(e){ if(window.TMGuard) TMGuard.crash(e, 'chargement du compte'); return; }
+    if(!me || !me.profile || !me.profile.onboarded_at){ goTo('onb', true); return; }
+    var view = take('tm-app-view'), welcome = take('tm-app-welcome');
+    send({type:'account', acc:{kind:'fresh', email:TMDB.email(), onb:toOnb(me), view:view || 'accueil', welcome:welcome || undefined}});
+  }
 
   /* ---------- La page vient de démarrer ---------- */
   function onReady(){
     if(PAGE === 'site'){
-      var f = readJSON(SS, 'tm-flash', null);
-      if(f){ drop(SS, 'tm-flash'); send({type:'toast', msg:f, kind:'ok'}); }
+      var f = take('tm-flash');
+      if(f) send({type:'toast', msg:f, kind:'ok'});
     }
     if(PAGE === 'onb'){
-      var o = readJSON(SS, 'tm-onb-open', null); drop(SS, 'tm-onb-open');
+      var o = take('tm-onb-open');
       if(!o){
         var q = new URLSearchParams(location.search);
         o = {mode:q.get('mode') === 'login' ? 'login' : 'signup', role:q.get('role') || undefined};
@@ -207,17 +220,7 @@ window.TM_SHELL = true;
       send({type:'open', mode:o.mode, role:o.role, contact:o.contact});
     }
     if(PAGE === 'app'){
-      var s = readJSON(SS, 'tm-session', null), acc;
-      if(s && s.acc){
-        acc = s.acc;
-        var a = accounts()[s.key];
-        if(a && a.tool && acc.kind === 'fresh'){ acc = Object.assign({}, acc, {tool:a.tool, onb:a.onb}); }
-        /* Au rechargement : pas de second message de bienvenue. */
-        writeJSON(SS, 'tm-session', {key:s.key, acc:Object.assign({}, s.acc, {welcome:undefined, view:'accueil'})});
-      } else {
-        acc = {kind:'demo', email:'', view:'accueil', welcome:'Bienvenue dans le compte de démonstration.'};
-      }
-      send({type:'account', acc:acc});
+      startApp();
       /* Bouton « retour » du navigateur : on reste dans l'outil et on remonte à l'accueil. */
       try{ history.pushState({tm:'app'}, ''); }catch(e){}
       window.addEventListener('popstate', function(){
@@ -227,29 +230,11 @@ window.TM_SHELL = true;
     }
   }
 
-  /* ---------- Fin de l'inscription ou connexion ---------- */
-  function onboardingDone(d){
-    var email = (d.ident || '').trim(), k = email.toLowerCase(), acc, all = accounts();
-    if(d.login){
-      var a = all[k];
-      if(a){
-        var first = (a.tool && a.tool.first) || (a.onb && a.onb.first) || '';
-        acc = {kind:'fresh', email:a.email, onb:a.onb, tool:a.tool, view:'accueil',
-          welcome:'Content de te revoir' + (first ? ', ' + first : '') + '.'};
-      } else {
-        k = 'demo:' + k;
-        acc = {kind:'demo', email:email, view:'accueil', welcome:'Bienvenue dans le compte de démonstration.'};
-      }
-    } else {
-      all[k] = {email:email, onb:d.me, tool:null}; saveAccounts(all);
-      /* « Découvrir les projets / les talents » : on arrive dans Explorer. */
-      acc = {kind:'fresh', email:email, onb:d.me, view:'explorer'};
-    }
-    if(!writeJSON(SS, 'tm-session', {key:k, acc:acc})){
-      if(acc.onb) acc.onb = Object.assign({}, acc.onb, {photo:''});
-      writeJSON(SS, 'tm-session', {key:k, acc:acc});
-    }
-    goTo('app', true);
+  async function leave(flashMsg, before){
+    try{ if(before) await before(); }catch(e){}
+    try{ if(window.TMDB) await TMDB.signOut(); }catch(e){}
+    put('tm-flash', flashMsg);
+    goTo('site', true);
   }
 
   /* ---------- Messages envoyés par la page ---------- */
@@ -257,23 +242,29 @@ window.TM_SHELL = true;
     var d = e.data; if(!d || !d.tm || e.source !== window) return;
     switch(d.type){
       case 'ready': onReady(); break;
-      case 'theme': try{ LS.setItem('tm-theme', d.v); }catch(err){} break;
+      case 'theme': try{ localStorage.setItem('tm-theme', d.v); }catch(err){} break;
       case 'open-onb':
-        writeJSON(SS, 'tm-onb-open', {mode:d.mode, role:d.role, contact:d.contact});
+        put('tm-onb-open', {mode:d.mode, role:d.role, contact:d.contact});
         goTo('onb'); break;
       case 'onb-close':
         if(document.referrer && document.referrer.indexOf(location.host) > -1 && history.length > 1) history.back();
         else goTo('site');
         break;
-      case 'onb-done': onboardingDone(d); break;
+      case 'onb-done':
+        /* Nouveau compte : on arrive dans Explorer. Connexion : accueil. */
+        put('tm-app-view', d.login ? 'accueil' : 'explorer');
+        if(d.login) put('tm-app-welcome', 'Content de te revoir.');
+        goTo('app', true); break;
       case 'logout':
-        var s = readJSON(SS, 'tm-session', null);
-        if(s && d.me){ var all = accounts(); if(all[s.key]){ all[s.key].tool = d.me; saveAccounts(all); } }
-        drop(SS, 'tm-session'); flash('Tu es déconnecté. À bientôt sur TakaMatch.'); goTo('site', true); break;
+        if(new URLSearchParams(location.search).get('demo') === '1'){ put('tm-flash', 'Tu as quitté la démonstration.'); goTo('site', true); break; }
+        leave('Tu es déconnecté. À bientôt sur TakaMatch.'); break;
       case 'deleted':
-        var s2 = readJSON(SS, 'tm-session', null);
-        if(s2){ var all2 = accounts(); delete all2[s2.key]; saveAccounts(all2); }
-        drop(SS, 'tm-session'); flash('Ton compte a été supprimé.'); goTo('site', true); break;
+        /* La suppression définitive est faite par l'équipe (données, fichiers, paiements). */
+        leave('Ta demande de suppression est enregistrée. L\'équipe la traite sous 48 h.', function(){
+          return window.TMDB && TMDB.uid() ? TMDB.insert('support_tickets', {topic:'Suppression du compte',
+            body:'Je demande la suppression définitive de mon compte TakaMatch.'}) : null;
+        });
+        break;
     }
   });
 })();

@@ -831,7 +831,7 @@ function renderOnb(){
       +     '<div class="at"><span aria-hidden="true">@</span><input class="inp" id="handle" placeholder="ton_pseudo" autocomplete="off" spellcheck="false" maxlength="20" value="'+esc(ME.handle)+'" aria-describedby="handleMsg"></div>'
       +     '<div id="handleMsg" class="hint" aria-live="polite">'+esc(st.msg)+'</div></div>'
       +   '<div class="note-card">'+ic('lock')+'<div><b>Ton vrai nom reste caché</b>'
-      +     '<p class="hint">'+esc([myName(), sexL(ME.sex), ME.city].filter(Boolean).join(' · '))+' : visible seulement après un match accepté des deux côtés. Évite de reprendre ton nom dans ton pseudo.</p></div></div>'
+      +     '<p class="hint">'+esc([myName(), sexL(ME.sex)].filter(Boolean).join(' · '))+' : visible seulement après un match accepté des deux côtés. Ta ville, elle, reste affichée sur ta fiche. Évite de reprendre ton nom dans ton pseudo.</p></div></div>'
       + '</div>';
     foot = onbFoot(a);
   }

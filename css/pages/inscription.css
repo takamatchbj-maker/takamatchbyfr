@@ -1280,3 +1280,6 @@ b.req{color:var(--bad);font-weight:700}
 
 /* Page autonome : fond papier au lieu de la vitrine floutée. */
 .tm-shell,.tm-shell body{background:var(--ground)!important}
+
+/* Connexion Apple pas encore proposée (compte Apple Developer requis). */
+[data-act="onb-social"][data-m="apple"]{display:none!important}
