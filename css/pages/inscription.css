@@ -1281,5 +1281,9 @@ b.req{color:var(--bad);font-weight:700}
 /* Page autonome : fond papier au lieu de la vitrine floutée. */
 .tm-shell,.tm-shell body{background:var(--ground)!important}
 
+/* La vitrine en arrière-plan : visible à travers le voile flouté de la fenêtre,
+   jamais cliquable ni atteignable au clavier. */
+.bg-site{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:0;pointer-events:none;background:var(--ground)}
+
 /* Connexion Apple pas encore proposée (compte Apple Developer requis). */
 [data-act="onb-social"][data-m="apple"]{display:none!important}

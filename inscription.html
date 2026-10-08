@@ -20,15 +20,17 @@
      Pour brancher un outil de suivi d'erreurs plus tard (Sentry…) :
      TMGuard.onError = err => { ... }
      ============================================================ -->
-<link rel="stylesheet" href="css/variables.css">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/pages/inscription.css">
-<script src="js/main.js"></script>
-<script src="js/supabase.js"></script>
+<link rel="stylesheet" href="css/variables.css?v=20261008c">
+<link rel="stylesheet" href="css/base.css?v=20261008c">
+<link rel="stylesheet" href="css/components.css?v=20261008c">
+<link rel="stylesheet" href="css/pages/inscription.css?v=20261008c">
+<script src="js/main.js?v=20261008c"></script>
+<script src="js/supabase.js?v=20261008c"></script>
 </head>
 <body>
 <div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
+<!-- Le décor : la vraie vitrine, affichée derrière la fenêtre et floutée par le voile. -->
+<iframe class="bg-site" src="index.html" title="Aperçu du site TakaMatch" aria-hidden="true" tabindex="-1"></iframe>
 <!-- Le décor : la vitrine derrière la fenêtre (papier et halos du hero). -->
 <div class="scene" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
 
@@ -56,7 +58,7 @@
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
-<script src="js/pages/inscription.js"></script>
-<script src="js/pages/inscription-auth.js"></script>
+<script src="js/pages/inscription.js?v=20261008c"></script>
+<script src="js/pages/inscription-auth.js?v=20261008c"></script>
 </body>
 </html>
