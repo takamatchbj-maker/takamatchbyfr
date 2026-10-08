@@ -13,7 +13,8 @@
   'use strict';
   var SB_URL = 'https://ucxeopgigfzmuqzuzynr.supabase.co';
   var SB_KEY = 'sb_publishable_j-dzjIrf_94H7f0Ogg_QkQ_sGlLjW-R';
-  var SKEY = 'tm-sb-session';
+  /* L'admin garde sa propre session (window.TM_SB_SKEY), séparée de celle des membres. */
+  var SKEY = window.TM_SB_SKEY || 'tm-sb-session';
 
   /* ---------- Session (gardée dans ce navigateur) ---------- */
   var session = null;
@@ -109,6 +110,7 @@
   /* ---------- API publique : window.TMDB ---------- */
   var DB = window.TMDB = {
     url: SB_URL,
+    key: SB_KEY,   /* clé publique (lecture des prix…) */
     session: function(){ return session; },
     user: function(){ return session && session.user; },
     uid: function(){ return session && session.user && session.user.id; },

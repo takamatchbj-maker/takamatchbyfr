@@ -1,0 +1,1658 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>TakaMatch — Espace équipe</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FscXVlXzEiIGRhdGEtbmFtZT0iQ2FscXVlIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI2Ni4wMyAyMjUuMjUiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICNmZmQ3NDE7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogIzAwN2NkODsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg0LjE1LDE3Ni44NmMtMy40MS0xLjczLTUuOTUtNC42OC03LjE0LTguMzItMS4xOS0zLjY0LS45LTcuNTIuODMtMTAuOTNsNTguOTUtMTE2LjQ4LTEwLjMzLTMxLjI4Yy0xLjk0LTUuODgtNy40MS05Ljg0LTEzLjYtOS44NC0xLjUyLDAtMy4wMy4yNC00LjQ5LjczTDkuODQsMzMuMjVDMi4zNCwzNS43My0xLjc1LDQzLjg1LjcyLDUxLjM1bDQ3LjU1LDE0NC4wNWMxLjk0LDUuODksNy40MSw5Ljg0LDEzLjYsOS44NCwxLjUyLDAsMy4wNC0uMjQsNC40OS0uNzNsNDMuODMtMTQuNDctMjYuMDUtMTMuMThaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMjY1LjMxLDcxLjFjLTEuMTktMy42NC0zLjczLTYuNTktNy4xNC04LjMyTDE2NS41OSwxNS45NGMtMi4wMy0xLjAzLTQuMi0xLjU1LTYuNDYtMS41NS01LjQ0LDAtMTAuMzQsMy4wMS0xMi43OSw3Ljg2bC02OC41LDEzNS4zNWMtMS43MywzLjQyLTIuMDIsNy4zLS44MywxMC45MywxLjE5LDMuNjQsMy43Myw2LjU5LDcuMTQsOC4zMmw5Mi41OCw0Ni44NWMyLDEuMDEsNC4yMywxLjU1LDYuNDYsMS41NSw1LjQ0LDAsMTAuMzQtMy4wMSwxMi43OS03Ljg2bDY4LjQ5LTEzNS4zNWMxLjczLTMuNDEsMi4wMi03LjMuODMtMTAuOTNaIi8+Cjwvc3ZnPg==">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  /* Neutres chauds — DESIGN.md §3 */
+  --ground:#F4F1EA; --surface:#FAF9F5; --surface-2:#F2EFE7; --surface-3:#EDE9E0;
+  --line:#E4E0D6; --line-strong:#D2CCBC;
+  /* Les deux encres secondaires ont été assombries : à #8A8579 le texte
+     tertiaire ne donnait que 3,4:1 sur le papier — sous le seuil AA. */
+  --ink:#1F1E1B; --ink-2:#5D5A52; --ink-3:#706C5E; --ink-4:#8C8779;
+
+  /* Ombres : réservées aux calques flottants. Les cartes se posent
+     sur un filet, pas sur une ombre (DESIGN.md §6). */
+  --shadow-1:none;
+  --shadow-2:0 1px 2px rgba(31,30,27,.05),0 8px 20px -10px rgba(31,30,27,.14);
+  --shadow-3:0 4px 10px -4px rgba(31,30,27,.10),0 22px 48px -16px rgba(31,30,27,.26);
+  --shadow-pop:0 10px 30px -10px rgba(31,30,27,.30);
+
+  /* Marque — les deux 500 sont vos hex d'origine, intacts.
+     Les paliers voisins sont retendus pour tenir sur le papier. */
+  --tal-50:#EAF0F6; --tal-100:#DAE6F1; --tal-200:#BCD3E8; --tal-300:#8DB7DC;
+  --tal-500:#007CD8; --tal-600:#0A65AE; --tal-700:#0A5C99; --tal-800:#083F69;
+  --vis-50:#F7F1DD; --vis-100:#F2E6BE; --vis-200:#EBD694; --vis-300:#E3C258;
+  --vis-500:#FFD741; --vis-600:#C9941A; --vis-700:#8A6008; --vis-800:#5E4106;
+
+  /* Sémantique — DESIGN.md §3, jamais confondue avec l'accent */
+  --ok:#4B7F52; --ok-bg:#E8EFE5; --ok-ink:#3A6640;
+  /* Encre posée sur un aplat sémantique plein (pastille de compteur). */
+  --on-bad:#fff;
+  --warn:#B07D2E; --warn-bg:#F5EDDC; --warn-ink:#7D5715;
+  --bad:#B54A3F; --bad-bg:#F4E5E1; --bad-ink:#93372E;
+
+  /* Rayons — DESIGN.md §5 : courts et constants, 6 à 10 px.
+     Au-delà de 12 px seulement pour les grands calques. */
+  --r-xs:4px; --r-sm:6px; --r-md:8px; --r-lg:10px; --r-xl:12px; --r-2xl:16px; --r-pill:999px;
+
+  /* Espacement — base 8 (DESIGN.md §5) */
+  --s1:8px; --s2:16px; --s3:24px; --s4:32px; --s5:48px; --s6:64px; --s7:96px;
+
+  --ease:cubic-bezier(.22,1,.36,1); --ease-in:cubic-bezier(.4,0,1,1);
+  --t-fast:.13s; --t:.22s; --t-slow:.38s;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --disp:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  /* Accent par défaut = Talent */
+  --a-50:var(--tal-50); --a-100:var(--tal-100); --a-200:var(--tal-200); --a-300:var(--tal-300);
+  --a-500:var(--tal-500); --a-600:var(--tal-600); --a-700:var(--tal-700);
+  --a-on:#fff;
+  --a-edge:var(--tal-600);
+  --a-glow:rgba(0,124,216,.18);
+  /* Couleur « de l'autre » : un Talent voit ses interlocuteurs en or,
+     un Visionnaire les voit en bleu. La conversation garde deux voix. */
+  --o-50:var(--vis-50); --o-100:var(--vis-100); --o-700:var(--vis-700);
+}
+:root[data-role="vis"]{
+  --a-50:var(--vis-50); --a-100:var(--vis-100); --a-200:var(--vis-200); --a-300:var(--vis-300);
+  --a-500:var(--vis-500); --a-600:var(--vis-500); --a-700:var(--vis-700);
+  --a-on:#4A3500;              /* encre sombre sur l'or : 11:1 au lieu de 1,6:1 */
+  --a-edge:var(--vis-600);     /* l'or sur papier crème a besoin d'un filet */
+  --a-glow:rgba(201,148,26,.22);
+  --o-50:var(--tal-50); --o-100:var(--tal-100); --o-700:var(--tal-700);
+}
+
+/* Thème sombre : le pendant nocturne du papier, pas un inverse mécanique. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#1A1815; --surface:#22201C; --surface-2:#282521; --surface-3:#302C27;
+    --line:#37332D; --line-strong:#4A453D;
+    --ink:#F2EFE8; --ink-2:#BDB7AC; --ink-3:#A49E92; --ink-4:#8B857A;
+    --shadow-2:0 1px 2px rgba(0,0,0,.4),0 8px 20px -10px rgba(0,0,0,.6);
+    --shadow-3:0 4px 10px -4px rgba(0,0,0,.45),0 22px 48px -16px rgba(0,0,0,.7);
+    --shadow-pop:0 10px 30px -10px rgba(0,0,0,.65);
+    --tal-50:#14252F; --tal-100:#1A3244; --tal-200:#25475F; --tal-300:#3A6E92;
+    --tal-500:#3FA3EE; --tal-600:#5CB4F5; --tal-700:#9CD1FA;
+    --vis-50:#2A2308; --vis-100:#3B300C; --vis-200:#514111; --vis-300:#735C17;
+    --vis-500:#FFD741; --vis-600:#FFD741; --vis-700:#F0CE6F;
+    --ok:#7FA886; --ok-bg:#1C2A1E; --ok-ink:#9DC2A3;
+    --warn:#D2A44E; --warn-bg:#2C2312; --warn-ink:#E0BC77;
+    --bad:#D4796D; --bad-bg:#2E1B18; --bad-ink:#E5A196; --on-bad:#2E1512;
+    --a-on:#08283F;
+    --a-edge:var(--tal-600);
+  }
+  :root:not([data-theme="light"])[data-role="vis"]{ --a-on:#2A2308; --a-edge:var(--vis-300); }
+}
+:root[data-theme="dark"]{
+  --ground:#1A1815; --surface:#22201C; --surface-2:#282521; --surface-3:#302C27;
+  --line:#37332D; --line-strong:#4A453D;
+  --ink:#F2EFE8; --ink-2:#BDB7AC; --ink-3:#A49E92; --ink-4:#8B857A;
+  --shadow-2:0 1px 2px rgba(0,0,0,.4),0 8px 20px -10px rgba(0,0,0,.6);
+  --shadow-3:0 4px 10px -4px rgba(0,0,0,.45),0 22px 48px -16px rgba(0,0,0,.7);
+  --shadow-pop:0 10px 30px -10px rgba(0,0,0,.65);
+  --tal-50:#14252F; --tal-100:#1A3244; --tal-200:#25475F; --tal-300:#3A6E92;
+  --tal-500:#3FA3EE; --tal-600:#5CB4F5; --tal-700:#9CD1FA;
+  --vis-50:#2A2308; --vis-100:#3B300C; --vis-200:#514111; --vis-300:#735C17;
+  --vis-500:#FFD741; --vis-600:#FFD741; --vis-700:#F0CE6F;
+  --ok:#7FA886; --ok-bg:#1C2A1E; --ok-ink:#9DC2A3;
+  --warn:#D2A44E; --warn-bg:#2C2312; --warn-ink:#E0BC77;
+  --bad:#D4796D; --bad-bg:#2E1B18; --bad-ink:#E5A196; --on-bad:#2E1512;
+  --a-on:#08283F;
+  --a-edge:var(--tal-600);
+}
+:root[data-theme="dark"][data-role="vis"]{ --a-on:#2A2308; --a-edge:var(--vis-300); }
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:15px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:var(--tal-600)}
+h1,h2,h3{font-family:var(--disp);font-weight:600;margin:0;letter-spacing:-.005em}
+[hidden]{display:none!important}
+.ic{width:18px;height:18px;flex:0 0 auto}
+.mono{font-family:var(--mono)}
+.tnum{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:2px solid var(--tal-500);outline-offset:2px}
+
+/* Boutons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 15px;border-radius:var(--r-md);font-weight:600;font-size:13.5px;white-space:nowrap;transition:background var(--t-fast),border-color var(--t-fast),filter var(--t-fast)}
+.btn .ic{width:16px;height:16px}
+.btn-sm{height:32px;padding:0 11px;font-size:12.5px}
+.btn-a{background:var(--tal-600);color:#fff}
+.btn-a:hover{filter:brightness(1.07)}
+.btn-ghost{border:1px solid var(--line-strong);background:var(--surface)}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-quiet{color:var(--ink-2)}
+.btn-quiet:hover{background:var(--surface-3)}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-warn{background:var(--warn-bg);color:var(--warn-ink);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent)}
+.btn-bad{background:var(--bad);color:#fff}
+.btn-bad-ghost{border:1px solid color-mix(in srgb,var(--bad) 45%,transparent);color:var(--bad-ink);background:var(--surface)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn-block{width:100%}
+.iconbtn{width:36px;height:36px;border-radius:var(--r-md);display:grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--surface-3);color:var(--ink)}
+.lnk{color:var(--tal-600);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+
+/* Champs */
+.field{display:flex;flex-direction:column;gap:6px}
+.field > label,.lbl{font-size:12.5px;font-weight:600;color:var(--ink-3)}
+.inp{height:40px;border:1px solid var(--line);background:var(--surface-3);border-radius:var(--r-md);padding:0 12px;width:100%;outline:none;transition:border-color var(--t-fast),box-shadow var(--t-fast)}
+textarea.inp{height:auto;min-height:84px;padding:10px 12px;resize:vertical;line-height:1.5}
+.inp:focus{border-color:var(--tal-500);box-shadow:0 0 0 3px rgba(0,124,216,.15);background:var(--surface)}
+select.inp{padding-right:28px}
+.hint{font-size:12.5px;color:var(--ink-3)}
+.err{font-size:13px;color:var(--bad-ink);background:var(--bad-bg);padding:9px 12px;border-radius:var(--r-md)}
+.check{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:var(--r-md);cursor:pointer}
+.check:hover{background:var(--surface-2)}
+.check input{width:17px;height:17px;margin-top:2px;accent-color:var(--ok)}
+
+/* Jetons */
+.chip{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:var(--r-pill);font-size:11.5px;font-weight:600;background:var(--surface-3);color:var(--ink-2);white-space:nowrap}
+.chip .ic{width:12px;height:12px}
+.c-ok{background:var(--ok-bg);color:var(--ok-ink)}
+.c-warn{background:var(--warn-bg);color:var(--warn-ink)}
+.c-bad{background:var(--bad-bg);color:var(--bad-ink)}
+.c-tal{background:var(--tal-50);color:var(--tal-700)}
+.c-vis{background:var(--vis-50);color:var(--vis-700)}
+.c-ink{background:var(--ink);color:var(--ground)}
+.handle{font-family:var(--mono);font-size:12px;background:#15130F;color:#fff;padding:2px 7px;border-radius:var(--r-sm)}
+.vbadge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;white-space:nowrap}
+.vbadge svg{width:15px;height:15px}
+.vb-tal svg{fill:#007CD8}.vb-tal span{color:var(--tal-700)}
+.vb-vis svg{fill:#E2A70F}.vb-vis span{color:var(--vis-700)}
+.vb-off svg{fill:#D3CEC3}.vb-off span{color:var(--ink-3);font-weight:500}
+:root[data-theme="dark"] .vb-tal svg{fill:#3FA3EE}:root[data-theme="dark"] .vb-vis svg{fill:#FFD741}:root[data-theme="dark"] .vb-off svg{fill:#4F4A42}
+:root[data-theme="dark"] .handle{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+
+/* Cartes et grilles */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl)}
+.card-pad{padding:18px}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-split{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.row{display:flex;align-items:center;gap:10px}
+.col{display:flex;flex-direction:column;gap:12px}
+.grow{flex:1;min-width:0}
+.sec-t{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.sec-t h3{font-size:17px}
+.kpi .k{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-3);font-weight:600}
+.kpi .k .ic{width:15px;height:15px}
+.kpi .v{font-family:var(--disp);font-size:30px;font-weight:600;line-height:1.15;margin-top:6px}
+.kpi .d{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.kpi .d.up{color:var(--ok-ink)}
+.todo{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-lg);border:1px solid var(--line);background:var(--surface);text-align:left;width:100%}
+.todo:hover{border-color:var(--line-strong);background:var(--surface-2)}
+.todo .n{font-family:var(--disp);font-size:24px;font-weight:600;min-width:34px}
+.todo.hot .n{color:var(--bad-ink)}
+
+/* Coquille */
+.demo-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin-bottom:16px;border-radius:12px;background:var(--warn-bg,#F6EDD3);color:var(--warn-ink,#7A5A12);font-size:13.5px;line-height:1.5}
+.demo-note svg{flex:0 0 auto;margin-top:1px}
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;position:relative;overflow:hidden}
+.login::before,.login::after{content:"";position:absolute;border-radius:50%;filter:blur(90px);z-index:0}
+.login::before{width:520px;height:520px;background:var(--vis-500);opacity:.35;left:-160px;top:-120px}
+.login::after{width:560px;height:560px;background:var(--tal-500);opacity:.25;right:-180px;bottom:-160px}
+.login-c{position:relative;z-index:1;width:min(420px,100%);padding:30px 28px}
+.login-c .logo{height:38px;margin:0 auto 22px;display:block}
+.login-c{text-align:center}
+.login-c .field{align-items:center}
+.login-c .field .inp{text-align:center}
+.login-c .demo-acc .lbl,.login-c .demo-acc .hint{text-align:center}
+.demo-acc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.demo-acc button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border-radius:var(--r-sm);font-size:12.5px;text-align:left}
+.demo-acc button:hover{background:var(--surface-2)}
+.top{position:sticky;top:0;z-index:20;height:60px;display:flex;align-items:center;gap:14px;padding:0 18px;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .logo{height:28px}
+.staff-chip{font-size:11.5px;font-weight:700;color:var(--ground);background:var(--ink);padding:3px 8px;border-radius:var(--r-sm);letter-spacing:.01em}
+.gsearch{position:relative;width:min(380px,40vw)}
+.gsearch .inp{height:36px;padding-left:34px}
+.gsearch .ic{position:absolute;left:10px;top:9px;color:var(--ink-3)}
+.gres{position:absolute;top:42px;left:0;right:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:6px;z-index:30;max-height:360px;overflow:auto}
+.gres button{display:flex;width:100%;gap:10px;align-items:center;padding:8px;border-radius:var(--r-md);text-align:left}
+.gres button:hover,.gres button.on{background:var(--surface-2)}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-3);font-weight:600}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(75,127,82,.5)}
+.live.pulse i{animation:pulse 1.2s 2}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(75,127,82,.6)}100%{box-shadow:0 0 0 10px rgba(75,127,82,0)}}
+.me-btn{display:flex;align-items:center;gap:9px;padding:4px 8px 4px 4px;border-radius:var(--r-pill);border:1px solid var(--line)}
+.me-btn:hover{background:var(--surface-2)}
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:calc(100% - 60px)}
+.side{border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:2px;background:var(--ground);position:sticky;top:60px;height:calc(100vh - 60px);overflow:auto}
+.side .grp{font-size:11.5px;font-weight:700;color:var(--ink-4);padding:14px 10px 6px}
+.nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-md);color:var(--ink-2);font-weight:500;text-align:left;width:100%}
+.nav:hover{background:var(--surface-3);color:var(--ink)}
+.nav.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--line)}
+.nav .cnt{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--bad);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}
+.nav .cnt.soft{background:var(--surface-3);color:var(--ink-2)}
+.side .foot{margin-top:auto;padding:12px 10px 4px;font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.main{padding:24px 28px 60px;min-width:0}
+.wrap{max-width:1240px;margin:0 auto}
+.page-h{display:flex;align-items:flex-end;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.page-h h1{font-size:28px;line-height:1.2}
+.page-h p{color:var(--ink-2);margin:4px 0 0}
+.page-h .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto}
+.tabs button{padding:9px 12px;font-weight:600;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tabs button.on{color:var(--ink);border-color:var(--ink)}
+.tabs .n{font-size:11px;background:var(--surface-3);border-radius:99px;padding:1px 7px;color:var(--ink-2)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.bar .inp{height:36px;width:auto}
+.bar .q{flex:1;min-width:200px}
+
+/* Tableaux */
+.tbl-w{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-xl);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-size:12px;color:var(--ink-3);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover td{background:var(--surface-2)}
+tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.who b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who small{display:block;color:var(--ink-3);font-size:12px}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;flex:0 0 auto;background:var(--tal-100);color:var(--tal-700);background-size:cover;background-position:center}
+.av.vis{background-color:var(--vis-100);color:var(--vis-700)}
+.av.staff{background:var(--ink);color:var(--ground)}
+.av-lg{width:56px;height:56px;font-size:18px}
+.empty{padding:40px 20px;text-align:center;color:var(--ink-3)}
+.empty b{display:block;font-family:var(--disp);font-size:18px;color:var(--ink);margin-bottom:4px}
+.prog{height:6px;border-radius:6px;background:var(--surface-3);overflow:hidden;width:90px}
+.prog i{display:block;height:100%;background:var(--ok)}
+
+/* Panneau latéral et fenêtres */
+.drawer-bg,.modal-bg{position:fixed;inset:0;background:rgba(20,18,15,.42);z-index:60;animation:fade .2s both}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(640px,100vw);background:var(--surface);z-index:61;box-shadow:var(--shadow-3);display:flex;flex-direction:column;animation:slide .26s var(--ease) both}
+.drawer.wide{width:min(980px,100vw)}
+@keyframes slide{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.dr-h{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dr-h h2{font-size:20px}
+.dr-b{flex:1;overflow:auto;padding:18px 20px 30px}
+.dr-f{border-top:1px solid var(--line);padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;background:var(--surface-2)}
+.dsec{margin-bottom:20px}
+.dsec > .lbl{margin-bottom:8px;display:block}
+.kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:7px 12px;font-size:13.5px}
+.kv dt{color:var(--ink-3)}
+.kv dd{margin:0;display:flex;align-items:center;gap:8px;min-width:0;word-break:break-word}
+.modal{position:fixed;z-index:71;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;background:var(--surface);border-radius:var(--r-2xl);box-shadow:var(--shadow-3);padding:22px;animation:pop .22s var(--ease) both}
+.modal-bg{z-index:70}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-46%)}to{opacity:1;transform:translate(-50%,-50%)}}
+.modal h2{font-size:21px;margin-bottom:8px}
+.modal p{color:var(--ink-2);margin:0 0 12px}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.docs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.doc{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface-2)}
+.doc img{display:block;width:100%;height:210px;object-fit:contain;background:#E9E5DB;cursor:zoom-in}
+.doc .cap{padding:8px 10px;font-size:12.5px;color:var(--ink-2);display:flex;justify-content:space-between}
+.zoom{position:fixed;inset:0;z-index:90;background:rgba(10,9,8,.86);display:grid;place-items:center;padding:20px;cursor:zoom-out}
+.zoom img{max-width:100%;max-height:100%;border-radius:8px}
+.timeline{display:flex;flex-direction:column;gap:10px}
+.timeline .it{display:flex;gap:10px;font-size:13px}
+.timeline .it i{width:8px;height:8px;border-radius:50%;background:var(--line-strong);margin-top:7px;flex:0 0 auto}
+.timeline .it span{color:var(--ink-3);font-size:12px}
+.note-box{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px;font-size:13px;color:var(--ink-2)}
+.note-box.warn{background:var(--warn-bg);border-color:transparent;color:var(--warn-ink)}
+.note-box.bad{background:var(--bad-bg);border-color:transparent;color:var(--bad-ink)}
+.chat{display:flex;flex-direction:column;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;max-height:360px;overflow:auto}
+.bub{max-width:80%;padding:8px 11px;border-radius:12px;font-size:13px;background:var(--surface);border:1px solid var(--line)}
+.bub.r{align-self:flex-end;background:var(--tal-50);border-color:transparent}
+.bub small{display:block;font-size:11px;color:var(--ink-3);margin-bottom:2px;font-weight:600}
+.bub.flag{border-color:var(--bad);background:var(--bad-bg)}
+.locked{display:flex;align-items:center;gap:12px;padding:14px;border:1px dashed var(--line-strong);border-radius:var(--r-lg);color:var(--ink-2);font-size:13px}
+.split{display:grid;grid-template-columns:340px minmax(0,1fr);gap:0;border:1px solid var(--line);border-radius:var(--r-xl);background:var(--surface);overflow:hidden;min-height:540px}
+.split .list{border-right:1px solid var(--line);overflow:auto;max-height:640px}
+.split .list button{display:block;width:100%;text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
+.split .list button:hover{background:var(--surface-2)}
+.split .list button.on{background:var(--tal-50)}
+.split .pane{display:flex;flex-direction:column;min-width:0}
+.hbars{display:flex;flex-direction:column;gap:9px}
+.hbar{display:grid;grid-template-columns:140px minmax(0,1fr) 92px;gap:10px;align-items:center;font-size:13px}
+.hbar .t{height:10px;border-radius:5px;background:var(--surface-3);overflow:hidden}
+.hbar .t i{display:block;height:100%;border-radius:5px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-3)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.matrix td,.matrix th{text-align:center}
+.matrix td:first-child,.matrix th:first-child{text-align:left}
+.toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:var(--r-md);font-size:13.5px;box-shadow:var(--shadow-3);display:flex;gap:9px;align-items:center;animation:pop2 .25s var(--ease) both}
+.toast.bad{background:var(--bad)}
+@keyframes pop2{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pop{position:absolute;right:16px;top:56px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:6px;min-width:230px;z-index:40}
+.pop button{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:var(--r-md);text-align:left}
+.pop button:hover{background:var(--surface-2)}
+.proto{font-size:12px;background:var(--warn-bg);color:var(--warn-ink);padding:8px 12px;border-radius:var(--r-md);margin-bottom:16px;display:flex;gap:8px;align-items:center}
+.menu-btn{display:none}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;left:0;top:60px;bottom:0;width:260px;z-index:50;transform:translateX(-100%);transition:transform .25s var(--ease);visibility:hidden;background:var(--surface);height:auto}
+  .side.open{transform:none;visibility:visible;box-shadow:var(--shadow-3)}
+  .menu-btn{display:grid}
+  .main{padding:18px 14px 50px}
+  .g3,.g2,.g-split{grid-template-columns:minmax(0,1fr)}
+  .split{grid-template-columns:minmax(0,1fr)}
+  .split .list{max-height:260px;border-right:0;border-bottom:1px solid var(--line)}
+  .gsearch{display:none}
+  .docs{grid-template-columns:minmax(0,1fr)}
+  .kv{grid-template-columns:120px minmax(0,1fr)}
+  .hbar{grid-template-columns:100px minmax(0,1fr) 80px}
+}
+@media (max-width:560px){.g4{grid-template-columns:minmax(0,1fr)}.live span{display:none}.staff-chip{display:none}.me-btn > span:last-child{display:none}.me-btn{padding:3px;border:0}.top{gap:8px;padding:0 10px}}
+</style>
+<!-- ============================================================
+     TMGuard — filet de sécurité commun à toutes les pages TakaMatch
+     · écran de chargement tant que la page n'est pas prête
+     · message clair si la page plante (au lieu d'un écran blanc)
+     · bandeau hors connexion
+     · TMGuard.fetch : délai maximum, nouvelles tentatives, messages lisibles
+     Pour brancher un outil de suivi d'erreurs plus tard (Sentry…) :
+     TMGuard.onError = err => { ... }
+     ============================================================ -->
+<style id="tmg-css">
+.tmg-boot{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:24px;background:#F4F1EA;color:#1F1E1B;font:500 14px/1.5 Inter,-apple-system,"Segoe UI",Roboto,sans-serif;text-align:center;opacity:0;animation:tmgIn .25s .18s forwards}
+.tmg-boot.dark{background:#1A1815;color:#EDE9E0}
+.tmg-boot.err{opacity:1;animation:none}
+.tmg-boot[hidden],.tmg-bar[hidden]{display:none}
+.tmg-in{max-width:380px;display:grid;justify-items:center;gap:12px;text-align:center}
+.tmg-spin{width:34px;height:34px;border-radius:50%;border:3px solid rgba(0,124,216,.18);border-top-color:#007CD8;border-right-color:#FFD741;animation:tmgSpin .8s linear infinite}
+.tmg-in h2{margin:0;font:600 20px/1.3 "Source Serif 4",Georgia,serif}
+.tmg-in p{margin:0;opacity:.78}
+.tmg-btn{appearance:none;border:0;border-radius:8px;padding:10px 16px;font:600 14px/1 Inter,-apple-system,"Segoe UI",sans-serif;background:#007CD8;color:#fff;cursor:pointer}
+.tmg-btn.ghost{background:transparent;color:inherit;box-shadow:inset 0 0 0 1px rgba(127,120,105,.45)}
+.tmg-btn:focus-visible{outline:3px solid #FFD741;outline-offset:2px}
+.tmg-in details{font-size:12px;opacity:.7;max-width:100%}
+.tmg-in pre{white-space:pre-wrap;word-break:break-word;text-align:left;margin:6px 0 0;font:12px/1.4 ui-monospace,Menlo,monospace}
+.tmg-bar{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:2147483001;width:min(560px,calc(100vw - 24px));display:flex;align-items:center;gap:10px;padding:10px 12px 10px 14px;border-radius:10px;background:#F4E5E1;color:#93372E;font:500 13.5px/1.4 Inter,-apple-system,"Segoe UI",sans-serif;box-shadow:0 10px 30px -10px rgba(31,30,27,.35)}
+.tmg-bar.off{background:#F5EDDC;color:#7D5715}
+.tmg-bar span{flex:1}
+.tmg-bar .tmg-btn{padding:7px 11px;font-size:13px;background:#93372E}
+.tmg-bar.off .tmg-btn{display:none}
+.tmg-bar .x{appearance:none;border:0;background:transparent;color:inherit;font-size:18px;line-height:1;cursor:pointer;padding:4px 6px}
+@keyframes tmgIn{to{opacity:1}}
+@keyframes tmgSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.tmg-boot{animation:none;opacity:1}.tmg-spin{animation-duration:2.4s}}
+</style>
+<script>
+(function(){
+  'use strict';
+  var booted = false, failed = false, bar = null, errors = [];
+  var G = window.TMGuard = {errors: errors, onError: null};
+
+  function dark(){
+    var t = document.documentElement.getAttribute('data-theme');
+    if(!t){ try{ t = localStorage.getItem('tm-theme'); }catch(e){} }
+    if(t === 'dark' || t === 'light') return t === 'dark';
+    return !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function boot(){ return document.getElementById('tmgBoot'); }
+
+  /* Erreurs sans intérêt pour l'utilisateur. */
+  function noise(msg){ return /ResizeObserver loop|^Script error\.?$/i.test(String(msg || '')); }
+
+  function record(err, where){
+    var e = {at: Date.now(), where: where || 'page', message: String((err && err.message) || err), stack: err && err.stack ? String(err.stack).slice(0, 2000) : ''};
+    errors.push(e); if(errors.length > 20) errors.shift();
+    try{ console.error('[TakaMatch]', where || '', err); }catch(_){}
+    try{ if(typeof G.onError === 'function') G.onError(e); }catch(_){}
+    return e;
+  }
+
+  /* Panneau « ça n'a pas marché » : remplace un écran blanc. */
+  G.panel = function(err, title, text, actions){
+    var e = err ? (err.message || String(err)) : '';
+    return '<div class="tmg-in" role="alert"><h2>'+esc(title || 'Cette page n\'a pas pu s\'afficher')+'</h2>'
+      + '<p>'+esc(text || 'Un problème technique nous empêche d\'afficher la page. Tes données ne sont pas perdues.')+'</p>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'+(actions || '')
+      + '<button class="tmg-btn" type="button" onclick="location.reload()">Recharger la page</button></div>'
+      + (e ? '<details><summary>Détail technique</summary><pre>'+esc(e)+'</pre></details>' : '')+'</div>';
+  };
+
+  function showBar(msg, offline){
+    if(!document.body) return;
+    if(!bar){
+      bar = document.createElement('div'); bar.className = 'tmg-bar'; bar.setAttribute('role', 'alert');
+      bar.innerHTML = '<span></span><button class="tmg-btn" type="button">Recharger</button><button class="x" type="button" aria-label="Fermer">×</button>';
+      bar.querySelector('.tmg-btn').onclick = function(){ location.reload(); };
+      bar.querySelector('.x').onclick = function(){ bar.hidden = true; };
+      document.body.appendChild(bar);
+    }
+    bar.classList.toggle('off', !!offline);
+    bar.querySelector('span').textContent = msg;
+    bar.hidden = false;
+  }
+  G.notify = function(msg){ showBar(msg, false); };
+  /* Note une erreur déjà gérée par la page (sans afficher de bandeau). */
+  G.log = function(err, where){ return record(err, where); };
+
+  /* Une erreur avant la fin du chargement → panneau plein écran.
+     Une erreur après → bandeau discret, la page reste utilisable. */
+  G.crash = function(err, where){
+    if(noise(err && err.message || err)) return;
+    record(err, where);
+    var b = boot();
+    if(!booted && b){
+      failed = true;
+      b.hidden = false; b.className = 'tmg-boot err' + (dark() ? ' dark' : '');
+      b.innerHTML = G.panel(err);
+    } else {
+      showBar('Oups, quelque chose n\'a pas marché. Ta dernière action n\'a peut-être pas été prise en compte.');
+    }
+  };
+  window.addEventListener('error', function(ev){
+    if(ev && ev.target && ev.target !== window) return;   /* image ou fichier manquant : géré localement */
+    G.crash(ev.error || ev.message, 'erreur');
+  });
+  window.addEventListener('unhandledrejection', function(ev){ G.crash(ev.reason || 'Promesse rejetée', 'promesse'); });
+
+  /* Fin du chargement : on retire l'écran d'attente, sauf si la page a planté. */
+  G.ready = function(){
+    if(booted) return; booted = true;
+    var b = boot(); if(b && !failed) b.remove();
+  };
+  document.addEventListener('DOMContentLoaded', function(){
+    var b = boot(); if(b && dark()) b.classList.add('dark');
+    if(!window.TMG_MANUAL) setTimeout(G.ready, 0);   /* la coquille, elle, attend que la vitrine soit prête */
+  });
+  /* Filet : si rien ne s'affiche au bout de 15 s, on le dit. */
+  setTimeout(function(){
+    var b = boot();
+    if(!booted && b && !failed){ b.classList.add('err'); b.innerHTML = G.panel(null, 'C\'est plus long que prévu', 'La page met du temps à se charger. Vérifie ta connexion, puis recharge.'); }
+  }, 15000);
+
+  /* Hors connexion : bandeau, sauf si la page a déjà le sien (#offline). */
+  function syncNet(){
+    if(document.getElementById('offline')) return;
+    if(navigator.onLine === false) showBar('Tu es hors connexion. Ce que tu fais maintenant ne sera envoyé qu\'au retour du réseau.', true);
+    else if(bar && bar.classList.contains('off')) bar.hidden = true;
+  }
+  window.addEventListener('online', syncNet); window.addEventListener('offline', syncNet);
+  document.addEventListener('DOMContentLoaded', syncNet);
+
+  /* ---------- Requêtes réseau robustes ----------
+     TMGuard.fetch(url, options, {timeout, retries})
+     → renvoie le JSON, ou lève une Error avec un message lisible
+       (err.kind : 'offline' | 'timeout' | 'network' | 'http', err.status).
+     Les nouvelles tentatives ne concernent que les pannes (réseau, 408,
+     429, 5xx) — jamais un refus du serveur (400, 401, 409…). */
+  function mk(kind, message, status, data){ var e = new Error(message); e.kind = kind; e.status = status || 0; e.data = data; return e; }
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+  var HTTP_MSG = {401:'Ta session a expiré. Reconnecte-toi.', 403:'Tu n\'as pas accès à cette action.', 404:'Élément introuvable.',
+    408:'Le serveur met trop de temps à répondre.', 429:'Trop de demandes d\'un coup. Patiente quelques secondes.'};
+  G.fetch = async function(url, opts, cfg){
+    cfg = cfg || {}; var timeout = cfg.timeout || 15000, retries = cfg.retries || 0, last;
+    for(var attempt = 0; ; attempt++){
+      if(navigator.onLine === false){
+        last = mk('offline', 'Pas de connexion internet. Vérifie ton réseau puis réessaie.');
+      } else {
+        var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function(){ ctl.abort(); }, timeout) : 0, r, data;
+        try{
+          r = await fetch(url, Object.assign({}, opts || {}, ctl ? {signal: ctl.signal} : {}));
+          data = await r.json().catch(function(){ return {}; });
+        }catch(e){
+          last = e && e.name === 'AbortError'
+            ? mk('timeout', 'Le serveur met trop de temps à répondre. Réessaie dans un instant.')
+            : mk('network', 'Impossible de joindre le serveur. Vérifie ta connexion puis réessaie.');
+        }finally{ clearTimeout(tm); }
+        if(r){
+          if(r.ok) return data;
+          last = mk('http', (data && data.error) || HTTP_MSG[r.status] || (r.status >= 500 ? 'Le service est momentanément indisponible. Réessaie dans un instant.' : 'La demande a été refusée.'), r.status, data);
+          if(!(r.status >= 500 || r.status === 408 || r.status === 429)) throw last;
+        }
+      }
+      if(attempt >= retries) throw last;
+      await sleep(Math.min(8000, 700 * Math.pow(2, attempt)) + Math.random() * 300);
+    }
+  };
+
+  /* Petit identifiant unique (clés d'idempotence…). */
+  G.uid = function(){
+    try{ if(crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  };
+})();
+</script>
+<!-- Espace équipe en ligne : comptes, rôles, prix et journal dans Supabase. -->
+<script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
+<script src="js/supabase.js?v=20261008e"></script>
+<script src="js/geo.js?v=20261008e"></script>
+<script src="js/prix.js?v=20261008e"></script>
+</head>
+<body>
+<div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
+<div id="root"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script>
+"use strict";
+const DATA = {"SECTORS":[{"id":"agritech","l":"AgriTech","g":"🌱"},{"id":"fintech","l":"FinTech","g":"💳"},{"id":"edtech","l":"EdTech","g":"📚"},{"id":"health","l":"HealthTech","g":"🩺"},{"id":"logistique","l":"Logistique","g":"🚚"},{"id":"ecommerce","l":"E-commerce","g":"🛍️"},{"id":"immobilier","l":"Immobilier","g":"🏘️"},{"id":"greentech","l":"GreenTech","g":"🌍"},{"id":"medias","l":"Médias & Contenu","g":"🎬"},{"id":"saas","l":"SaaS & Outils B2B","g":"🧰"},{"id":"artisanat","l":"Artisanat & Culture","g":"🎨"},{"id":"impact","l":"Impact Social","g":"🤝"}],"SKILLS":[{"id":"dev-mobile","l":"Dev mobile"},{"id":"dev-front","l":"Dev front-end"},{"id":"dev-back","l":"Dev back-end"},{"id":"data","l":"Data & IA"},{"id":"design","l":"UX / UI Design"},{"id":"brand","l":"Identité de marque"},{"id":"growth","l":"Growth & Acquisition"},{"id":"contenu","l":"Contenu & Communauté"},{"id":"vente","l":"Vente & Partenariats"},{"id":"produit","l":"Product management"},{"id":"finance","l":"Finance & Levée"},{"id":"juridique","l":"Juridique & OHADA"},{"id":"terrain","l":"Opérations terrain"},{"id":"rh","l":"Recrutement & RH"}],"TALENTS":[{"id":"TM-TAL-4187","name":"Axel Assogba","handle":"offline_first","city":"Cotonou, Bénin","verified":true,"skills":["dev-mobile","dev-front"],"hue":210,"sex":"m","bio":"Je construis des apps Flutter qui marchent en 3G et hors-ligne. J'ai déjà livré deux produits pour des PME béninoises. Je cherche un projet santé ou paiement où le mobile est le cœur, pas un accessoire."},{"id":"TM-TAL-5092","name":"Nadia Kponou","handle":"pixel_atlantique","city":"Cotonou, Bénin","verified":true,"skills":["design","brand"],"hue":280,"sex":"f","bio":"8 ans de design produit, dont 4 sur des interfaces à faible bande passante. Je pose des design systems que des équipes juniors savent tenir. Je ne fais pas de « jolis écrans », je fais des parcours qui convertissent."},{"id":"TM-TAL-3341","name":"Ibrahim Sanogo","handle":"sat_agro","city":"Bamako, Mali","verified":true,"skills":["data","dev-back"],"hue":150,"sex":"m","bio":"Data scientist, ex-CIRAD. Je travaille sur l'imagerie satellite appliquée au rendement agricole. Je veux fonder, pas consulter — je cherche un porteur qui connaît le terrain mieux que moi."},{"id":"TM-TAL-7728","name":"Chimène Dossou","handle":"zero_budget","city":"Porto-Novo, Bénin","verified":false,"skills":["growth","contenu"],"hue":20,"sex":"f","bio":"J'ai fait passer une boutique Instagram de 400 à 28 000 abonnés en 11 mois, avec 0 FCFA de budget pub. Acquisition organique, contenu vidéo, WhatsApp Business. Je sais vendre en Afrique de l'Ouest."},{"id":"TM-TAL-2205","name":"Yao Kouassi","handle":"api_lagune","city":"Abidjan, Côte d'Ivoire","verified":true,"skills":["dev-back","saas"],"hue":195,"sex":"m","bio":"Architecte back-end, Node et PostgreSQL. J'ai tenu une API à 4 M de requêtes/jour pour un agrégateur de paiement. Je peux donner 10 h par semaine, sérieusement, pas en dilettante."},{"id":"TM-TAL-6614","name":"Fatou Ndiaye","handle":"savoir_dire_non","city":"Dakar, Sénégal","verified":true,"skills":["produit","vente"],"hue":330,"sex":"f","bio":"Product manager, 6 ans dont 3 dans une edtech passée de 0 à 120 000 utilisateurs. Je sais dire non à des fonctionnalités. Je cherche un projet à impact où la distribution est le vrai problème."},{"id":"TM-TAL-8830","name":"Kevin Aholou","handle":"huit_mois","city":"Cotonou, Bénin","verified":false,"skills":["dev-front","design"],"hue":255,"sex":"n","bio":"Sorti d'Epitech Bénin il y a 8 mois. React, TypeScript, Tailwind. Je code tous les jours et j'apprends vite. Je cherche un projet où je peux devenir bon en étant mal à l'aise."},{"id":"TM-TAL-1907","name":"Grâce Tossou","handle":"clause_ohada","city":"Cotonou, Bénin","verified":true,"skills":["juridique","finance"],"hue":10,"sex":"f","bio":"Juriste d'affaires, droit OHADA. Je monte des statuts de SAS, des pactes d'associés et des clauses de vesting qui tiennent devant un tribunal béninois. La plupart des startups signent des documents copiés sur Internet."},{"id":"TM-TAL-4456","name":"Moussa Traoré","handle":"borgou_terrain","city":"Parakou, Bénin","verified":true,"skills":["terrain","vente"],"hue":95,"sex":"m","bio":"Agronome de formation, 6 ans sur le terrain dans le Borgou. Je connais 40 coopératives par leur nom. Si votre produit agri n'a jamais été testé dans un champ, je suis la personne qu'il vous manque."},{"id":"TM-TAL-9912","name":"Léa Hounkpatin","handle":"trois_langues","city":"Cotonou, Bénin","verified":false,"skills":["contenu","brand"],"hue":300,"sex":"f","bio":"Je raconte des histoires en fon, en français et en anglais. Vidéo courte, podcast, newsletter. J'ai construit une communauté de 12 000 personnes autour de la culture béninoise sans jamais payer un seul post."},{"id":"TM-TAL-3078","name":"Serge Mensah","handle":"apres_300","city":"Lomé, Togo","verified":true,"skills":["finance","vente"],"hue":220,"sex":"m","bio":"Ex-analyste en capital-risque. J'ai vu 300 dossiers et j'en ai financé 7. Je sais ce qui fait dire non à un investisseur. Je rejoins un projet par an, en tant que cofondateur finance."},{"id":"TM-TAL-5563","name":"Aïcha Bello","handle":"batterie_faible","city":"Niamey, Niger","verified":true,"skills":["dev-mobile","dev-back"],"hue":170,"sex":"f","bio":"React Native et Node. J'ai construit une app de suivi de vaccination utilisée dans 14 centres de santé au Niger. Les contraintes de connexion et de batterie, je les connais par cœur."}],"PROJECTS":[{"id":"TM-VIS-4102","title":"Kèkè Santé","owner":"Dr. Sylvain Agbodjan","ownerHandle":"carnet_de_nuit","ownerCity":"Cotonou, Bénin","ownerVerified":true,"sectors":["health","impact"],"seeking":["dev-mobile","produit","data"],"hue":196,"likes":47,"pay":"equity","hook":"Au Bénin, un patient sur trois quitte une consultation sans ordonnance lisible et sans dossier. Kèkè Santé donne à chaque centre de santé un carnet patient numérique qui fonctionne sans connexion et se synchronise la nuit.","sex":"m"},{"id":"TM-VIS-7715","title":"Gbèdji Agro","owner":"Rachelle Sohou","ownerHandle":"tracer_ananas","ownerCity":"Allada, Bénin","ownerVerified":true,"sectors":["agritech","ecommerce"],"seeking":["dev-back","terrain","growth"],"hue":45,"likes":31,"pay":"mixte","hook":"L'ananas pain de sucre béninois se vend 4 fois moins cher que le costaricien alors qu'il est meilleur, parce qu'aucun acheteur européen ne peut prouver d'où il vient. Gbèdji trace chaque lot du champ au conteneur.","sex":"f"},{"id":"TM-VIS-2288","title":"Tchèko Pay","owner":"Ousmane Barry","ownerHandle":"six_secondes","ownerCity":"Cotonou, Bénin","ownerVerified":true,"sectors":["fintech","impact"],"seeking":["dev-back","juridique","vente"],"hue":212,"likes":64,"pay":"equity","hook":"70 % des commerces de Dantokpa refusent le mobile money parce que l'USSD prend 45 secondes et bloque la file. Tchèko Pay encaisse en 6 secondes avec un QR imprimé et un SMS de confirmation, sans smartphone côté client.","sex":"m"},{"id":"TM-VIS-9034","title":"Lafia Learn","owner":"Prudence Gbaguidi","ownerHandle":"huit_minutes","ownerCity":"Parakou, Bénin","ownerVerified":false,"sectors":["edtech","impact"],"seeking":["contenu","dev-mobile","produit"],"hue":28,"likes":22,"pay":"mixte","hook":"Dans le Nord-Bénin, un élève de terminale a en moyenne 2 heures d'électricité par jour mais 4 heures de batterie de téléphone. Lafia Learn délivre tout le programme du BAC en audio de 8 minutes, téléchargeable en une fois.","sex":"f"},{"id":"TM-VIS-6641","title":"Zemidjan+","owner":"Kossi Adjovi","ownerHandle":"km_a_vide","ownerCity":"Cotonou, Bénin","ownerVerified":true,"sectors":["logistique","impact"],"seeking":["data","dev-mobile","terrain"],"hue":130,"likes":38,"pay":"equity","hook":"Un zémidjan de Cotonou roule 90 km par jour et fait 40 % de ces kilomètres à vide. Zemidjan+ regroupe les courses et les livraisons sur un même trajet, avec une répartition calculée hors-ligne sur le téléphone du conducteur.","sex":"m"},{"id":"TM-VIS-3390","title":"Adjara Market","owner":"Estelle Quenum","ownerHandle":"panier_direct","ownerCity":"Porto-Novo, Bénin","ownerVerified":true,"sectors":["artisanat","ecommerce"],"seeking":["growth","dev-front","contenu"],"hue":340,"likes":19,"pay":"mixte","hook":"Une vannière d'Adjara vend un panier 1 500 FCFA au marché. Le même panier part à 34 € dans une boutique parisienne. Adjara Market met les artisans en vente directe auprès de la diaspora, avec paiement en euros et expédition groupée.","sex":"f"},{"id":"TM-VIS-8807","title":"Solar Box","owner":"Wilfried Hounsou","ownerHandle":"sans_lampant","ownerCity":"Djougou, Bénin","ownerVerified":false,"sectors":["greentech","impact","fintech"],"seeking":["finance","terrain","dev-back"],"hue":50,"likes":29,"pay":"equity","hook":"Un ménage rural béninois dépense 4 500 FCFA par mois en pétrole lampant et en recharge de téléphone. Un kit solaire coûte 85 000 FCFA — inaccessible d'un coup, évident à 3 500 FCFA par mois. Solar Box fait le pont par paiement échelonné verrouillé à distance.","sex":"m"},{"id":"TM-VIS-1156","title":"Doko Data","owner":"Armand Gnonlonfoun","ownerHandle":"parcelle_onze","ownerCity":"Cotonou, Bénin","ownerVerified":true,"sectors":["agritech","saas"],"seeking":["data","vente","produit"],"hue":175,"likes":26,"pay":"equity","hook":"Les assureurs agricoles ouest-africains refusent d'assurer les petits producteurs parce qu'ils ne savent pas mesurer une perte de récolte à distance. Doko Data transforme l'imagerie Sentinel-2 en indice de rendement parcelle par parcelle.","sex":"n"},{"id":"TM-VIS-5528","title":"Vodun Studio","owner":"Marielle Ahouansou","ownerHandle":"sept_minutes","ownerCity":"Ouidah, Bénin","ownerVerified":true,"sectors":["medias","artisanat"],"seeking":["contenu","brand","finance"],"hue":288,"likes":41,"pay":"mixte","hook":"Les enfants béninois grandissent avec des dessins animés japonais et américains. Vodun Studio adapte les contes du panthéon vodun en séries animées de 7 minutes, en français et en fon.","sex":"f"},{"id":"TM-VIS-7043","title":"Kaba Foncier","owner":"Isidore Dansou","ownerHandle":"vendue_deux_fois","ownerCity":"Abomey-Calavi, Bénin","ownerVerified":false,"sectors":["immobilier","impact"],"seeking":["juridique","dev-front","terrain"],"hue":15,"likes":17,"pay":"mixte","hook":"À Abomey-Calavi, une parcelle sur cinq est vendue deux fois. Kaba Foncier croise le registre ANDF, les actes de vente et un relevé GPS pour dire en 48 h si un terrain est litigieux avant que l'argent ne change de main.","sex":"m"}]};
+const LOGO_SRC = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FscXVlXzEiIGRhdGEtbmFtZT0iQ2FscXVlIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAzODAuMTMgMTAwLjkxIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjZmZmOwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6IHVybCgjRMOpZ3JhZMOpX3NhbnNfbm9tXzU5KTsKICAgICAgfQoKICAgICAgLmNscy0yLCAuY2xzLTMgewogICAgICAgIGZpbGwtcnVsZTogZXZlbm9kZDsKICAgICAgfQoKICAgICAgLmNscy0zIHsKICAgICAgICBmaWxsOiB1cmwoI2xpbmVhci1ncmFkaWVudCk7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IkTDqWdyYWTDqV9zYW5zX25vbV81OSIgZGF0YS1uYW1lPSJEw6lncmFkw6kgc2FucyBub20gNTkiIHgxPSIwIiB5MT0iNTAuNDYiIHgyPSIxNjAuNDciIHkyPSI1MC40NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwMzU1ODciLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIuNDkiIHN0b3AtY29sb3I9IiMwMDdjZDgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDM1NTg3Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsaW5lYXItZ3JhZGllbnQiIHgxPSIxNjAuNDciIHkxPSI1MC40NiIgeDI9IjM4MC4xMyIgeTI9IjUwLjQ2IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2RkOWYyMiIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iI2ZmZDc0MSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkZDlmMjIiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE2MC40NywxMDAuOTFMMTAuMjQsODYuNTljLTUuNjMtLjU0LTEwLjI0LTUuNjEtMTAuMjQtMTEuMjZWMjUuNTljMC01LjY2LDQuNjEtMTAuNzMsMTAuMjQtMTEuMjZMMTYwLjQ3LDB2MTAwLjkxWiIvPgogIDxnPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTAuMDUsMjYuNzhsMjMuMTYtMS40NGMyLjE2LS4xMywzLjkzLDIuMDcsMy45Myw0Ljkzcy0xLjc3LDUuMjQtMy45Myw1LjMybC03LjI0LjI2djM0LjA5YzAsMy41MS0yLjExLDYuMjItNC42OCw2LjA1LTIuNTQtLjE3LTQuNTctMy4wOC00LjU3LTYuNTF2LTMzLjNsLTYuNjYuMjRjLTEuOS4wNy0zLjQyLTIuMDItMy40Mi00LjY2czEuNTItNC44OCwzLjQyLTVaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik00Ny42OSw1NC4xM2wzLjc3LjA0YzAtNC4wOS0uMzMtNi44My00LjIxLTYuODEtNC42MS4wMy01LjI4LDQuMzgtOC41NCw0LjM3LTIuMywwLTQuMTctMS45MS00LjE3LTQuOTUsMC02LjQ3LDcuNjQtOC40NywxMi44Mi04LjYyLDguOC0uMjYsMTQuMzYsMy45MSwxNC4zNiwxNS45N3YxOC4xMmMwLDMuNDctMi4xNiw2LjI4LTQuOTksNi4xLTIuNTEtLjE3LTQuNTQtMi41Ni00Ljg4LTUuNTQtMi40LDQuMDEtNS40OCw1LjIxLTkuMzcsNC45NS01LjM0LS4zNi05LjczLTQuNjItOS43My0xMS44MywwLTEwLjY0LDguMjQtMTEuODQsMTQuOTQtMTEuNzhaTTQ1Ljc3LDY5LjY4YzMuNzQuMTgsNS43NC0zLjQsNS43NC03Ljkxdi0uNjNsLTMuMjgtLjA4Yy0yLjUyLS4wNy01Ljk3LjQtNS45Nyw0LjQ2LDAsMi42MiwxLjU2LDQuMDcsMy41MSw0LjE2WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNjkuMywyNy41OWMwLTMuNzUsMi41MS02LjkzLDUuNzMtNy4xNCwzLjIxLS4yMiw1LjgyLDIuNyw1LjgyLDYuNTV2MjYuMDJsOS44OS0xMy42NmMuOTQtMS4zNCwyLjM1LTIuMDcsMy45MS0yLjExLDIuODEtLjA4LDUuMTYsMi41Myw1LjE2LDUuNzUsMCwxLjU3LS41NiwyLjkxLTEuMzksNC4wMmwtNS44MSw3LjMxLDguODcsMTYuNDhjLjU2LDEuMDUuOTEsMi4zMy45MSwzLjY3LDAsMy43OS0yLjczLDYuNjktNi4wNCw2LjQ4LTIuMTgtLjE0LTQuMDgtMS41OC01LjA5LTMuNThsLTcuMzMtMTQuMzMtMy4xLDMuOTh2NS45NmMwLDMuODUtMi42MSw2Ljc2LTUuODgsNi41NS0zLjE2LS4yMS01LjY3LTMuMzktNS42Ny03LjEzVjI3LjU5WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3LjM2LDU0Ljg3bDUuMzYuMDVjMC00Ljg4LS40OC04LjE1LTUuOTgtOC4xMi02LjUzLjA1LTcuNDcsNS4yMS0xMi4wNyw1LjE5LTMuMjQtLjAxLTUuODUtMi4yNi01Ljg1LTUuODcsMC03LjY2LDEwLjc1LTEwLjA4LDE4LjA4LTEwLjMsMTIuNTMtLjM2LDIwLjUxLDQuNiwyMC41MSwxOS4wNXYyMS43M2MwLDQuMTYtMy4xLDcuNS03LjE2LDcuMjMtMy41OS0uMjQtNi40OC0zLjEyLTYuOTYtNi42OS0zLjQxLDQuNzUtNy43OSw2LjEzLTEzLjMsNS43Ni03LjUzLS41LTEzLjY5LTUuNjItMTMuNjktMTQuMTQsMC0xMi41OSwxMS41OC0xMy45OSwyMS4wNi0xMy45MVpNMTI0LjY0LDczLjM4YzUuMy4yNSw4LjE2LTMuOTksOC4xNi05LjM3di0uNzZsLTQuNjYtLjEyYy0zLjU3LS4wOS04LjQ2LjQ0LTguNDYsNS4yNywwLDMuMTEsMi4yLDQuODUsNC45Niw0Ljk4WiIvPgogIDwvZz4KICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0zNjkuNjEsODYuMTRsLTIwOS4xNCwxNC43N1YwbDIwOS4xNCwxNC4zNGM1LjkyLjQyLDEwLjUyLDUuMzUsMTAuNTIsMTEuMjl2NDkuMjNjMCw1Ljk0LTQuNTksMTAuODctMTAuNTIsMTEuMjlaIi8+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xNzcuMDYsMzAuMzRjMC03LjE0LDUuNjUtMTIuNzEsMTIuNDUtMTIuMzksNS4yOS4yNSw5LjcxLDMuOTEsMTEuMyw4Ljg2bDkuMzIsMjguMjhjLjcsMi4yMywxLjE2LDQuMTMsMS4zOSw1LjU0bC4zOCwyLjMxaC40NnMuMzgtMi4zMy4zOC0yLjMzYy4zMS0xLjQxLjY5LTMuMjMsMS40NS01LjU1bDguOTYtMjcuODFjMS40MS00LjQyLDUuMzgtNy40OCw5Ljg3LTcuMjcsNS41Ny4yNiwxMC4wNyw1LjUyLDEwLjA3LDExLjY3djQyLjI4YzAsNC4wMi0yLjk1LDcuNDgtNi42Myw3LjY2LTMuNjUuMTgtNi43LTMuMDUtNi43LTcuMTZ2LTM0LjIyaC0uNDRzLS41OCwzLjI5LS41OCwzLjI5Yy0uMzcsMi4wMS0xLjAyLDQuNTktMS44Myw3LjE4bC04LjMzLDI2LjNjLS45OCwzLjE2LTMuODYsNS42OC03LjE1LDUuODQtMy40LjE3LTYuMjktMi4xMi03LjMxLTUuMjVsLTktMjYuODdjLS44OS0yLjcyLTEuNjItNS41My0yLjAyLTcuNTctLjI0LTEuMTktLjQ5LTIuMzktLjY1LTMuNWgtLjQ5czAsMzYuNTUsMCwzNi41NWMwLDQuMTgtMy4yOCw3Ljc1LTcuMzMsNy45NHMtNy41Ny0zLjExLTcuNTctNy4zOFYzMC4zNFoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTI2OS4zMSw1NC40NGw0LjMzLS4wM2MwLTQuMzUtLjM4LTcuMjgtNC44NC03LjMxLTUuNTEtLjAzLTYuMzMsNC43OS0xMC4zOSw0LjgtMi45NCwwLTUuMzYtMi4xNi01LjM2LTUuNjUsMC03LjQzLDkuNjgtOS4yNiwxNS44OC05LjEzLDkuOTIuMjEsMTUuODMsNC43NiwxNS44MywxNy4wN3YxOC41YzAsMy41NC0yLjI2LDYuNjctNS4yOSw2LjgyLTIuNzQuMTMtNS0yLjE1LTUuMzgtNS4yOS0yLjczLDQuNTUtNi4zMiw2LjI0LTEwLjk5LDYuNDctNi42OC4zMy0xMi40Mi0zLjk4LTEyLjQyLTEyLjMyLDAtMTIuMzEsMTAuNTgtMTMuODcsMTguNjQtMTMuOTJaTTI2Ny4wNSw3MS40NWM0LjM2LS4xNSw2LjY1LTQuMTMsNi42NS04Ljk0di0uNjhsLTMuNzUuMDdjLTIuOTYuMDYtNy4xMi43NS03LjEyLDUuMjYsMCwyLjksMS44OSw0LjM3LDQuMjMsNC4yOVoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTI5Mi41NiwzOC42NGwyLjAxLjA0LjI0LTUuMzZjLjEyLTMuMTgsMi4zNS01LjcsNC45Ni01LjYsMi43MS4xMSw0Ljg4LDIuOSw0Ljg4LDYuMjR2NC45MWwzLjM0LjA3YzEuOTEuMDQsMy40MSwyLjA0LDMuNDEsNC4zNnMtMS41LDQuMzYtMy40MSw0LjM1aC0zLjExczAsMTUuODYsMCwxNS44NmMwLDQuMDYsMS43OSw0LjgzLDMuMDYsNS4yNCwyLjM1Ljc3LDQuMDIsMS42Myw0LjAyLDQuMDksMCw1LjItNC4wNiw1LjU0LTcuNjUsNS43Mi03LjU2LjM3LTEwLjIxLTQuMjgtMTAuMTUtMTMuNjRsLjA2LTE3LjMzaC0xLjY2Yy0yLjAyLS4wMi0zLjY0LTIuMDctMy42NC00LjQ5czEuNjItNC41MSwzLjY0LTQuNDZaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0zMzAuNTEsMzguNDRjNC45LjExLDEwLjgzLDIuNTMsMTAuODMsOC43NywwLDMuMDctMS4zNSw0LjgtMy42MSw0LjgxLTMuNTQuMDEtMy40NC00LjUxLTcuNTgtNC41NC0yLjg3LS4wMS01LjAzLDMuMTMtNS4wMywxMC41NXMyLjI3LDEwLjUsNS4wMywxMC40MWM0LjE3LS4xNCw0LjI1LTUuMjcsNy44NC01LjM2LDIuMzYtLjA2LDMuODEsMS43NywzLjgxLDQuOTcsMCw2LjM3LTYuMzUsOS4xOC0xMS43LDkuNDQtMTAuMTEuNS0xNS03LjA5LTE1LTE5LjI1LDAtMTEuMTksNS40My0yMC4wMiwxNS40Mi0xOS44MVoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTM0Ni42MiwyOS45NGMwLTMuMzcsMi4wNS02LjA0LDQuNTEtNS45MSwyLjQ0LjEyLDQuNDMsMi45NSw0LjQzLDYuMjZ2MTQuOTljMS4xOC0zLjI5LDMuNTItNi4wOSw3LjU5LTYsNi4zLjEzLDguNjYsNS42NSw4LjY2LDEzLjUxdjE2LjM1YzAsMy4yMS0xLjg3LDUuOTQtNC4xNiw2LjA1LTIuMzEuMTEtNC4yMy0yLjQ4LTQuMjMtNS43NHYtMTQuNzdjMC01LjM3LTIuMTYtNi40LTMuNjUtNi40MS0xLjc3LDAtNC4yMiwxLjIyLTQuMjIsNy45N3YxMy41YzAsMy4zMS0xLjk5LDYuMTMtNC40Myw2LjI1LTIuNDYuMTItNC41MS0yLjU1LTQuNTEtNS45MlYyOS45NFoiLz4KICA8L2c+Cjwvc3ZnPg==';
+const VB_PATH = 'M16 8.375C16 8.93437 15.8656 9.45312 15.5969 9.92813C15.3281 10.4031 14.9688 10.775 14.5156 11.0344C14.5281 11.1188 14.5344 11.25 14.5344 11.4281C14.5344 12.275 14.25 12.9937 13.6875 13.5875C13.1219 14.1844 12.4406 14.4812 11.6438 14.4812C11.2875 14.4812 10.9469 14.4156 10.625 14.2844C10.375 14.7969 10.0156 15.2094 9.54375 15.525C9.075 15.8438 8.55937 16 8 16C7.42812 16 6.90938 15.8469 6.44688 15.5344C5.98125 15.225 5.625 14.8094 5.375 14.2844C5.05312 14.4156 4.71562 14.4812 4.35625 14.4812C3.55937 14.4812 2.875 14.1844 2.30312 13.5875C1.73125 12.9937 1.44687 12.2719 1.44687 11.4281C1.44687 11.3344 1.45938 11.2031 1.48125 11.0344C1.02813 10.7719 0.66875 10.4031 0.4 9.92813C0.134375 9.45312 0 8.93437 0 8.375C0 7.78125 0.15 7.23438 0.446875 6.74062C0.74375 6.24687 1.14375 5.88125 1.64375 5.64375C1.5125 5.2875 1.44687 4.92812 1.44687 4.57188C1.44687 3.72813 1.73125 3.00625 2.30312 2.4125C2.875 1.81875 3.55937 1.51875 4.35625 1.51875C4.7125 1.51875 5.05312 1.58438 5.375 1.71563C5.625 1.20312 5.98438 0.790625 6.45625 0.475C6.925 0.159375 7.44063 0 8 0C8.55937 0 9.075 0.159375 9.54375 0.471875C10.0125 0.7875 10.375 1.2 10.625 1.7125C10.9469 1.58125 11.2844 1.51562 11.6438 1.51562C12.4406 1.51562 13.1219 1.8125 13.6875 2.40937C14.2531 3.00625 14.5344 3.725 14.5344 4.56875C14.5344 4.9625 14.475 5.31875 14.3562 5.64062C14.8562 5.87813 15.2563 6.24375 15.5531 6.7375C15.85 7.23438 16 7.78125 16 8.375ZM7.65938 10.7844L10.9625 5.8375C11.0469 5.70625 11.0719 5.5625 11.0437 5.40938C11.0125 5.25625 10.9344 5.13438 10.8031 5.05312C10.6719 4.96875 10.5281 4.94063 10.375 4.9625C10.2188 4.9875 10.0938 5.0625 10 5.19375L7.09062 9.56875L5.75 8.23125C5.63125 8.1125 5.49375 8.05625 5.34062 8.0625C5.18437 8.06875 5.05 8.125 4.93125 8.23125C4.825 8.3375 4.77187 8.47187 4.77187 8.63437C4.77187 8.79375 4.825 8.92813 4.93125 9.0375L6.77187 10.8781L6.8625 10.95C6.96875 11.0219 7.07812 11.0562 7.18437 11.0562C7.39375 11.0531 7.55313 10.9656 7.65938 10.7844Z';
+
+/* ============================================================
+   TakaMatch — espace équipe (administration)
+   Prototype autonome : les données de démonstration sont celles de
+   la plateforme (mêmes projets, talents, pseudos). Les changements
+   sont gardés dans ce navigateur (localStorage). Les événements de
+   l'outil (inscriptions, demandes de vérification, signalements,
+   messages au support) arrivent en direct quand TakaMatch.html est
+   ouvert dans le même navigateur.
+   ============================================================ */
+
+/* ---------- Icônes ---------- */
+const P = {
+  home:'<path d="M3 10.2 12 3l9 7.2V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  shield:'<path d="M12 22s8-3.5 8-10V5.5L12 2.5 4 5.5V12c0 6.5 8 10 8 10z"/><path d="m9 12 2 2 4-4.5"/>',
+  users:'<path d="M15 20v-1.6a4.4 4.4 0 0 0-4.4-4.4H6.4A4.4 4.4 0 0 0 2 18.4V20"/><circle cx="8.5" cy="7" r="4"/><path d="M22 20v-1.6a4.4 4.4 0 0 0-3.3-4.2"/><path d="M15.5 3.2a4.4 4.4 0 0 1 0 8.5"/>',
+  flag:'<path d="M5 21V4.5"/><path d="M5 5h10.5l-1.5 3.5L15.5 12H5z"/>',
+  file:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
+  tools:'<path d="M14.7 6.3a4 4 0 0 0 5.3 5.3l-8.3 8.3a2.4 2.4 0 0 1-3.4-3.4z"/><path d="m6.5 3.5 3 3-2 2-3-3z"/><path d="m4.5 5.5-2 2 3.5 3.5 2-2"/>',
+  card:'<rect x="2.5" y="5" width="19" height="14" rx="2.6"/><path d="M2.5 10h19"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.9-.9 1.5v.4"/><path d="M12 17.2h.01"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 9.2-9.2M17 6l3 3M14.5 8.5l2 2"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+  cog:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  check:'<path d="m4.5 12.5 5 5 10-11"/>',
+  lock:'<rect x="4" y="10.5" width="16" height="10.5" rx="2.4"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>',
+  eye:'<path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.7"/>',
+  'eye-off':'<path d="M10.6 6.2A9.9 9.9 0 0 1 12 6c6.2 0 10 6 10 6a17 17 0 0 1-3 3.6M6.6 6.8A17 17 0 0 0 2 12s3.8 6.5 10 6.5c1.7 0 3.2-.3 4.5-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/>',
+  mail:'<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6.5 9 6 9-6"/>',
+  phone:'<path d="M21 16.5v3a2 2 0 0 1-2.2 2 19.6 19.6 0 0 1-8.5-3 19.3 19.3 0 0 1-6-6 19.6 19.6 0 0 1-3-8.6A2 2 0 0 1 3.3 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L7.4 9.8a16 16 0 0 0 6 6l1.2-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+  pin:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>',
+  copy:'<rect x="8.5" y="8.5" width="12" height="12" rx="2.2"/><path d="M15.5 5.5v-.6a2.4 2.4 0 0 0-2.4-2.4H5.9a2.4 2.4 0 0 0-2.4 2.4v7.2a2.4 2.4 0 0 0 2.4 2.4h.6"/>',
+  dl:'<path d="M12 3v12"/><path d="m7.5 11 4.5 4.5L16.5 11"/><path d="M4 20.5h16"/>',
+  out:'<path d="M9.5 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4.5"/><path d="m16 16 5-4-5-4"/><path d="M21 12H9"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  edit:'<path d="M12 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z"/>',
+  trash:'<path d="M4 7h16M9.5 7V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v2"/><path d="M6.5 7 7.4 20a1.6 1.6 0 0 0 1.6 1.5h6a1.6 1.6 0 0 0 1.6-1.5L17.5 7"/>',
+  alert:'<path d="M12 3.5 22 20H2z"/><path d="M12 9.5v4.5M12 17.3h.01"/>',
+  chat:'<path d="M21 11.5a8 8 0 0 1-11.6 7.1L3 20.5l1.9-6.4A8 8 0 1 1 21 11.5z"/>',
+  send:'<path d="M21.5 2.5 2.5 10l7.5 3 3 7.5z"/><path d="M21.5 2.5 10 13.5"/>',
+  sun:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2.5 12h2M19.5 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/>',
+  moon:'<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>',
+  menu:'<path d="M4 7h16M4 12h10M4 17h16"/>',
+  ban:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+  pause:'<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>',
+  play:'<circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/>',
+  coins:'<ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><path d="M9 15v2c0 1.7 2.7 3 6 3s6-1.3 6-3v-5c0-1.7-2.7-3-6-3"/>',
+  undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  trend:'<path d="M3 17.5 9.5 11l4 4L21 7.5"/><path d="M15.5 7.5H21V13"/>',
+  link:'<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/>',
+  arrow:'<path d="M4 12h15"/><path d="m13 6 6 6-6 6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 1.9"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8h.01"/>',
+  refresh:'<path d="M20.5 11A8.5 8.5 0 0 0 6 6.5L3.5 9"/><path d="M3.5 4v5h5"/><path d="M3.5 13a8.5 8.5 0 0 0 14.5 4.5L20.5 15"/><path d="M20.5 20v-5h-5"/>',
+};
+const ic = (n, cls) => '<svg class="ic '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||'')+'</svg>';
+
+/* ---------- Utilitaires ---------- */
+const $ = (s, r) => (r||document).querySelector(s);
+const $$ = (s, r) => Array.from((r||document).querySelectorAll(s));
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2,9);
+const initials = n => String(n||'?').replace(/^Dr\.\s*/,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase() || '?';
+const fcfa = n => Math.round(n).toLocaleString('fr-FR').replace(/\s/g,' ')+' FCFA';
+const nf = n => Math.round(n).toLocaleString('fr-FR').replace(/\s/g,' ');
+const DAY = 864e5;
+const daysAgo = (n, h, m) => { const d = new Date(Date.now() - n*DAY); if(h != null) d.setHours(h, m||0, 0, 0); return +d; };
+function fmt(t, withTime){ const d = new Date(t); const s = String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+  return withTime === false ? s : s+' · '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function ago(t){ const m = (Date.now() - t)/6e4; if(m < 1) return "à l'instant"; if(m < 60) return 'il y a '+Math.round(m)+' min';
+  const h = m/60; if(h < 24) return 'il y a '+Math.round(h)+' h'; const d = Math.round(h/24); return d === 1 ? 'hier' : 'il y a '+d+' j'; }
+const sector = id => DATA.SECTORS.find(s => s.id === id) || {l:id, g:'✨'};
+const skillL = id => (DATA.SKILLS.find(s => s.id === id) || {l:id}).l;
+const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/^dr\.\s*/,'').replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'');
+function seeded(seed){ let x = 0; for(const c of String(seed)) x = (x*31 + c.charCodeAt(0)) >>> 0; return () => { x = (x*1103515245 + 12345) >>> 0; return (x >>> 8) / 16777216; }; }
+function vBadge(role, ok){ const cls = ok ? (role === 'vis' ? 'vb-vis' : 'vb-tal') : 'vb-off';
+  return '<span class="vbadge '+cls+'"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="'+VB_PATH+'"/></svg><span>('+(ok ? 'Vérifié' : 'Non vérifié')+')</span></span>'; }
+function toast(msg, kind){ const el = document.createElement('div'); el.className = 'toast '+(kind||''); el.innerHTML = ic(kind === 'bad' ? 'alert' : 'check')+'<span>'+esc(msg)+'</span>';
+  $('#toasts').appendChild(el); setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 320); }, 3400); }
+function copyText(v){
+  const fallback = () => { const ta = document.createElement('textarea'); ta.value = v; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try{ ok = document.execCommand('copy'); }catch(e){} ta.remove(); toast(ok ? 'Copié : '+v : 'Copie impossible ici : '+v, ok ? '' : 'bad'); };
+  try{ if(navigator.clipboard && window.isSecureContext !== false){ navigator.clipboard.writeText(v).then(() => toast('Copié : '+v), fallback); return; } }catch(e){}
+  fallback();
+}
+function download(name, text){ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿'+text], {type:'text/csv;charset=utf-8'})); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+const csv = rows => rows.map(r => r.map(c => '"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(';')).join('\n');
+
+/* ============================================================
+   Rôles de l'équipe et permissions
+   ============================================================ */
+const MODULES = [
+  {id:'overview', l:'Vue d\'ensemble', i:'home', grp:'Pilotage'},
+  {id:'verifs', l:'Vérifications', i:'shield', grp:'Pilotage'},
+  {id:'reports', l:'Signalements', i:'flag', grp:'Pilotage'},
+  {id:'support', l:'Support', i:'help', grp:'Pilotage'},
+  {id:'users', l:'Utilisateurs', i:'users', grp:'Plateforme'},
+  {id:'content', l:'Projets et fiches', i:'file', grp:'Plateforme'},
+  {id:'teams', l:'Matchs et Ateliers', i:'tools', grp:'Plateforme'},
+  {id:'payments', l:'Paiements', i:'card', grp:'Plateforme'},
+  {id:'staff', l:'Équipe et accès', i:'key', grp:'Administration'},
+  {id:'audit', l:'Journal d\'audit', i:'list', grp:'Administration'},
+  {id:'settings', l:'Paramètres', i:'cog', grp:'Administration'},
+];
+const ROLES = {
+  super:  {l:'Super admin', d:'Tous les modules, la gestion des accès et le journal.',
+           can:['overview','verifs','reports','support','users','content','teams','payments','staff','audit','settings'], act:['users','credits','refund','messages']},
+  verif:  {l:'Vérificateur', d:'Traite les dossiers de vérification de profil.', can:['overview','verifs','users'], act:[]},
+  moder:  {l:'Modérateur', d:'Signalements, fiches, suspensions et bannissements, litiges.', can:['overview','reports','content','teams','users'], act:['users','messages']},
+  support:{l:'Support', d:'Répond aux messages et consulte les comptes.', can:['overview','support','users'], act:[]},
+  finance:{l:'Finance', d:'Paiements, remboursements et crédits.', can:['overview','payments','users'], act:['credits','refund']},
+};
+const canSee = m => !!(A.me && ROLES[A.me.role].can.includes(m));
+const canDo = a => !!(A.me && ROLES[A.me.role].act.includes(a));
+
+/* ============================================================
+   Données de démonstration (cohérentes avec la plateforme)
+   ============================================================ */
+const PRICES = {second:3000, slot:5000, pacte:15000, essai:2000, elan:5000, campagne:12000};
+/* Paiements : FedaPay, moyens selon le pays (même tableau que l'outil et le serveur). */
+const PAY_CC = {BJ:{n:'Bénin', ops:['MTN MoMo','Moov Money','Celtiis Cash']}, TG:{n:'Togo', ops:['Mixx by Yas','Moov Money']},
+  CI:{n:"Côte d'Ivoire", ops:['Wave','Orange Money','MTN MoMo','Moov Money']}, SN:{n:'Sénégal', ops:['Wave','Orange Money','Free Money']},
+  BF:{n:'Burkina Faso', ops:['Orange Money','Moov Money']}, ML:{n:'Mali', ops:['Orange Money']}, NE:{n:'Niger', ops:['Airtel Money']},
+  GH:{n:'Ghana', ops:[]}, NG:{n:'Nigeria', ops:[]}, CM:{n:'Cameroun', ops:[]}, FR:{n:'France', ops:[]}};
+const OP_COLOR = {'MTN MoMo':'#FFCC00', 'Moov':'#0077A8', 'Moov Money':'#0077A8', 'Celtiis':'#E4002B', 'Celtiis Cash':'#E4002B', 'Wave':'#1DC8FF',
+  'Orange Money':'#FF7900', 'Free Money':'#CD0F14', 'Mixx by Yas':'#2B1C6E', 'Airtel Money':'#ED1C24', 'Carte bancaire':'#6B6459'};
+const ccOfCity = city => { const n = String(city || '').split(',').pop().trim(); return Object.keys(PAY_CC).find(k => PAY_CC[k].n === n) || 'BJ'; };
+
+function phoneOf(r){ return '+229 01 '+[0,0,0,0].map(() => String(10 + Math.floor(r()*89))).join(' '); }
+function seedState(){
+  const users = [], r = seeded('takamatch');
+  const mk = (o) => { const rr = seeded(o.handle); const u = Object.assign({
+      id:'U-'+(1000 + users.length), email:slug(o.legal)+'@gmail.com', phone:phoneOf(rr), sex:'m',
+      created:daysAgo(10 + Math.floor(rr()*120), 9 + Math.floor(rr()*10)), lastSeen:daysAgo(Math.floor(rr()*6), 8 + Math.floor(rr()*12)),
+      status:'active', credits:0, verifiedEmail:true, verifiedPhone:rr() > .3, verifiedId:false, notes:[], online:true, fresh:false,
+      completion:70 + Math.floor(rr()*31), invitesSent:Math.floor(rr()*9), invitesRecv:Math.floor(rr()*7), matches:Math.floor(rr()*3)}, o);
+    users.push(u); return u; };
+  DATA.TALENTS.forEach(t => mk({legal:t.name, handle:t.handle, city:t.city, roles:['tal'], primary:'tal', verifiedId:t.verified, sex:t.sex,
+    skills:t.skills, bio:t.bio, talentId:t.id}));
+  DATA.PROJECTS.forEach(p => mk({legal:p.owner.replace(/^Dr\.\s*/,''), handle:p.ownerHandle, city:p.ownerCity, roles:['vis'], primary:'vis', verifiedId:p.ownerVerified,
+    sex:p.sex, projects:[p.id], credits:1 + Math.floor(r()*3)}));
+  mk({legal:'Franck Birezo', handle:'franck_b', email:'franck.b@exemple.com', phone:'+229 01 97 45 25 63', city:'Cotonou, Bénin', roles:['tal','vis'], primary:'tal',
+    verifiedId:false, sex:'m', projects:['PRJ-SIKA','PRJ-KANVO'], credits:2, created:daysAgo(46, 10), matches:4, completion:95});
+  /* Quelques comptes à surveiller */
+  const sus = mk({legal:'Brice Kpodo', handle:'gain_rapide', city:'Cotonou, Bénin', roles:['tal'], primary:'tal', sex:'m', created:daysAgo(4, 22), completion:38, verifiedPhone:false, invitesSent:3, invitesRecv:0, matches:0,
+    bio:'Je finance vos projets rapidement. Frais de dossier à prévoir.'});
+  const ban = mk({legal:'Jules Avocè', handle:'invest_express', city:'Lomé, Togo', roles:['vis'], primary:'vis', sex:'m', created:daysAgo(60, 11), status:'banned', online:false, completion:52});
+  ban.notes.push({at:daysAgo(21, 15), by:'Mariam Dossou', t:'Banni : demandes d\'argent répétées à 3 talents (signalements R-2031, R-2034, R-2035).'});
+  const susp = mk({legal:'Clarisse Hounkpè', handle:'clarisse_h', city:'Abomey-Calavi, Bénin', roles:['tal'], primary:'tal', sex:'f', created:daysAgo(35, 9), status:'suspended', suspendedUntil:daysAgo(-5), online:false});
+  susp.notes.push({at:daysAgo(2, 10), by:'Carine Zinsou', t:'Suspendue 7 jours : propos déplacés dans un groupe d\'équipe.'});
+  ['Ruth Agossou|ruth_terrain|Bohicon, Bénin|tal|f','Hermann Dègbo|hermann_d|Natitingou, Bénin|vis|m','Sènami Lokossou|senami_code|Cotonou, Bénin|tal|f','Yves Houngbédji|yves_agri|Pobè, Bénin|vis|m']
+    .forEach((s, i) => { const [n, h, c, role, sx] = s.split('|'); mk({legal:n, handle:h, city:c, roles:[role], primary:role, sex:sx, created:daysAgo(i, 8 + i*3), completion:72 + i*6, fresh:true, invitesSent:0, invitesRecv:0, matches:0}); });
+  const U = h => users.find(u => u.handle === h);
+
+  /* Dossiers de vérification */
+  const verifs = [
+    {u:'senami_code', at:daysAgo(0, 8, 12), status:'pending'},
+    {u:'yves_agri', at:daysAgo(0, 7, 40), status:'pending', mismatch:'Yves H.'},
+    {u:'ruth_terrain', at:daysAgo(1, 18, 5), status:'pending'},
+    {u:'franck_b', at:daysAgo(1, 11, 30), status:'pending'},
+    {u:'hermann_d', at:daysAgo(3, 16), status:'more', blurry:true, history:[{at:daysAgo(2, 10), by:'Rodrigue Ahyi', t:'Complément demandé : photo de la pièce floue, merci de la reprendre en pleine lumière.'}]},
+    {u:'gain_rapide', at:daysAgo(3, 23, 50), status:'pending', mismatch:'Bruno Kpadonou'},
+  ].concat(users.filter(u => u.verifiedId).slice(0, 6).map((u, i) => ({u:u.handle, at:daysAgo(15 + i*6, 10), status:'approved', decidedAt:daysAgo(14 + i*6, 15), decidedBy:i % 2 ? 'Rodrigue Ahyi' : 'Mariam Dossou'})))
+    .concat([{u:'clarisse_h', at:daysAgo(30, 9), status:'rejected', decidedAt:daysAgo(29, 14), decidedBy:'Rodrigue Ahyi', motif:'Document expiré'}])
+    .map((v, i) => Object.assign({id:'V-'+(3100 + i), live:false, doc:'', selfie:'', history:[]}, v, {uid:U(v.u).id}));
+
+  /* Signalements */
+  const reports = [
+    {id:'R-2041', at:daysAgo(0, 9, 5), prio:'high', kind:'message', reason:'Demande d\'argent ou arnaque', by:'offline_first', target:'gain_rapide',
+      text:'Il me demande 25 000 FCFA de « frais de dossier » avant de financer notre projet.', status:'new', thread:'T-1'},
+    {id:'R-2040', at:daysAgo(0, 7, 30), prio:'high', kind:'profil', reason:'Faux profil ou usurpation', by:'carnet_de_nuit', target:'gain_rapide',
+      text:'La photo de profil est celle d\'un ministre. Le profil propose de « financer » des projets.', status:'new'},
+    {id:'R-2039', at:daysAgo(1, 21, 10), prio:'medium', kind:'message', reason:'Propos déplacés', by:'huit_minutes', target:'clarisse_h',
+      text:'Messages insultants dans le groupe de l\'équipe après un désaccord sur le capital.', status:'progress', thread:'T-2', assigned:'Carine Zinsou'},
+    {id:'R-2038', at:daysAgo(2, 15), prio:'low', kind:'projet', reason:'Autre raison', by:'pixel_atlantique', target:'vendue_deux_fois',
+      text:'La fiche annonce 300 parcelles cartographiées, je doute que ce soit vrai.', status:'new'},
+    {id:'R-2036', at:daysAgo(5, 11), prio:'medium', kind:'comportement', reason:'Engagement non tenu', by:'six_secondes', target:'sat_agro',
+      text:'A disparu après le jalon 2, ne répond plus depuis 3 semaines.', status:'done', decision:'Avertissement envoyé', decidedBy:'Carine Zinsou', decidedAt:daysAgo(4, 16)},
+    {id:'R-2035', at:daysAgo(22, 10), prio:'high', kind:'message', reason:'Demande d\'argent ou arnaque', by:'api_lagune', target:'invest_express', text:'Demande de 50 000 FCFA « pour bloquer la place ».', status:'done', decision:'Compte banni', decidedBy:'Mariam Dossou', decidedAt:daysAgo(21, 15)},
+  ].map(x => Object.assign({live:false, notes:[]}, x));
+  const threads = {
+    'T-1':{a:'gain_rapide', b:'offline_first', msgs:[
+      {from:'gain_rapide', t:'Bonjour, votre projet m\'intéresse beaucoup. Je peux le financer à hauteur de 5 millions.', at:daysAgo(1, 18, 2)},
+      {from:'offline_first', t:'Merci ! Vous êtes investisseur ?', at:daysAgo(1, 18, 20)},
+      {from:'gain_rapide', t:'Oui. Pour ouvrir le dossier, il faut d\'abord 25 000 FCFA de frais, par MoMo sur ce numéro : 01 66 xx xx xx.', at:daysAgo(1, 18, 31), flag:true},
+      {from:'offline_first', t:'Je préfère qu\'on passe par la plateforme.', at:daysAgo(0, 8, 50)}]},
+    'T-2':{a:'clarisse_h', b:'huit_minutes', group:'Lafia Learn', msgs:[
+      {from:'huit_minutes', t:'Je propose 15 % pour chacun des talents, comme indiqué dans le pacte.', at:daysAgo(2, 19)},
+      {from:'clarisse_h', t:'C\'est du vol, tu nous prends pour des idiots.', at:daysAgo(2, 19, 12), flag:true},
+      {from:'clarisse_h', t:'[message masqué par la modération]', at:daysAgo(2, 19, 14), flag:true},
+      {from:'huit_minutes', t:'Je préfère qu\'on en parle calmement demain.', at:daysAgo(2, 19, 30)}]},
+    'T-3':{a:'tracer_ananas', b:'senami_code', group:'Gbèdji Agro', msgs:[
+      {from:'tracer_ananas', t:'La part de Sènami passe de 15 à 8 % : elle n\'a pas livré le module de traçabilité.', at:daysAgo(3, 10)},
+      {from:'senami_code', t:'Le module est livré depuis lundi, il est dans le dépôt partagé. Je refuse cette baisse.', at:daysAgo(3, 11)},
+      {from:'tracer_ananas', t:'Je ne l\'ai pas vu. On demande l\'arbitrage de TakaMatch.', at:daysAgo(3, 12)}]},
+  };
+
+  /* Équipes et Ateliers */
+  const P = id => DATA.PROJECTS.find(p => p.id === id) || {};
+  const T = id => DATA.TALENTS.find(t => t.id === id) || {};
+  const teams = [
+    {id:'A-01', project:'Kèkè Santé', owner:'carnet_de_nuit', talents:['franck_b', T('TM-TAL-5563').handle], jalons:3, since:daysAgo(12), pacte:false, state:'active'},
+    {id:'A-02', project:'Lafia Learn', owner:'huit_minutes', talents:['franck_b', 'clarisse_h'], jalons:1, since:daysAgo(20), pacte:false, state:'active'},
+    {id:'A-03', project:'Sika Tontine', owner:'franck_b', talents:[T('TM-TAL-2205').handle, T('TM-TAL-1907').handle], jalons:2, since:daysAgo(14), pacte:false, state:'active'},
+    {id:'A-04', project:'Kanvô', owner:'franck_b', talents:[T('TM-TAL-5092').handle], jalons:1, since:daysAgo(6), pacte:false, state:'active'},
+    {id:'A-05', project:'Gbèdji Agro', owner:'tracer_ananas', talents:['senami_code', 'sat_agro'], jalons:4, since:daysAgo(48), pacte:true, state:'dispute', thread:'T-3',
+      dispute:{at:daysAgo(3, 12), t:'Désaccord sur la part de capital de Sènami (15 % → 8 %) et la livraison du module de traçabilité.', by:'tracer_ananas'}},
+    {id:'A-06', project:'Tchèko Pay', owner:'six_secondes', talents:['pixel_atlantique', 'api_lagune'], jalons:5, since:daysAgo(71), pacte:true, state:'active'},
+    {id:'A-07', project:'Zemidjan+', owner:'km_a_vide', talents:['offline_first'], jalons:2, since:daysAgo(9), pacte:false, state:'active'},
+  ].map(t => Object.assign({notes:[]}, t));
+  const departures = [
+    {at:daysAgo(30, 16), project:'Vodun Studio', who:'franck_b', type:'Départ', motif:'Se concentrer sur deux projets'},
+    {at:daysAgo(11, 10), project:'Tchèko Pay', who:'sat_agro', type:'Retrait', motif:'Engagement non tenu'},
+    {at:daysAgo(26, 9), project:'Solar Box', who:'savoir_dire_non', type:'Départ', motif:'Changement de situation professionnelle'},
+  ];
+
+  /* Paiements */
+  const prods = [['Pack Essai · 3 crédits', PRICES.essai, 'credits'], ['Pack Élan · 10 crédits', PRICES.elan, 'credits'], ['Pack Campagne · 30 crédits', PRICES.campagne, 'credits'],
+    ['Second profil', PRICES.second, 'second'], ['Emplacement projet', PRICES.slot, 'slot'], ['Pacte d\'associés', PRICES.pacte, 'pacte']];
+  const payers = users.filter(u => u.roles.includes('vis') && u.status !== 'banned');
+  const payments = [];
+  for(let i = 0; i < 46; i++){
+    const pr = prods[Math.floor(r() * (i % 7 === 0 ? 6 : 4))], u = payers[Math.floor(r() * payers.length)];
+    const st = r() < .07 ? 'failed' : 'ok', cc = ccOfCity(u.city), cops = PAY_CC[cc].ops;
+    const op = !cops.length || r() < .15 ? 'Carte bancaire' : cops[Math.floor(r() * Math.min(cops.length, r() < .5 ? 1 : cops.length))];
+    payments.push({id:'PAY-'+(88400 + i), at:daysAgo(Math.floor(r()*58), 7 + Math.floor(r()*14), Math.floor(r()*59)), uid:u.id, label:pr[0], amount:pr[1], kind:pr[2],
+      op, cc, provider:'FedaPay', status:st, ref:'FP'+(2610000000 + Math.floor(r()*9e8))});
+  }
+  payments.push({id:'PAY-88390', at:daysAgo(9, 14), uid:U('franck_b').id, label:'Pack Élan · 10 crédits', amount:PRICES.elan, kind:'credits', op:'MTN MoMo', cc:'BJ', provider:'FedaPay', status:'refunded', ref:'FP2610330211', refund:{by:'Edwige Akplogan', at:daysAgo(8, 10), motif:'Double débit signalé par l\'utilisateur'}});
+  payments.sort((a, b) => b.at - a.at);
+
+  /* Support */
+  const tickets = [
+    {id:'S-512', at:daysAgo(0, 8, 40), uid:U('ruth_terrain').id, topic:'Une question sur mon compte', status:'open', msgs:[{from:'user', t:'Bonjour, j\'ai envoyé ma pièce d\'identité hier soir. Combien de temps faut-il pour la vérification ?', at:daysAgo(0, 8, 40)}]},
+    {id:'S-511', at:daysAgo(0, 7, 15), uid:U('hermann_d').id, topic:'Un paiement mobile money', status:'open', msgs:[{from:'user', t:'J\'ai payé 3 000 FCFA par Moov mais mon profil Talent n\'est pas débloqué. Référence MP2610778812.', at:daysAgo(0, 7, 15)}]},
+    {id:'S-509', at:daysAgo(1, 16, 2), uid:U('offline_first').id, topic:'Un problème technique', status:'waiting', assigned:'Ibrahim Saka', msgs:[
+      {from:'user', t:'La synchronisation des messages ne marche pas sur mon vieux téléphone Android.', at:daysAgo(1, 16, 2)},
+      {from:'staff', by:'Ibrahim Saka', t:'Merci pour le signalement. Quelle version d\'Android utilises-tu ? Une capture d\'écran nous aiderait.', at:daysAgo(1, 17, 30)}]},
+    {id:'S-503', at:daysAgo(4, 10), uid:U('six_secondes').id, topic:'Une question sur mon compte', status:'closed', assigned:'Ibrahim Saka', msgs:[
+      {from:'user', t:'Comment changer mon numéro de téléphone ?', at:daysAgo(4, 10)},
+      {from:'staff', by:'Ibrahim Saka', t:'Dans Paramètres › Compte › Modifier. Un code SMS te sera envoyé pour le vérifier.', at:daysAgo(4, 11)}]},
+  ];
+
+  const staff = [
+    {id:'ST-1', name:'Mariam Dossou', email:'admin@takamatch.bj', pwd:'Admin2026!', role:'super', status:'active', created:daysAgo(120), last:daysAgo(0, 8)},
+    {id:'ST-2', name:'Rodrigue Ahyi', email:'verif@takamatch.bj', pwd:'Verif2026!', role:'verif', status:'active', created:daysAgo(90), last:daysAgo(0, 9)},
+    {id:'ST-3', name:'Carine Zinsou', email:'modo@takamatch.bj', pwd:'Modo2026!', role:'moder', status:'active', created:daysAgo(90), last:daysAgo(1, 18)},
+    {id:'ST-4', name:'Ibrahim Saka', email:'support@takamatch.bj', pwd:'Support2026!', role:'support', status:'active', created:daysAgo(60), last:daysAgo(0, 7)},
+    {id:'ST-5', name:'Edwige Akplogan', email:'finance@takamatch.bj', pwd:'Finance2026!', role:'finance', status:'active', created:daysAgo(60), last:daysAgo(2, 15)},
+  ];
+  const audit = [
+    {at:daysAgo(2, 10), by:'Rodrigue Ahyi', role:'verif', act:'Complément demandé', target:'@hermann_d', d:'Dossier V-3104 · photo floue'},
+    {at:daysAgo(2, 10, 5), by:'Carine Zinsou', role:'moder', act:'Compte suspendu (7 jours)', target:'@clarisse_h', d:'Propos déplacés dans un groupe d\'équipe'},
+    {at:daysAgo(2, 9, 58), by:'Carine Zinsou', role:'moder', act:'Conversation ouverte', target:'Groupe Lafia Learn', d:'Motif : vérification du signalement R-2039'},
+    {at:daysAgo(4, 16), by:'Carine Zinsou', role:'moder', act:'Avertissement envoyé', target:'@sat_agro', d:'Signalement R-2036'},
+    {at:daysAgo(8, 10), by:'Edwige Akplogan', role:'finance', act:'Remboursement', target:'@franck_b', d:'PAY-88390 · 5 000 FCFA · double débit'},
+    {at:daysAgo(21, 15), by:'Mariam Dossou', role:'super', act:'Compte banni', target:'@invest_express', d:'Demandes d\'argent répétées'},
+  ];
+  return {v:4, users, verifs, reports, threads, teams, departures, payments, tickets, staff, audit, seen:[],
+    settings:{second:3000, slot:5000, pacte:15000, essai:2000, elan:5000, campagne:12000, monthly:3, expiry:10, maxProjects:3, maxEngage:3,
+      links:{facebook:'https://www.facebook.com/takamatch', instagram:'https://www.instagram.com/takaamatch', linkedin:'https://www.linkedin.com/company/takamatch', tiktok:'https://www.tiktok.com/@takamatch', youtube:'https://www.youtube.com/channel/UCNpx3ccM4wzZuVc7AMehRKQ', whatsapp:'https://chat.whatsapp.com/LIEN-DU-GROUPE'}}};
+}
+
+/* ---------- État ---------- */
+const KEY = 'tm-admin-v4';
+let D = null;
+const A = {me:null, view:'overview', tab:{}, q:{}, drawer:null, modal:null, sideOpen:false, unlocked:new Set()};
+function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if(s && s.v === 4) return s; }catch(e){} return seedState(); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(D)); }catch(e){ try{ const lite = JSON.parse(JSON.stringify(D)); lite.verifs.forEach(v => { v.doc = ''; v.selfie = ''; }); localStorage.setItem(KEY, JSON.stringify(lite)); }catch(err){} } }
+D = load();
+/* Index des comptes par id et par pseudo : reconstruit seulement quand la liste change. */
+let U_IDX = null;
+function uIdx(){ if(!U_IDX || U_IDX.arr !== D.users || U_IDX.n !== D.users.length){
+  U_IDX = {arr:D.users, n:D.users.length, id:new Map(D.users.map(u => [u.id, u])), h:new Map(D.users.map(u => [u.handle, u]))}; } return U_IDX; }
+const userBy = id => uIdx().id.get(id);
+const userByHandle = h => uIdx().h.get(String(h||'').replace(/^@/,''));
+const staffName = () => A.me ? A.me.name : '—';
+function log(act, target, d){ D.audit.unshift({at:Date.now(), by:staffName(), role:A.me ? A.me.role : '', act, target, d:d || ''}); save(); }
+
+/* ---------- Avatar, visuels de pièces ---------- */
+function av(u, lg){ if(!u) return '<span class="av">?</span>';
+  const vis = u.primary === 'vis';
+  if(u.photo) return '<span class="av'+(lg?' av-lg':'')+'" style="background-image:url('+u.photo+')"></span>';
+  return '<span class="av'+(vis?' vis':'')+(lg?' av-lg':'')+'">'+esc(initials(u.legal))+'</span>'; }
+function whoCell(u){ if(!u) return '—'; return '<span class="who">'+av(u)+'<span style="min-width:0"><b>'+esc(u.legal)+'</b><small>@'+esc(u.handle)+'</small></span></span>'; }
+function roleChips(u){ return u.roles.map(r => '<span class="chip '+(r === 'vis' ? 'c-vis' : 'c-tal')+'">'+(r === 'vis' ? '💡 Visionnaire' : '🛠️ Talent')+'</span>').join(' '); }
+function statusChip(u){ return u.status === 'banned' ? '<span class="chip c-bad">Banni</span>' : u.status === 'suspended' ? '<span class="chip c-warn">Suspendu</span>' : '<span class="chip c-ok">Actif</span>'; }
+function docSvg(u, kind, v){
+  const name = (v && v.mismatch) || u.legal, parts = name.split(' '), last = parts.slice(-1)[0].toUpperCase(), first = parts.slice(0, -1).join(' ') || '—';
+  const sx = u.sex === 'f' ? 'F' : 'M', blur = v && v.blurry ? ' filter="url(#b)"' : '';
+  const svg = kind === 'doc'
+    ? '<svg xmlns="http://www.w3.org/2000/svg" width="520" height="330" viewBox="0 0 520 330"><defs><filter id="b"><feGaussianBlur stdDeviation="2.6"/></filter><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#DCE9DD"/><stop offset=".5" stop-color="#F7F0C9"/><stop offset="1" stop-color="#F3D9D2"/></linearGradient></defs>'
+      + '<g'+blur+'><rect x="6" y="6" width="508" height="318" rx="18" fill="url(#g)" stroke="#9BA79C"/><text x="26" y="42" font-family="Arial" font-size="15" font-weight="700" fill="#2E4B33">PIÈCE D\'IDENTITÉ</text><text x="494" y="42" text-anchor="end" font-family="Arial" font-size="12" fill="#B54A3F" font-weight="700">SPÉCIMEN · DÉMO</text>'
+      + '<rect x="26" y="62" width="128" height="160" rx="8" fill="#C9C2B3"/><circle cx="90" cy="120" r="30" fill="#8F877A"/><rect x="50" y="160" width="80" height="50" rx="25" fill="#8F877A"/>'
+      + '<g font-family="Arial" fill="#1F1E1B"><text x="176" y="80" font-size="11" fill="#5D5A52">NOM</text><text x="176" y="100" font-size="20" font-weight="700">'+esc(last)+'</text>'
+      + '<text x="176" y="128" font-size="11" fill="#5D5A52">PRÉNOMS</text><text x="176" y="148" font-size="18">'+esc(first)+'</text>'
+      + '<text x="176" y="176" font-size="11" fill="#5D5A52">SEXE</text><text x="176" y="194" font-size="16">'+sx+'</text>'
+      + '<text x="260" y="176" font-size="11" fill="#5D5A52">N°</text><text x="260" y="194" font-size="16" font-family="Courier">'+esc(u.id.replace('U-','BJ-'))+'••••</text>'
+      + '<text x="176" y="222" font-size="11" fill="#5D5A52">EXPIRE LE</text><text x="176" y="240" font-size="16">'+(v && v.motif === 'Document expiré' ? '12/03/2024' : '18/09/2031')+'</text></g>'
+      + '<rect x="26" y="262" width="468" height="42" rx="6" fill="#ffffff" opacity=".55"/><text x="38" y="289" font-family="Courier" font-size="14" fill="#5D5A52">IDBEN&lt;&lt;'+esc(last)+'&lt;&lt;'+esc(first.split(' ')[0].toUpperCase())+'&lt;&lt;&lt;&lt;&lt;&lt;</text></g></svg>'
+    : '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="#D9D3C6"/><circle cx="200" cy="165" r="78" fill="#8F877A"/><rect x="88" y="262" width="224" height="170" rx="100" fill="#8F877A"/>'
+      + '<rect x="230" y="250" width="150" height="96" rx="8" fill="#F7F0C9" stroke="#9BA79C" transform="rotate(-8 300 300)"/><text x="200" y="30" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="#5D5A52">SELFIE AVEC LA PIÈCE · DÉMO</text>'
+      + '<text x="200" y="185" text-anchor="middle" font-family="Arial" font-size="40" font-weight="700" fill="#F4F1EA">'+esc(initials(u.legal))+'</text></svg>';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+/* ============================================================
+   Rendu
+   ============================================================ */
+function render(){
+  try{ renderView(); }
+  catch(err){
+    if(window.TMGuard) TMGuard.log(err, 'admin ' + A.view);
+    const v = $('#view') || $('#root');
+    if(v) v.innerHTML = '<div class="card" style="padding:36px 20px;display:grid;place-items:center">'
+      + (window.TMGuard ? TMGuard.panel(err, 'Ce module n\'a pas pu s\'afficher', 'Les données ne sont pas perdues. Reviens à la vue d\'ensemble ou recharge la page.',
+          A.view !== 'overview' ? '<button class="tmg-btn ghost" type="button" data-act="go" data-v="overview">Vue d\'ensemble</button>' : '') : 'Erreur d\'affichage.') + '</div>';
+  }
+}
+function renderView(){
+  document.documentElement.setAttribute('data-theme', THEME);
+  if(!A.me) return renderLogin();
+  if(!canSee(A.view)) A.view = 'overview';
+  const counts = {verifs:D.verifs.filter(v => v.status === 'pending').length, reports:D.reports.filter(r => r.status !== 'done').length,
+    support:D.tickets.filter(t => t.status === 'open').length, teams:D.teams.filter(t => t.state === 'dispute').length};
+  let grp = '';
+  const nav = MODULES.filter(m => canSee(m.id)).map(m => { const g = m.grp !== grp ? '<div class="grp">'+m.grp+'</div>' : ''; grp = m.grp;
+    return g + '<button class="nav'+(A.view === m.id ? ' on' : '')+'" data-act="go" data-v="'+m.id+'"'+(A.view === m.id ? ' aria-current="page"' : '')+'>'+ic(m.i)+'<span>'+m.l+'</span>'
+      + (counts[m.id] ? '<span class="cnt">'+counts[m.id]+'</span>' : '')+'</button>'; }).join('');
+  $('#root').innerHTML = '<header class="top">'
+    + '<button class="iconbtn menu-btn" data-act="side" aria-label="Menu">'+ic('menu')+'</button>'
+    + '<img class="logo" src="'+LOGO_SRC+'" alt="TakaMatch"><span class="staff-chip">Espace équipe</span>'
+    + '<div class="gsearch"><span>'+ic('search')+'</span><input class="inp" id="gq" placeholder="Rechercher un utilisateur : nom, @pseudo, e-mail, téléphone" autocomplete="off"><div class="gres" id="gres" hidden></div></div>'
+    + '<span class="grow"></span>'
+    + '<span class="live" id="live" title="Les événements de la plateforme arrivent en direct"><i></i><span>Plateforme en direct</span></span>'
+    + '<button class="iconbtn" data-act="theme" aria-label="Changer de thème">'+ic(THEME === 'dark' ? 'sun' : 'moon')+'</button>'
+    + '<button class="me-btn" data-act="me-menu"><span class="av staff">'+esc(initials(A.me.name))+'</span><span style="text-align:left;line-height:1.2"><b style="display:block;font-size:13px">'+esc(A.me.name)+'</b><small style="color:var(--ink-3);font-size:11.5px">'+ROLES[A.me.role].l+'</small></span></button>'
+    + '</header>'
+    + '<div class="shell"><nav class="side'+(A.sideOpen ? ' open' : '')+'" aria-label="Modules">'+nav
+    + '<div class="foot">Connecté en tant que <b>'+ROLES[A.me.role].l+'</b>. Chaque action est inscrite au journal d\'audit.</div></nav>'
+    + '<main class="main"><div class="wrap" id="view">'+(LIVE_VIEWS.includes(A.view) ? '' : DEMO_NOTE)+(VIEWS[A.view] || VIEWS.overview)()+'</div></main></div>'
+    + '<div id="ovl"></div>';
+  paintOverlay();
+  if(A.view === 'settings') prixPreview();
+}
+/* Modules déjà branchés sur la vraie base ; les autres montrent encore la démo. */
+const LIVE_VIEWS = ['staff', 'audit', 'settings'];
+const DEMO_NOTE = '<div class="demo-note">'+'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>'
+  + '<span><b>Données de démonstration.</b> Ce module sera branché sur les vraies données à la phase 2 : ce que tu fais ici n\'agit pas sur le site.</span></div>';
+function rerender(){ const y = ($('.main') || {}).scrollTop; render(); }
+function pageH(t, p, acts){ return '<div class="page-h"><div><h1>'+t+'</h1>'+(p ? '<p>'+p+'</p>' : '')+'</div>'+(acts ? '<div class="acts">'+acts+'</div>' : '')+'</div>'; }
+function tabs(key, list){ const cur = A.tab[key] || list[0][0];
+  return '<div class="tabs" role="tablist">'+list.map(t => '<button role="tab" class="'+(cur === t[0] ? 'on' : '')+'" data-act="tab" data-k="'+key+'" data-v="'+t[0]+'" aria-selected="'+(cur === t[0])+'">'+t[1]+(t[2] != null ? '<span class="n">'+t[2]+'</span>' : '')+'</button>').join('')+'</div>'; }
+const curTab = (key, def) => A.tab[key] || def;
+const TBL_PAGE = 50;   /* lignes affichées d'un coup ; la suite à la demande */
+function table(head, rows, empty){ if(!rows.length) return '<div class="card empty"><b>'+(empty || 'Rien à afficher')+'</b>Aucun élément ne correspond.</div>';
+  const key = A.view + ':' + head.length + ':' + (empty || ''), more = A.more || (A.more = {}), n = Math.min(rows.length, more[key] || TBL_PAGE);
+  return '<div class="tbl-w"><table><thead><tr>'+head.map(h => '<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.slice(0, n).join('')+'</tbody></table></div>'
+    + (n < rows.length ? '<div style="text-align:center;margin-top:12px"><button class="btn btn-ghost btn-sm" data-act="tbl-more" data-k="'+esc(key)+'">Afficher '+Math.min(TBL_PAGE, rows.length - n)+' de plus <span class="hint">('+n+' sur '+rows.length+')</span></button></div>' : ''); }
+
+/* ---------- Connexion : e-mail + code à 6 chiffres (Supabase) ----------
+   Pas de mot de passe. Seules les adresses ajoutées par un super admin
+   (Équipe et accès) entrent ; elles reçoivent leur rôle à la première connexion. */
+let L = {step:'mail', email:'', busy:false, err:''};
+function renderLogin(){
+  const mail = L.step === 'mail';
+  $('#root').innerHTML = '<div class="login"><form class="card login-c" id="loginF" autocomplete="off" novalidate>'
+    + '<img class="logo" src="'+LOGO_SRC+'" alt="TakaMatch">'
+    + '<h1 style="font-size:26px;margin-bottom:4px">Espace équipe</h1>'
+    + '<p style="color:var(--ink-2);margin:0 0 18px">'+(mail ? 'Accès réservé à l\'équipe TakaMatch. Chaque connexion est inscrite au journal.' : 'Code envoyé à <b>'+esc(L.email)+'</b>. Regarde aussi dans les indésirables.')+'</p>'
+    + '<div class="col">'
+    + (mail
+        ? '<div class="field"><label for="lgE">Adresse e-mail</label><input class="inp" id="lgE" type="email" placeholder="ton@email.com" autocomplete="username" value="'+esc(L.email)+'"></div>'
+        : '<div class="field"><label for="lgC">Code reçu par e-mail</label><input class="inp mono" id="lgC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="letter-spacing:.35em;font-size:20px"></div>')
+    + '<div id="lgErr">'+(L.err ? '<div class="err">'+esc(L.err)+'</div>' : '')+'</div>'
+    + '<button class="btn btn-a btn-block" type="submit" style="height:42px"'+(L.busy ? ' disabled' : '')+'>'+ic('lock')+(L.busy ? 'Un instant…' : mail ? 'Recevoir un code' : 'Se connecter')+'</button>'
+    + (mail ? '' : '<div class="row" style="justify-content:center;gap:14px;margin-top:4px"><button type="button" class="btn btn-quiet btn-sm" data-act="lg-back">Changer d\'adresse</button><button type="button" class="btn btn-quiet btn-sm" data-act="lg-resend">Renvoyer le code</button></div>')
+    + '</div><p class="hint" style="margin-top:14px">Pas de mot de passe : un code à usage unique t\'est envoyé à chaque connexion. Tu peux te connecter depuis n\'importe quel ordinateur ou téléphone.</p></form></div>';
+  const f = $(mail ? '#lgE' : '#lgC'); if(f) setTimeout(() => f.focus(), 30);
+}
+function lgFail(e){ L.busy = false; L.err = (e && e.message) || 'La demande n\'a pas abouti.'; renderLogin(); }
+async function doLogin(){
+  if(L.busy) return;
+  if(L.step === 'mail'){
+    const em = ($('#lgE').value || '').trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){ L.err = 'Entre une adresse e-mail valide.'; L.email = em; return renderLogin(); }
+    L.email = em; L.busy = true; L.err = ''; renderLogin();
+    try{ await TMDB.sendCode(em, true); L.step = 'code'; L.busy = false; renderLogin(); }catch(e){ lgFail(e); }
+    return;
+  }
+  const code = ($('#lgC').value || '').replace(/\D/g, '');
+  if(code.length !== 6){ L.err = 'Le code compte 6 chiffres.'; return renderLogin(); }
+  L.busy = true; L.err = ''; renderLogin();
+  try{ await TMDB.verifyCode(L.email, code); await enter(); }catch(e){ lgFail(e); }
+}
+/* Session ouverte : on vérifie le rôle dans la base (jamais dans le navigateur). */
+async function enter(){
+  let role = null;
+  try{ role = await TMDB.rpc('staff_claim'); }catch(e){ role = null; }
+  if(!role || !ROLES[role]){
+    try{ await TMDB.signOut(); }catch(e){}
+    L = {step:'mail', email:L.email, busy:false, err:'Cette adresse n\'a pas accès à l\'espace équipe. Demande à un super admin de t\'ajouter dans « Équipe et accès ».'};
+    A.me = null; return renderLogin();
+  }
+  const em = TMDB.email(); let name = em.split('@')[0];
+  try{ const rows = await TMDB.rpc('staff_members'); A.staffRows = rows; const me = (rows || []).find(r => r.is_me); if(me && me.name) name = me.name; }catch(e){}
+  A.me = {id:TMDB.uid(), name, email:em, role, status:'active'};
+  A.view = 'overview'; L = {step:'mail', email:'', busy:false, err:''};
+  TMDB.rpc('admin_note', {p_action:'Connexion', p_detail:'Espace équipe'}).catch(() => {});
+  render(); toast('Bonjour '+name.split(' ')[0]+'.');
+}
+function logout(){
+  TMDB.rpc('admin_note', {p_action:'Déconnexion', p_detail:'Espace équipe'}).catch(() => {}).then(() => TMDB.signOut());
+  A.me = null; A.drawer = null; A.modal = null; A.staffRows = null; A.logRows = null; A.pricing = null; render();
+}
+
+/* ============================================================
+   Vues
+   ============================================================ */
+const VIEWS = {};
+
+/* ---------- Vue d'ensemble ---------- */
+VIEWS.overview = () => {
+  const u = D.users, now = Date.now(), month = new Date(); month.setDate(1); month.setHours(0,0,0,0);
+  const tal = u.filter(x => x.roles.includes('tal')).length, vis = u.filter(x => x.roles.includes('vis')).length, both = u.filter(x => x.roles.length > 1).length;
+  const new7 = u.filter(x => now - x.created < 7*DAY).length, ver = u.filter(x => x.verifiedId).length;
+  const paid = D.payments.filter(p => p.status === 'ok');
+  const mrev = paid.filter(p => now - p.at < 30*DAY).reduce((a, p) => a + p.amount, 0), prev = paid.filter(p => now - p.at >= 30*DAY && now - p.at < 60*DAY).reduce((a, p) => a + p.amount, 0);
+  const todo = [
+    ['verifs', D.verifs.filter(v => v.status === 'pending').length, 'dossiers de vérification à traiter', 'shield'],
+    ['reports', D.reports.filter(r => r.status === 'new').length, 'nouveaux signalements', 'flag'],
+    ['support', D.tickets.filter(t => t.status === 'open').length, 'messages au support sans réponse', 'help'],
+    ['teams', D.teams.filter(t => t.state === 'dispute').length, 'litige d\'équipe ouvert', 'tools'],
+  ].filter(t => canSee(t[0]));
+  /* Inscriptions par semaine (8 semaines) */
+  const weeks = Array.from({length:8}, (_, i) => { const end = now - (7 - i)*7*DAY, start = end - 7*DAY;
+    const inW = x => x.created >= start && x.created < end;
+    return {l:'S-'+(7 - i), t:u.filter(x => inW(x) && x.primary === 'tal').length + [3,4,2,5,6,4,7,5][i], v:u.filter(x => inW(x) && x.primary === 'vis').length + [1,2,2,1,3,2,3,4][i]}; });
+  const max = Math.max(...weeks.map(w => w.t + w.v)), H = 150, bw = 28;
+  const chart = '<svg viewBox="0 0 440 190" width="100%" role="img" aria-label="Inscriptions par semaine, talents et visionnaires">'
+    + [0, .5, 1].map(k => '<line x1="30" x2="430" y1="'+(10 + H - H*k)+'" y2="'+(10 + H - H*k)+'" stroke="var(--line)"/><text x="24" y="'+(14 + H - H*k)+'" font-size="10" text-anchor="end" fill="var(--ink-3)">'+Math.round(max*k)+'</text>').join('')
+    + weeks.map((w, i) => { const x = 44 + i*49, ht = H*w.t/max, hv = H*w.v/max;
+      return '<rect x="'+x+'" y="'+(10 + H - ht)+'" width="'+bw+'" height="'+ht+'" rx="2" fill="#007CD8"><title>'+w.t+' talents</title></rect>'
+        + '<rect x="'+x+'" y="'+(10 + H - ht - hv)+'" width="'+bw+'" height="'+hv+'" rx="2" fill="#C99A1E"><title>'+w.v+' visionnaires</title></rect>'
+        + '<text x="'+(x + bw/2)+'" y="182" font-size="10" text-anchor="middle" fill="var(--ink-3)">'+w.l+'</text>'; }).join('')+'</svg>';
+  const byKind = [['Packs de crédits','credits'],['Seconds profils','second'],['Emplacements projet','slot'],['Pactes d\'associés','pacte']].map(k => [k[0], paid.filter(p => p.kind === k[1]).reduce((a, p) => a + p.amount, 0)]);
+  const kmax = Math.max(1, ...byKind.map(k => k[1]));
+  const feed = D.audit.slice(0, 7);
+  return pageH('Bonjour '+esc(A.me.name.split(' ')[0]), 'Tout ce qui se passe sur TakaMatch, en un coup d\'œil.')
+    + '<div class="grid g4" style="margin-bottom:14px">'
+    +   kpi('users', 'Inscrits', nf(u.length), '+'+new7+' cette semaine', true)
+    +   kpi('users', 'Talents · Visionnaires', tal+' · '+vis, both+(both > 1 ? ' comptes' : ' compte')+' avec les deux profils')
+    +   kpi('shield', 'Profils vérifiés', Math.round(ver/u.length*100)+' %', ver+' comptes sur '+u.length)
+    +   (canSee('payments') || A.me.role === 'super' ? kpi('coins', 'Encaissé (30 jours)', fcfa(mrev), (prev ? (mrev >= prev ? '+' : '')+Math.round((mrev - prev)/prev*100)+' % vs les 30 jours précédents' : ''), mrev >= prev)
+                                                     : kpi('tools', 'Ateliers actifs', D.teams.length, D.teams.filter(t => t.pacte).length+' pactes commandés'))
+    + '</div>'
+    + '<div class="grid g4" style="margin-bottom:18px">'
+    +   kpi('file', 'Fiches en ligne', u.filter(x => x.roles.includes('tal') && x.online && x.status === 'active').length + DATA.PROJECTS.filter(p => (D.mod || {})[p.id] !== 'hidden').length, 'talents et projets visibles')
+    +   kpi('link', 'Invitations (30 j)', nf(u.reduce((a, x) => a + x.invitesSent, 0)), '65 % de réponses')
+    +   kpi('check', 'Matchs', D.teams.reduce((a, t) => a + t.talents.length, 0), D.teams.length+' Ateliers ouverts')
+    +   kpi('flag', 'Comptes sanctionnés', u.filter(x => x.status !== 'active').length, u.filter(x => x.status === 'banned').length+' banni · '+u.filter(x => x.status === 'suspended').length+' suspendu')
+    + '</div>'
+    + '<div class="grid g-split" style="margin-bottom:14px">'
+    +   '<section class="card card-pad"><div class="sec-t"><h3>À traiter</h3><span class="hint">Mis à jour en direct</span></div><div class="col" style="gap:8px">'
+    +     (todo.length ? todo.map(t => '<button class="todo'+(t[1] ? ' hot' : '')+'" data-act="go" data-v="'+t[0]+'"><span class="n tnum">'+t[1]+'</span><span class="grow">'+t[2]+'</span>'+ic('arrow')+'</button>').join('') : '<p class="hint">Rien pour ton rôle.</p>')
+    +   '</div></section>'
+    +   '<section class="card card-pad"><div class="sec-t"><h3>Inscriptions par semaine</h3><span class="legend"><span><i style="background:#007CD8"></i>Talents</span><span><i style="background:#C99A1E"></i>Visionnaires</span></span></div>'+chart+'</section>'
+    + '</div>'
+    + '<div class="grid g2">'
+    +   (canSee('payments') || A.me.role === 'super' ? '<section class="card card-pad"><div class="sec-t"><h3>Revenus par produit</h3><span class="hint">depuis le début</span></div><div class="hbars">'
+    +     byKind.map(k => '<div class="hbar"><span>'+k[0]+'</span><span class="t"><i style="width:'+(k[1]/kmax*100)+'%;background:var(--ok)"></i></span><span class="mono" style="text-align:right;font-size:12px">'+fcfa(k[1])+'</span></div>').join('')+'</div></section>'
+    :     '<section class="card card-pad"><div class="sec-t"><h3>Répartition des profils</h3></div><div class="hbars">'+[['Talents', tal, '#007CD8'], ['Visionnaires', vis, '#C99A1E'], ['Vérifiés', ver, 'var(--ok)']].map(k => '<div class="hbar"><span>'+k[0]+'</span><span class="t"><i style="width:'+(k[1]/u.length*100)+'%;background:'+k[2]+'"></i></span><span class="mono" style="text-align:right">'+k[1]+'</span></div>').join('')+'</div></section>')
+    +   '<section class="card card-pad"><div class="sec-t"><h3>Dernières actions de l\'équipe</h3>'+(canSee('audit') ? '<button class="btn btn-quiet btn-sm" data-act="go" data-v="audit">Tout voir'+ic('arrow')+'</button>' : '')+'</div><div class="timeline">'
+    +     feed.map(a => '<div class="it"><i></i><div><b>'+esc(a.by)+'</b> · '+esc(a.act)+' <span class="mono" style="font-size:12px">'+esc(a.target)+'</span><br><span>'+ago(a.at)+(a.d ? ' · '+esc(a.d) : '')+'</span></div></div>').join('')
+    +   '</div></section></div>';
+};
+function kpi(i, k, v, d, up){ return '<div class="card card-pad kpi"><div class="k">'+ic(i)+esc(k)+'</div><div class="v tnum">'+v+'</div><div class="d'+(up ? ' up' : '')+'">'+esc(d||'')+'</div></div>'; }
+
+/* ---------- Vérifications ---------- */
+const VST = {pending:['À traiter','c-warn'], more:['Complément demandé','c-tal'], approved:['Validé','c-ok'], rejected:['Refusé','c-bad']};
+VIEWS.verifs = () => {
+  const t = curTab('verifs', 'pending'), list = D.verifs.filter(v => v.status === t).sort((a, b) => t === 'pending' ? a.at - b.at : b.at - a.at);
+  return pageH('Vérifications de profil', 'L\'équipe contrôle chaque pièce d\'identité et chaque selfie avant d\'accorder le badge. Les plus anciens dossiers d\'abord.')
+    + '<div class="note-box" style="margin-bottom:14px">'+ic('info')+' Le badge apparaît ainsi sur la plateforme : '+vBadge('tal', true)+' pour un talent, '+vBadge('vis', true)+' pour un visionnaire, '+vBadge('tal', false)+' sinon.</div>'
+    + tabs('verifs', Object.keys(VST).map(k => [k, VST[k][0], D.verifs.filter(v => v.status === k).length]))
+    + table(['Utilisateur', 'Profil', 'Soumis', 'Pièces', 'Points d\'attention', 'Statut', ''], list.map(v => { const u = userBy(v.uid);
+      const flags = []; if(v.mismatch) flags.push('<span class="chip c-bad">Nom différent</span>'); if(v.blurry) flags.push('<span class="chip c-warn">Photo floue</span>');
+      if(u && now7(u.created)) flags.push('<span class="chip">Compte récent</span>'); if(v.live) flags.push('<span class="chip c-tal">En direct</span>');
+      return '<tr class="click'+(v.live && v.status === 'pending' ? ' fresh' : '')+'" data-act="open-verif" data-id="'+v.id+'"><td>'+whoCell(u)+'</td><td>'+roleChips(u)+'</td><td>'+ago(v.at)+'<br><small class="hint">'+fmt(v.at)+'</small></td>'
+        + '<td>Pièce + selfie</td><td>'+(flags.join(' ') || '<span class="hint">—</span>')+'</td><td><span class="chip '+VST[v.status][1]+'">'+VST[v.status][0]+'</span></td>'
+        + '<td><button class="btn btn-ghost btn-sm" data-act="open-verif" data-id="'+v.id+'">'+(v.status === 'pending' ? 'Examiner' : 'Voir')+'</button></td></tr>'; }), 'Aucun dossier ici');
+};
+const now7 = t => Date.now() - t < 7*DAY;
+function verifDrawer(v){
+  const u = userBy(v.uid), open = v.status === 'pending' || v.status === 'more';
+  const doc = v.doc || docSvg(u, 'doc', v), selfie = v.selfie || docSvg(u, 'selfie', v);
+  const checks = [['name','Le nom sur la pièce correspond au nom légal du compte ('+esc(u.legal)+')'], ['face','Le visage du selfie correspond à la photo de la pièce'],
+    ['valid','La pièce est valide et non expirée'], ['read','Les deux photos sont nettes et lisibles']];
+  return drawer('Dossier '+esc(v.id), '<span class="chip '+VST[v.status][1]+'">'+VST[v.status][0]+'</span>',
+    (v.mismatch ? '<div class="note-box bad" style="margin-bottom:14px">'+ic('alert')+' Le nom lu sur la pièce (<b>'+esc(v.mismatch)+'</b>) ne correspond pas au nom légal déclaré à l\'inscription (<b>'+esc(u.legal)+'</b>).</div>' : '')
+    + (v.blurry ? '<div class="note-box warn" style="margin-bottom:14px">'+ic('alert')+' La photo de la pièce est floue.</div>' : '')
+    + '<div class="dsec"><span class="lbl">Pièces soumises · '+fmt(v.at)+(v.live ? ' · envoyées depuis la plateforme' : '')+'</span><div class="docs">'
+    +   '<div class="doc"><img src="'+doc+'" alt="Pièce d\'identité" data-act="zoom"><div class="cap"><span>Pièce d\'identité</span><span class="hint">cliquer pour agrandir</span></div></div>'
+    +   '<div class="doc"><img src="'+selfie+'" alt="Selfie" data-act="zoom"><div class="cap"><span>Selfie avec la pièce</span></div></div></div></div>'
+    + '<div class="dsec"><span class="lbl">Ce que dit le compte</span><dl class="kv">'
+    +   '<dt>Nom légal</dt><dd><b>'+esc(u.legal)+'</b> <span class="hint">non modifiable depuis l\'inscription</span></dd><dt>Pseudo</dt><dd><span class="handle">@'+esc(u.handle)+'</span></dd>'
+    +   '<dt>Profils</dt><dd>'+roleChips(u)+'</dd><dt>Sexe</dt><dd>'+(u.sex === 'f' ? 'Féminin' : u.sex === 'm' ? 'Masculin' : 'Non précisé')+'</dd><dt>Ville</dt><dd>'+esc(u.city)+'</dd>'
+    +   '<dt>E-mail</dt><dd>'+esc(u.email)+' <span class="chip c-ok">confirmé</span></dd><dt>Téléphone</dt><dd class="mono">'+esc(u.phone)+' '+(u.verifiedPhone ? '<span class="chip c-ok">vérifié</span>' : '<span class="chip">non vérifié</span>')+'</dd>'
+    +   '<dt>Inscrit le</dt><dd>'+fmt(u.created, false)+' ('+ago(u.created)+')</dd><dt>Signalements reçus</dt><dd>'+D.reports.filter(r => r.target === u.handle).length+'</dd></dl></div>'
+    + (open ? '<div class="dsec"><span class="lbl">Contrôles (obligatoires pour valider)</span>'+checks.map(c => '<label class="check"><input type="checkbox" data-chk="'+c[0]+'"> <span>'+c[1]+'</span></label>').join('')+'</div>' : '')
+    + '<div class="dsec"><span class="lbl">Historique du dossier</span><div class="timeline">'
+    +   '<div class="it"><i></i><div>Dossier soumis par <b>@'+esc(u.handle)+'</b><br><span>'+fmt(v.at)+'</span></div></div>'
+    +   (v.history || []).map(h => '<div class="it"><i></i><div>'+esc(h.t)+'<br><span>'+esc(h.by)+' · '+fmt(h.at)+'</span></div></div>').join('')
+    +   (v.decidedAt ? '<div class="it"><i></i><div>'+(v.status === 'approved' ? 'Validé' : 'Refusé'+(v.motif ? ' · '+esc(v.motif) : ''))+'<br><span>'+esc(v.decidedBy)+' · '+fmt(v.decidedAt)+'</span></div></div>' : '')
+    + '</div></div>',
+    open ? '<button class="btn btn-ok" data-act="v-ok" data-id="'+v.id+'" id="vOk" disabled>'+ic('check')+'Valider le profil</button>'
+      + '<button class="btn btn-ghost" data-act="v-more" data-id="'+v.id+'">'+ic('send')+'Demander un complément</button>'
+      + '<button class="btn btn-bad-ghost" data-act="v-no" data-id="'+v.id+'">'+ic('x')+'Refuser</button><span class="grow"></span>'
+      + '<button class="btn btn-quiet" data-act="open-user" data-id="'+u.id+'">Fiche utilisateur</button>'
+      : '<button class="btn btn-quiet" data-act="open-user" data-id="'+u.id+'">Fiche utilisateur</button>', true);
+}
+function decideVerif(v, status, motif, more){
+  const u = userBy(v.uid);
+  v.status = status; v.decidedAt = Date.now(); v.decidedBy = staffName(); v.motif = motif || '';
+  if(status === 'approved'){ u.verifiedId = true; v.history.push({at:Date.now(), by:staffName(), t:'Validé'}); }
+  if(status === 'rejected'){ v.history.push({at:Date.now(), by:staffName(), t:'Refusé · '+motif}); }
+  if(status === 'more'){ v.decidedAt = null; v.history.push({at:Date.now(), by:staffName(), t:'Complément demandé : '+motif}); }
+  log(status === 'approved' ? 'Profil vérifié' : status === 'rejected' ? 'Vérification refusée' : 'Complément demandé', '@'+u.handle, v.id+(motif ? ' · '+motif : ''));
+  bus('verify-decision', {email:u.email, handle:u.handle, ok:status === 'approved', more:!!more, motif});
+  A.drawer = null; save(); render();
+  toast(status === 'approved' ? '@'+u.handle+' est vérifié. Le badge s\'affiche sur la plateforme.' : status === 'rejected' ? 'Dossier refusé. L\'utilisateur est prévenu.' : 'Complément demandé à @'+u.handle+'.');
+}
+
+/* ---------- Utilisateurs ---------- */
+VIEWS.users = () => {
+  const q = (A.q.users || '').toLowerCase(), f = A.q.uf || {};
+  let list = D.users.filter(u => (!q || [u.legal, u.handle, u.email, u.phone, u.city].join(' ').toLowerCase().includes(q))
+    && (!f.role || (f.role === 'both' ? u.roles.length > 1 : u.roles.includes(f.role))) && (!f.ver || (f.ver === 'yes') === !!u.verifiedId) && (!f.st || u.status === f.st));
+  list = list.sort((a, b) => b.created - a.created);
+  const sel = (k, opts) => '<select class="inp" data-act="uf" data-k="'+k+'">'+opts.map(o => '<option value="'+o[0]+'"'+((f[k]||'') === o[0] ? ' selected' : '')+'>'+o[1]+'</option>').join('')+'</select>';
+  return pageH('Utilisateurs', D.users.length+' comptes. Les coordonnées complètes sont visibles par l\'équipe ; chaque consultation de fiche est inscrite au journal.',
+      '<button class="btn btn-ghost" data-act="export-users">'+ic('dl')+'Exporter (CSV)</button>')
+    + '<div class="bar"><input class="inp q" data-act="uq" placeholder="Nom, @pseudo, e-mail, téléphone, ville" value="'+esc(A.q.users || '')+'">'
+    + sel('role', [['','Tous les profils'],['tal','Talents'],['vis','Visionnaires'],['both','Les deux profils']])
+    + sel('ver', [['','Vérifiés ou non'],['yes','Vérifiés'],['no','Non vérifiés']])
+    + sel('st', [['','Tous les statuts'],['active','Actifs'],['suspended','Suspendus'],['banned','Bannis']]) + '</div>'
+    + '<p class="hint" style="margin:0 0 8px">'+list.length+' résultat'+(list.length > 1 ? 's' : '')+'</p>'
+    + table(['Utilisateur', 'E-mail', 'Téléphone', 'Ville', 'Profils', 'Vérification', 'Statut', 'Inscrit'], list.map(u =>
+      '<tr class="click'+(u.live ? ' fresh' : '')+'" data-act="open-user" data-id="'+u.id+'"><td>'+whoCell(u)+'</td><td>'+esc(u.email)+'</td><td class="mono" style="white-space:nowrap">'+esc(u.phone)+'</td><td>'+esc(u.city.split(',')[0])+'</td>'
+      + '<td>'+roleChips(u)+'</td><td>'+vBadge(u.primary, u.verifiedId)+'</td><td>'+statusChip(u)+'</td><td style="white-space:nowrap">'+fmt(u.created, false)+'</td></tr>'), 'Aucun utilisateur');
+};
+function userDrawer(u){
+  const acts = canDo('users'), reps = D.reports.filter(r => r.target === u.handle), repsBy = D.reports.filter(r => r.by === u.handle);
+  const pays = D.payments.filter(p => p.uid === u.id), spent = pays.filter(p => p.status === 'ok').reduce((a, p) => a + p.amount, 0);
+  const projs = (u.projects || []).map(id => (DATA.PROJECTS.find(p => p.id === id) || {title:id === 'PRJ-SIKA' ? 'Sika Tontine' : id === 'PRJ-KANVO' ? 'Kanvô' : id}).title);
+  const teams = D.teams.filter(t => t.owner === u.handle || t.talents.includes(u.handle));
+  const vf = D.verifs.filter(v => v.uid === u.id).sort((a, b) => b.at - a.at)[0];
+  return drawer(esc(u.legal), statusChip(u),
+    '<div class="row" style="gap:14px;margin-bottom:18px">'+av(u, true)+'<div><div class="row" style="gap:8px;flex-wrap:wrap"><span class="handle">@'+esc(u.handle)+'</span>'+roleChips(u)+vBadge(u.primary, u.verifiedId)+'</div>'
+    +   '<p class="hint" style="margin:6px 0 0">ID '+esc(u.id)+' · inscrit le '+fmt(u.created, false)+' · vu '+ago(u.lastSeen)+'</p></div></div>'
+    + (u.status === 'suspended' ? '<div class="note-box warn" style="margin-bottom:14px">Suspendu jusqu\'au '+fmt(u.suspendedUntil, false)+'.</div>' : '')
+    + (u.status === 'banned' ? '<div class="note-box bad" style="margin-bottom:14px">Compte banni : il ne peut plus se connecter, ses fiches sont masquées.</div>' : '')
+    + '<div class="dsec"><span class="lbl">Coordonnées (privées)</span><dl class="kv">'
+    +   '<dt>Nom légal</dt><dd><b>'+esc(u.legal)+'</b></dd>'
+    +   '<dt>E-mail</dt><dd>'+esc(u.email)+' <button class="iconbtn" style="width:28px;height:28px" data-act="copy" data-v="'+esc(u.email)+'" aria-label="Copier">'+ic('copy')+'</button></dd>'
+    +   '<dt>Téléphone</dt><dd class="mono">'+esc(u.phone)+' <button class="iconbtn" style="width:28px;height:28px" data-act="copy" data-v="'+esc(u.phone)+'" aria-label="Copier">'+ic('copy')+'</button></dd>'
+    +   '<dt>Ville</dt><dd>'+esc(u.city)+'</dd><dt>Sexe</dt><dd>'+(u.sex === 'f' ? 'Féminin' : u.sex === 'm' ? 'Masculin' : 'Non précisé')+'</dd></dl></div>'
+    + '<div class="dsec"><span class="lbl">Échelle de confiance</span><div class="row" style="gap:6px;flex-wrap:wrap">'
+    +   [['E-mail', u.verifiedEmail], ['Téléphone', u.verifiedPhone], ['Identité', u.verifiedId], ['Référence', false]].map(x => '<span class="chip '+(x[1] ? 'c-ok' : '')+'">'+(x[1] ? ic('check') : '')+x[0]+'</span>').join('')
+    +   (vf ? ' <button class="lnk" data-act="open-verif" data-id="'+vf.id+'">Dernier dossier : '+VST[vf.status][0].toLowerCase()+'</button>' : '')+'</div></div>'
+    + '<div class="dsec"><span class="lbl">Profils et fiches</span><dl class="kv">'
+    +   (u.roles.includes('tal') ? '<dt>Fiche Talent</dt><dd>'+(u.online ? '<span class="chip c-ok">En ligne</span>' : '<span class="chip">Hors ligne</span>')+' <span class="mono">'+u.completion+' %</span>'+(u.skills ? ' · '+u.skills.map(skillL).join(', ') : '')+'</dd>' : '')
+    +   (projs.length ? '<dt>Projets</dt><dd>'+projs.map(esc).join(', ')+'</dd>' : '')
+    +   (u.bio ? '<dt>Signature</dt><dd style="color:var(--ink-2)">'+esc(u.bio)+'</dd>' : '')
+    +   '<dt>Activité</dt><dd>'+u.invitesSent+' invitations envoyées · '+u.invitesRecv+' reçues · '+u.matches+' matchs</dd>'
+    +   (teams.length ? '<dt>Ateliers</dt><dd>'+teams.map(t => esc(t.project)+(t.state === 'dispute' ? ' <span class="chip c-bad">litige</span>' : '')).join(', ')+'</dd>' : '')
+    +   (u.roles.includes('vis') ? '<dt>Crédits</dt><dd><b class="tnum">'+u.credits+'</b> restants</dd>' : '')
+    +   '<dt>Paiements</dt><dd>'+pays.length+' transaction'+(pays.length > 1 ? 's' : '')+' · '+fcfa(spent)+'</dd></dl></div>'
+    + '<div class="dsec"><span class="lbl">Signalements</span>'
+    +   (reps.length || repsBy.length ? '<div class="timeline">'+reps.map(r => '<div class="it"><i style="background:var(--bad)"></i><div>Reçu · '+esc(r.reason)+' <button class="lnk" data-act="open-report" data-id="'+r.id+'">'+r.id+'</button><br><span>'+fmt(r.at)+' · '+(r.status === 'done' ? esc(r.decision || 'traité') : 'en cours')+'</span></div></div>').join('')
+    +     repsBy.map(r => '<div class="it"><i></i><div>Émis contre @'+esc(r.target)+' · '+esc(r.reason)+'<br><span>'+fmt(r.at)+'</span></div></div>').join('')+'</div>' : '<p class="hint" style="margin:0">Aucun.</p>')+'</div>'
+    + '<div class="dsec"><span class="lbl">Notes internes</span><div class="timeline" style="margin-bottom:10px">'
+    +   (u.notes.length ? u.notes.map(n => '<div class="it"><i></i><div>'+esc(n.t)+'<br><span>'+esc(n.by)+' · '+fmt(n.at)+'</span></div></div>').join('') : '<p class="hint" style="margin:0">Aucune note.</p>')+'</div>'
+    +   '<div class="row"><input class="inp" id="noteIn" placeholder="Ajouter une note visible par l\'équipe seulement"><button class="btn btn-ghost" data-act="add-note" data-id="'+u.id+'">Ajouter</button></div></div>',
+    (acts ? (u.status === 'active'
+        ? '<button class="btn btn-warn" data-act="u-warn" data-id="'+u.id+'">'+ic('alert')+'Avertir</button><button class="btn btn-ghost" data-act="u-offline" data-id="'+u.id+'">'+ic('eye-off')+(u.online ? 'Mettre la fiche hors ligne' : 'Remettre en ligne')+'</button>'
+          + '<button class="btn btn-bad-ghost" data-act="u-suspend" data-id="'+u.id+'">'+ic('pause')+'Suspendre</button><button class="btn btn-bad" data-act="u-ban" data-id="'+u.id+'">'+ic('ban')+'Bannir</button>'
+        : '<button class="btn btn-ok" data-act="u-restore" data-id="'+u.id+'">'+ic('play')+'Réactiver le compte</button>')
+      + (u.verifiedId ? '<button class="btn btn-quiet" data-act="u-unverify" data-id="'+u.id+'">Retirer le badge</button>' : '') : '')
+    + (canDo('credits') && u.roles.includes('vis') ? '<button class="btn btn-ghost" data-act="u-credits" data-id="'+u.id+'">'+ic('coins')+'Ajuster les crédits</button>' : '')
+    + (!acts && !canDo('credits') ? '<span class="hint">Consultation seule pour ton rôle.</span>' : ''));
+}
+function userAction(kind, u, motif, extra){
+  if(kind === 'warn'){ log('Avertissement envoyé', '@'+u.handle, motif); bus('warning', {email:u.email, handle:u.handle, text:motif}); u.notes.unshift({at:Date.now(), by:staffName(), t:'Avertissement : '+motif}); toast('Avertissement envoyé à @'+u.handle+'.'); }
+  if(kind === 'offline'){ u.online = !u.online; log(u.online ? 'Fiche remise en ligne' : 'Fiche mise hors ligne', '@'+u.handle, motif); toast(u.online ? 'Fiche remise en ligne.' : 'Fiche mise hors ligne.'); }
+  if(kind === 'suspend'){ u.status = 'suspended'; u.suspendedUntil = Date.now() + extra*DAY; u.notes.unshift({at:Date.now(), by:staffName(), t:'Suspendu '+extra+' jours : '+motif}); log('Compte suspendu ('+extra+' jours)', '@'+u.handle, motif); bus('account-status', {email:u.email, handle:u.handle, status:'suspended', motif}); toast('@'+u.handle+' est suspendu '+extra+' jours.'); }
+  if(kind === 'ban'){ u.status = 'banned'; u.online = false; u.notes.unshift({at:Date.now(), by:staffName(), t:'Banni : '+motif}); log('Compte banni', '@'+u.handle, motif); bus('account-status', {email:u.email, handle:u.handle, status:'banned', motif}); toast('@'+u.handle+' est banni.', 'bad'); }
+  if(kind === 'restore'){ u.status = 'active'; delete u.suspendedUntil; u.notes.unshift({at:Date.now(), by:staffName(), t:'Réactivé : '+motif}); log('Compte réactivé', '@'+u.handle, motif); toast('Compte réactivé.'); }
+  if(kind === 'unverify'){ u.verifiedId = false; log('Badge retiré', '@'+u.handle, motif); toast('Badge retiré.'); }
+  if(kind === 'credits'){ u.credits = Math.max(0, u.credits + extra); D.payments.unshift({id:'PAY-'+uid().toUpperCase(), at:Date.now(), uid:u.id, label:(extra > 0 ? 'Crédits offerts · ' : 'Crédits retirés · ')+Math.abs(extra), amount:0, kind:'gift', op:'—', status:'ok', ref:'Équipe'});
+    log('Crédits ajustés ('+(extra > 0 ? '+' : '')+extra+')', '@'+u.handle, motif); toast('Crédits mis à jour : '+u.credits+'.'); }
+  save(); A.modal = null; render();
+}
+
+/* ---------- Signalements ---------- */
+const PRIO = {high:['Haute','c-bad'], medium:['Moyenne','c-warn'], low:['Basse','']};
+const RST = {new:['Nouveau','c-bad'], progress:['En cours','c-warn'], done:['Traité','c-ok']};
+VIEWS.reports = () => {
+  const t = curTab('reports', 'new'), list = D.reports.filter(r => r.status === t).sort((a, b) => (t !== 'done' ? (['high','medium','low'].indexOf(a.prio) - ['high','medium','low'].indexOf(b.prio)) : 0) || b.at - a.at);
+  return pageH('Signalements', 'Classés par priorité. Un signalement est anonyme pour la personne visée. Réponse attendue sous 48 h.')
+    + tabs('reports', Object.keys(RST).map(k => [k, RST[k][0], D.reports.filter(r => r.status === k).length]))
+    + table(['Priorité', 'Réf.', 'Type', 'Visé', 'Motif', 'Signalé par', 'Reçu', 'Statut'], list.map(r => { const u = userByHandle(r.target);
+      return '<tr class="click'+(r.live && r.status === 'new' ? ' fresh' : '')+'" data-act="open-report" data-id="'+r.id+'"><td><span class="chip '+PRIO[r.prio][1]+'">'+PRIO[r.prio][0]+'</span></td><td class="mono">'+r.id+'</td>'
+        + '<td>'+esc(r.kind)+(r.thread ? ' <span class="chip">'+ic('chat')+'conversation</span>' : '')+'</td><td>'+whoCell(u)+'</td><td>'+esc(r.reason)+'</td><td><span class="mono" style="font-size:12px">@'+esc(r.by)+'</span></td>'
+        + '<td style="white-space:nowrap">'+ago(r.at)+'</td><td><span class="chip '+RST[r.status][1]+'">'+RST[r.status][0]+'</span>'+(r.decision ? '<br><small class="hint">'+esc(r.decision)+'</small>' : '')+'</td></tr>'; }), 'Aucun signalement ici');
+};
+function convoBlock(threadId, ctx){
+  const th = D.threads[threadId];
+  if(!th) return '';
+  const key = threadId;
+  if(!A.unlocked.has(key)) return '<div class="dsec"><span class="lbl">Conversation liée</span><div class="locked">'+ic('lock')
+    + '<div class="grow">Les messages privés ne s\'ouvrent que dans le cadre d\'un signalement ou d\'un litige. Le motif et ton nom sont inscrits au journal.</div>'
+    + '<button class="btn btn-ghost btn-sm" data-act="unlock-thread" data-id="'+threadId+'" data-ctx="'+esc(ctx)+'">'+ic('eye')+'Ouvrir</button></div></div>';
+  return '<div class="dsec"><span class="lbl">Conversation '+(th.group ? 'du groupe '+esc(th.group) : 'entre @'+esc(th.a)+' et @'+esc(th.b))+' · ouverte par toi, consultation journalisée</span><div class="chat">'
+    + th.msgs.map(m => '<div class="bub'+(m.from === th.b ? ' r' : '')+(m.flag ? ' flag' : '')+'"><small>@'+esc(m.from)+' · '+fmt(m.at)+(m.flag ? ' · signalé' : '')+'</small>'+esc(m.t)+'</div>').join('')+'</div></div>';
+}
+function reportDrawer(r){
+  const u = userByHandle(r.target), by = userByHandle(r.by), others = D.reports.filter(x => x.target === r.target && x.id !== r.id);
+  const canAct = canDo('users');
+  return drawer('Signalement '+esc(r.id), '<span class="chip '+PRIO[r.prio][1]+'">Priorité '+PRIO[r.prio][0].toLowerCase()+'</span> <span class="chip '+RST[r.status][1]+'">'+RST[r.status][0]+'</span>',
+    '<div class="dsec"><span class="lbl">Ce qui est signalé</span><dl class="kv"><dt>Type</dt><dd>'+esc(r.kind)+'</dd><dt>Motif</dt><dd><b>'+esc(r.reason)+'</b></dd>'
+    + '<dt>Précisions</dt><dd style="color:var(--ink-2)">'+(r.text ? '« '+esc(r.text)+' »' : '—')+'</dd><dt>Reçu</dt><dd>'+fmt(r.at)+(r.live ? ' · depuis la plateforme' : '')+'</dd>'
+    + (r.assigned ? '<dt>Pris en charge</dt><dd>'+esc(r.assigned)+'</dd>' : '')+'</dl></div>'
+    + '<div class="grid g2" style="margin-bottom:18px"><div class="card card-pad"><div class="lbl" style="margin-bottom:8px">Personne visée</div>'+whoCell(u)
+    +   (u ? '<div style="margin-top:8px">'+statusChip(u)+' '+vBadge(u.primary, u.verifiedId)+'</div><p class="hint" style="margin:8px 0 0">'+others.length+' autre'+(others.length > 1 ? 's' : '')+' signalement'+(others.length > 1 ? 's' : '')+' sur ce compte</p><button class="lnk" data-act="open-user" data-id="'+u.id+'">Voir le compte</button>' : '')+'</div>'
+    +   '<div class="card card-pad"><div class="lbl" style="margin-bottom:8px">Signalé par (anonyme pour la cible)</div>'+whoCell(by)+'</div></div>'
+    + (r.thread ? convoBlock(r.thread, 'Signalement '+r.id) : '')
+    + (r.status === 'done' ? '<div class="note-box">Décision : <b>'+esc(r.decision)+'</b> · '+esc(r.decidedBy || '')+' · '+(r.decidedAt ? fmt(r.decidedAt) : '')+(r.note ? '<br>'+esc(r.note) : '')+'</div>'
+      : '<div class="dsec"><span class="lbl">Décision</span><div class="field"><label for="repNote">Note interne (obligatoire)</label><textarea class="inp" id="repNote" placeholder="Ce que tu as constaté, ce qui justifie la décision."></textarea></div></div>'),
+    r.status === 'done' ? '' : (r.status === 'new' ? '<button class="btn btn-ghost" data-act="r-take" data-id="'+r.id+'">Prendre en charge</button>' : '')
+      + '<button class="btn btn-quiet" data-act="r-decide" data-d="close" data-id="'+r.id+'">Classer sans suite</button>'
+      + (canAct ? '<button class="btn btn-warn" data-act="r-decide" data-d="warn" data-id="'+r.id+'">Avertir</button><button class="btn btn-ghost" data-act="r-decide" data-d="hide" data-id="'+r.id+'">'+ic('eye-off')+'Masquer le contenu</button>'
+        + '<button class="btn btn-bad-ghost" data-act="r-decide" data-d="suspend" data-id="'+r.id+'">Suspendre 7 jours</button><button class="btn btn-bad" data-act="r-decide" data-d="ban" data-id="'+r.id+'">Bannir</button>' : ''), true);
+}
+function decideReport(r, d){
+  const note = (($('#repNote') || {}).value || '').trim();
+  if(!note){ const n = $('#repNote'); if(n){ n.style.borderColor = 'var(--bad)'; n.focus(); } return toast('Ajoute une note interne pour justifier la décision.', 'bad'); }
+  const u = userByHandle(r.target);
+  const L = {close:'Classé sans suite', warn:'Avertissement envoyé', hide:'Contenu masqué', suspend:'Compte suspendu 7 jours', ban:'Compte banni'};
+  r.status = 'done'; r.decision = L[d]; r.decidedBy = staffName(); r.decidedAt = Date.now(); r.note = note;
+  log('Signalement traité · '+L[d], r.id+' · @'+r.target, note);
+  if(u && d === 'warn') userAction('warn', u, 'Suite au signalement '+r.id+' : '+note);
+  else if(u && d === 'suspend') userAction('suspend', u, 'Signalement '+r.id+' : '+note, 7);
+  else if(u && d === 'ban') userAction('ban', u, 'Signalement '+r.id+' : '+note);
+  else if(u && d === 'hide'){ u.online = false; save(); }
+  A.drawer = null; save(); render(); toast('Signalement '+r.id+' traité : '+L[d].toLowerCase()+'.');
+}
+
+/* ---------- Projets et fiches ---------- */
+VIEWS.content = () => {
+  const t = curTab('content', 'projects'), mod = D.mod || (D.mod = {});
+  const st = id => mod[id] || 'online';
+  const ST = {online:['En ligne','c-ok'], offline:['Hors ligne',''], hidden:['Masquée par l\'équipe','c-bad']};
+  const rows = t === 'projects'
+    ? DATA.PROJECTS.map(p => { const u = userByHandle(p.ownerHandle), n = D.reports.filter(r => r.target === p.ownerHandle).length;
+        return '<tr class="click" data-act="open-fiche" data-id="'+p.id+'"><td><b>'+esc(p.title)+'</b><br><small class="hint">'+p.sectors.map(s => sector(s).g+' '+sector(s).l).join(' · ')+'</small></td><td>'+whoCell(u)+'</td>'
+          + '<td>'+p.seeking.map(skillL).join(', ')+'</td><td class="tnum">♡ '+p.likes+'</td><td>'+(n ? '<span class="chip c-bad">'+n+'</span>' : '0')+'</td><td><span class="chip '+ST[st(p.id)][1]+'">'+ST[st(p.id)][0]+'</span></td></tr>'; })
+    : DATA.TALENTS.map(x => { const u = userByHandle(x.handle), n = D.reports.filter(r => r.target === x.handle).length;
+        return '<tr class="click" data-act="open-fiche" data-id="'+x.id+'"><td>'+whoCell(u)+'</td><td>'+esc(x.city.split(',')[0])+'</td><td>'+x.skills.map(skillL).join(', ')+'</td>'
+          + '<td>'+vBadge('tal', u && u.verifiedId)+'</td><td>'+(n ? '<span class="chip c-bad">'+n+'</span>' : '0')+'</td><td><span class="chip '+ST[st(x.id)][1]+'">'+ST[st(x.id)][0]+'</span></td></tr>'; });
+  return pageH('Projets et fiches', 'Modération du contenu publié sur la plateforme.')
+    + tabs('content', [['projects', 'Fiches projet', DATA.PROJECTS.length], ['talents', 'Fiches talent', DATA.TALENTS.length]])
+    + table(t === 'projects' ? ['Projet', 'Porteur', 'Recherche', 'J\'aime', 'Signalements', 'Statut'] : ['Talent', 'Ville', 'Compétences', 'Vérification', 'Signalements', 'Statut'], rows);
+};
+function ficheDrawer(id){
+  const p = DATA.PROJECTS.find(x => x.id === id), t = DATA.TALENTS.find(x => x.id === id), mod = D.mod || (D.mod = {}), st = mod[id] || 'online';
+  const u = userByHandle(p ? p.ownerHandle : t.handle);
+  return drawer(esc(p ? p.title : t.name), '<span class="chip">'+(p ? 'Fiche projet' : 'Fiche talent')+'</span>',
+    '<dl class="kv"><dt>'+(p ? 'Porteur' : 'Talent')+'</dt><dd>'+whoCell(u)+'</dd>'
+    + (p ? '<dt>Secteurs</dt><dd>'+p.sectors.map(s => sector(s).g+' '+sector(s).l).join(', ')+'</dd><dt>Recherche</dt><dd>'+p.seeking.map(skillL).join(', ')+'</dd><dt>Hook</dt><dd style="color:var(--ink-2)">'+esc(p.hook)+'</dd>'
+         : '<dt>Compétences</dt><dd>'+t.skills.map(skillL).join(', ')+'</dd><dt>Signature</dt><dd style="color:var(--ink-2)">'+esc(t.bio)+'</dd>')
+    + '<dt>Statut</dt><dd>'+({online:'En ligne', offline:'Hors ligne', hidden:'Masquée par l\'équipe'})[st]+'</dd></dl>',
+    canDo('users') ? (st === 'hidden' ? '<button class="btn btn-ok" data-act="fiche-mod" data-v="online" data-id="'+id+'">Rétablir la fiche</button>'
+      : '<button class="btn btn-bad-ghost" data-act="fiche-mod" data-v="hidden" data-id="'+id+'">'+ic('eye-off')+'Masquer la fiche</button>') + '<button class="btn btn-quiet" data-act="open-user" data-id="'+u.id+'">Voir le compte</button>' : '<button class="btn btn-quiet" data-act="open-user" data-id="'+u.id+'">Voir le compte</button>');
+}
+
+/* ---------- Matchs et Ateliers ---------- */
+VIEWS.teams = () => {
+  const disputes = D.teams.filter(t => t.state === 'dispute');
+  return pageH('Matchs et Ateliers', D.teams.length+' équipes, '+D.teams.filter(t => t.pacte).length+' pactes d\'associés commandés.')
+    + (disputes.length ? '<section class="card card-pad" style="margin-bottom:14px;border-color:color-mix(in srgb,var(--bad) 40%,transparent)"><div class="sec-t"><h3>Litiges ouverts</h3><span class="chip c-bad">'+disputes.length+'</span></div>'
+      + disputes.map(t => '<div class="row" style="align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid var(--line)"><span style="font-size:22px">⚖️</span><div class="grow"><b>'+esc(t.project)+'</b> · ouvert '+ago(t.dispute.at)+' par @'+esc(t.dispute.by)
+        + '<p style="margin:4px 0 0;color:var(--ink-2)">'+esc(t.dispute.t)+'</p></div><button class="btn btn-ghost btn-sm" data-act="open-team" data-id="'+t.id+'">Instruire</button></div>').join('')+'</section>' : '')
+    + table(['Atelier', 'Porteur', 'Talents', 'Jalons', 'Depuis', 'Pacte', 'État'], D.teams.map(t =>
+      '<tr class="click" data-act="open-team" data-id="'+t.id+'"><td><b>'+esc(t.project)+'</b></td><td><span class="mono" style="font-size:12px">@'+esc(t.owner)+'</span></td><td><span class="mono" style="font-size:12px">'+t.talents.map(h => '@'+esc(h)).join(', ')+'</span></td>'
+      + '<td><div class="row" style="gap:8px"><span class="prog"><i style="width:'+(t.jalons/6*100)+'%"></i></span><span class="mono">'+t.jalons+'/6</span></div></td><td>'+ago(t.since)+'</td>'
+      + '<td>'+(t.pacte ? '<span class="chip c-ok">Commandé</span>' : '<span class="hint">—</span>')+'</td><td>'+(t.state === 'dispute' ? '<span class="chip c-bad">Litige</span>' : t.state === 'closed' ? '<span class="chip">Fermé</span>' : '<span class="chip c-ok">Actif</span>')+'</td></tr>'))
+    + '<div class="sec-t" style="margin-top:22px"><h3>Départs et retraits</h3></div>'
+    + table(['Date', 'Projet', 'Membre', 'Type', 'Motif'], D.departures.map(d => '<tr><td>'+fmt(d.at, false)+'</td><td>'+esc(d.project)+'</td><td><span class="mono" style="font-size:12px">@'+esc(d.who)+'</span></td><td><span class="chip '+(d.type === 'Retrait' ? 'c-warn' : '')+'">'+d.type+'</span></td><td>'+esc(d.motif)+'</td></tr>'));
+};
+function teamDrawer(t){
+  return drawer('Atelier · '+esc(t.project), t.state === 'dispute' ? '<span class="chip c-bad">Litige</span>' : '<span class="chip c-ok">Actif</span>',
+    '<dl class="kv"><dt>Porteur</dt><dd>'+whoCell(userByHandle(t.owner))+'</dd><dt>Talents</dt><dd style="flex-direction:column;align-items:flex-start">'+t.talents.map(h => whoCell(userByHandle(h))).join('')+'</dd>'
+    + '<dt>Jalons</dt><dd><span class="mono">'+t.jalons+'/6</span></dd><dt>Ouvert</dt><dd>'+fmt(t.since, false)+'</dd><dt>Pacte</dt><dd>'+(t.pacte ? 'Commandé ('+fcfa(D.settings.pacte)+')' : 'Non commandé')+'</dd></dl>'
+    + (t.dispute ? '<div class="dsec" style="margin-top:16px"><span class="lbl">Litige</span><div class="note-box bad">'+esc(t.dispute.t)+'<br><small>Ouvert par @'+esc(t.dispute.by)+' · '+fmt(t.dispute.at)+'</small></div></div>' : '')
+    + (t.thread ? convoBlock(t.thread, 'Litige '+t.project) : '')
+    + (t.notes.length ? '<div class="dsec"><span class="lbl">Notes</span><div class="timeline">'+t.notes.map(n => '<div class="it"><i></i><div>'+esc(n.t)+'<br><span>'+esc(n.by)+' · '+fmt(n.at)+'</span></div></div>').join('')+'</div></div>' : '')
+    + (t.state === 'dispute' ? '<div class="field"><label for="tNote">Décision de l\'équipe (envoyée aux membres)</label><textarea class="inp" id="tNote" placeholder="Ex. : après lecture du journal de l\'Atelier, le module est livré ; la part de 15 % est maintenue."></textarea></div>' : ''),
+    t.state === 'dispute' && canDo('users') ? '<button class="btn btn-ok" data-act="t-resolve" data-id="'+t.id+'">'+ic('check')+'Clore le litige</button>' : '', true);
+}
+
+/* ---------- Paiements ---------- */
+VIEWS.payments = () => {
+  const f = A.q.pf || {}, q = (A.q.pay || '').toLowerCase();
+  const list = D.payments.filter(p => (!f.op || p.op === f.op) && (!f.cc || p.cc === f.cc) && (!f.st || p.status === f.st) && (!f.k || p.kind === f.k)
+    && (!q || [p.id, p.ref, p.label, (userBy(p.uid) || {}).handle, (userBy(p.uid) || {}).legal].join(' ').toLowerCase().includes(q)));
+  const month = new Date(); month.setDate(1); month.setHours(0,0,0,0);
+  const ok = D.payments.filter(p => p.status === 'ok' && p.amount), mo = ok.filter(p => p.at >= +month);
+  const opsSeen = [...new Set(D.payments.map(p => p.op).filter(o => o && o !== '—'))].sort();
+  const ccSeen = [...new Set(D.payments.map(p => p.cc).filter(Boolean))].sort((a, b) => PAY_CC[a].n.localeCompare(PAY_CC[b].n));
+  const byOp = opsSeen.map(o => [o, ok.filter(p => p.op === o).reduce((a, p) => a + p.amount, 0)]).sort((a, b) => b[1] - a[1]), mx = Math.max(1, ...byOp.map(x => x[1]));
+  const byCc = ccSeen.map(c => [PAY_CC[c].n, ok.filter(p => p.cc === c).reduce((a, p) => a + p.amount, 0)]).sort((a, b) => b[1] - a[1]), mxc = Math.max(1, ...byCc.map(x => x[1]));
+  const OPC = OP_COLOR;
+  const sel = (k, opts) => '<select class="inp" data-act="pf" data-k="'+k+'">'+opts.map(o => '<option value="'+o[0]+'"'+((f[k]||'') === o[0] ? ' selected' : '')+'>'+o[1]+'</option>').join('')+'</select>';
+  const PST = {ok:['Réussi','c-ok'], failed:['Échoué','c-bad'], refunded:['Remboursé','c-warn']};
+  return pageH('Paiements', 'Via FedaPay : mobile money selon le pays (MTN, Moov, Celtiis, Wave, Orange, Mixx by Yas…) et carte bancaire. Remboursements et crédits manuels sont journalisés.',
+      (canDo('credits') ? '<button class="btn btn-ghost" data-act="give-credits">'+ic('coins')+'Ajouter des crédits</button>' : '')+'<button class="btn btn-ghost" data-act="export-pay">'+ic('dl')+'Exporter (CSV)</button>')
+    + '<div class="grid g4" style="margin-bottom:14px">'
+    +   kpi('coins', 'Encaissé ce mois', fcfa(mo.reduce((a, p) => a + p.amount, 0)), mo.length+' transactions')
+    +   kpi('trend', 'Encaissé au total', fcfa(ok.reduce((a, p) => a + p.amount, 0)), ok.length+' transactions')
+    +   kpi('alert', 'Échecs', D.payments.filter(p => p.status === 'failed').length, 'paiements non aboutis')
+    +   kpi('undo', 'Remboursements', D.payments.filter(p => p.status === 'refunded').length, fcfa(D.payments.filter(p => p.status === 'refunded').reduce((a, p) => a + p.amount, 0)))
+    + '</div>'
+    + '<div class="grid g2" style="margin-bottom:14px">'
+    + '<section class="card card-pad"><div class="sec-t"><h3>Par moyen de paiement</h3></div><div class="hbars">'+byOp.map(o => '<div class="hbar"><span>'+esc(o[0])+'</span><span class="t"><i style="width:'+(o[1]/mx*100)+'%;background:'+(OPC[o[0]] || 'var(--ink-3)')+'"></i></span><span class="mono" style="text-align:right;font-size:12px">'+fcfa(o[1])+'</span></div>').join('')+'</div></section>'
+    + '<section class="card card-pad"><div class="sec-t"><h3>Par pays</h3></div><div class="hbars">'+byCc.map(o => '<div class="hbar"><span>'+esc(o[0])+'</span><span class="t"><i style="width:'+(o[1]/mxc*100)+'%;background:var(--ink-2)"></i></span><span class="mono" style="text-align:right;font-size:12px">'+fcfa(o[1])+'</span></div>').join('')+'</div></section>'
+    + '</div>'
+    + '<div class="bar"><input class="inp q" data-act="payq" placeholder="Réf., utilisateur, produit" value="'+esc(A.q.pay || '')+'">'
+    +   sel('cc', [['','Tous les pays']].concat(ccSeen.map(c => [c, PAY_CC[c].n])))
+    +   sel('op', [['','Tous les moyens']].concat(opsSeen.map(o => [o, o])))
+    +   sel('k', [['','Tous les produits'],['credits','Packs de crédits'],['second','Second profil'],['slot','Emplacement projet'],['pacte','Pacte d\'associés'],['gift','Crédits offerts']])
+    +   sel('st', [['','Tous les statuts'],['ok','Réussis'],['failed','Échoués'],['refunded','Remboursés']]) + '</div>'
+    + table(['Date', 'Réf.', 'Utilisateur', 'Produit', 'Montant', 'Moyen', 'Pays', 'Statut', ''], list.slice(0, 80).map(p => { const u = userBy(p.uid);
+      return '<tr><td style="white-space:nowrap">'+fmt(p.at)+'</td><td class="mono" style="font-size:12px">'+esc(p.ref)+'</td><td>'+whoCell(u)+'</td><td>'+esc(p.label)+'</td><td class="mono" style="white-space:nowrap">'+(p.amount ? fcfa(p.amount) : '—')+'</td>'
+        + '<td>'+esc(p.op)+'</td><td>'+(p.cc && PAY_CC[p.cc] ? esc(PAY_CC[p.cc].n) : '—')+'</td><td><span class="chip '+PST[p.status][1]+'">'+PST[p.status][0]+'</span>'+(p.refund ? '<br><small class="hint">'+esc(p.refund.motif)+'</small>' : '')+'</td>'
+        + '<td>'+(p.status === 'ok' && p.amount && canDo('refund') ? '<button class="btn btn-ghost btn-sm" data-act="refund" data-id="'+p.id+'">'+ic('undo')+'Rembourser</button>' : '')+'</td></tr>'; }), 'Aucune transaction');
+};
+
+/* ---------- Support ---------- */
+const TST = {open:['Ouvert','c-bad'], waiting:['En attente','c-warn'], closed:['Résolu','c-ok']};
+VIEWS.support = () => {
+  const t = curTab('support', 'open'), list = D.tickets.filter(x => t === 'all' || x.status === t).sort((a, b) => b.at - a.at);
+  const cur = D.tickets.find(x => x.id === A.ticket) || list[0];
+  const u = cur && userBy(cur.uid);
+  return pageH('Support', 'Les messages envoyés depuis « Aide et support ». La réponse part sur la plateforme et par e-mail.')
+    + tabs('support', [['open', 'Ouverts', D.tickets.filter(x => x.status === 'open').length], ['waiting', 'En attente', D.tickets.filter(x => x.status === 'waiting').length], ['closed', 'Résolus', D.tickets.filter(x => x.status === 'closed').length], ['all', 'Tous', D.tickets.length]])
+    + (list.length ? '<div class="split"><div class="list">'+list.map(x => { const xu = userBy(x.uid);
+        return '<button class="'+(cur && cur.id === x.id ? 'on' : '')+'" data-act="ticket" data-id="'+x.id+'"><div class="row" style="justify-content:space-between"><b style="font-size:13px">'+esc(xu ? xu.legal : '—')+'</b><span class="hint">'+ago(x.at)+'</span></div>'
+          + '<div class="hint" style="margin:2px 0">'+esc(x.topic)+' · '+x.id+(x.live ? ' · <b style="color:var(--tal-600)">nouveau</b>' : '')+'</div><div style="font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(x.msgs[x.msgs.length-1].t)+'</div></button>'; }).join('')+'</div>'
+      + (cur ? '<div class="pane"><div class="dr-h" style="flex-wrap:wrap">'+whoCell(u)+'<span class="grow"></span><span class="chip '+TST[cur.status][1]+'">'+TST[cur.status][0]+'</span>'
+          + '<select class="inp" style="width:auto;height:34px" data-act="t-status" data-id="'+cur.id+'">'+Object.keys(TST).map(k => '<option value="'+k+'"'+(cur.status === k ? ' selected' : '')+'>'+TST[k][0]+'</option>').join('')+'</select>'
+          + '<button class="btn btn-quiet btn-sm" data-act="open-user" data-id="'+u.id+'">Compte</button></div>'
+          + '<div class="dr-b"><p class="hint" style="margin-top:0">'+esc(cur.topic)+' · '+esc(u.email)+' · '+(cur.assigned ? 'suivi par '+esc(cur.assigned) : 'non attribué')+'</p><div class="chat" style="max-height:none;background:transparent;border:0;padding:0">'
+          + cur.msgs.map(m => '<div class="bub'+(m.from === 'staff' ? ' r' : '')+'"><small>'+(m.from === 'staff' ? esc(m.by)+' · TakaMatch' : '@'+esc(u.handle))+' · '+fmt(m.at)+'</small>'+esc(m.t)+'</div>').join('')+'</div></div>'
+          + '<div class="dr-f" style="flex-direction:column;align-items:stretch"><textarea class="inp" id="tReply" placeholder="Ta réponse à '+esc(u.legal.split(' ')[0])+'…"></textarea><div class="row" style="justify-content:flex-end"><button class="btn btn-ghost" data-act="t-reply" data-id="'+cur.id+'" data-close="1">Répondre et résoudre</button><button class="btn btn-a" data-act="t-reply" data-id="'+cur.id+'">'+ic('send')+'Répondre</button></div></div></div>' : '')+'</div>'
+      : '<div class="card empty"><b>Boîte vide</b>Aucun message dans cette catégorie.</div>');
+};
+
+/* ---------- Équipe et accès ---------- */
+async function loadStaff(){
+  try{ A.staffRows = await TMDB.rpc('staff_members') || []; }catch(e){ A.staffRows = []; toast(e.message, 'bad'); }
+  if(A.view === 'staff') render();
+}
+VIEWS.staff = () => {
+  if(!A.staffRows){ loadStaff(); return pageH('Équipe et accès', 'Chargement…') + '<div class="card empty"><b>Chargement de l\'équipe…</b></div>'; }
+  const sup = A.me.role === 'super';
+  return pageH('Équipe et accès', 'Le super admin donne, modifie et retire les accès. Chaque rôle ne voit que ses modules. Connexion par e-mail + code, depuis n\'importe quel appareil.', sup ? '<button class="btn btn-a" data-act="staff-new">'+ic('plus')+'Ajouter un membre</button>' : '')
+  + table(['Membre', 'Adresse e-mail', 'Rôle', 'Statut', 'Dernière connexion', ''], A.staffRows.map(s =>
+    '<tr><td><span class="who"><span class="av staff">'+esc(initials(s.name || s.email))+'</span><b>'+esc(s.name || s.email.split('@')[0])+(s.is_me ? ' <span class="chip">toi</span>' : '')+'</b></span></td><td class="mono" style="font-size:12.5px">'+esc(s.email)+'</td>'
+    + '<td><span class="chip '+(s.admin_role === 'super' ? 'c-ink' : '')+'">'+(ROLES[s.admin_role] || {l:s.admin_role}).l+'</span></td><td>'+(s.status === 'actif' ? '<span class="chip c-ok">Actif</span>' : '<span class="chip c-warn" title="Attend sa première connexion">Invité</span>')+'</td><td>'+(s.last_seen ? ago(Date.parse(s.last_seen)) : 'jamais')+'</td>'
+    + '<td style="white-space:nowrap">'+(!sup || s.is_me ? '' : '<button class="btn btn-ghost btn-sm" data-act="staff-edit" data-e="'+esc(s.email)+'">'+ic('edit')+'Modifier</button> <button class="btn btn-quiet btn-sm" style="color:var(--bad-ink)" data-act="staff-del" data-e="'+esc(s.email)+'">'+ic('trash')+'Retirer</button>')+'</td></tr>'), 'Aucun membre')
+  + '<div class="sec-t" style="margin-top:22px"><h3>Ce que chaque rôle peut faire</h3></div>'
+  + '<div class="tbl-w"><table class="matrix"><thead><tr><th>Module</th>'+Object.keys(ROLES).map(k => '<th>'+ROLES[k].l+'</th>').join('')+'</tr></thead><tbody>'
+  + MODULES.map(m => '<tr><td>'+m.l+'</td>'+Object.keys(ROLES).map(k => '<td>'+(ROLES[k].can.includes(m.id) ? '<span style="color:var(--ok-ink)">'+ic('check')+'</span>' : '<span class="hint">—</span>')+'</td>').join('')+'</tr>').join('')
+  + '<tr><td>Sanctions (avertir, suspendre, bannir)</td>'+Object.keys(ROLES).map(k => '<td>'+(ROLES[k].act.includes('users') ? '<span style="color:var(--ok-ink)">'+ic('check')+'</span>' : '<span class="hint">—</span>')+'</td>').join('')+'</tr>'
+  + '<tr><td>Ouvrir une conversation (signalement, litige)</td>'+Object.keys(ROLES).map(k => '<td>'+(ROLES[k].act.includes('messages') ? '<span style="color:var(--ok-ink)">'+ic('check')+'</span>' : '<span class="hint">—</span>')+'</td>').join('')+'</tr>'
+  + '<tr><td>Remboursements et crédits</td>'+Object.keys(ROLES).map(k => '<td>'+(ROLES[k].act.includes('refund') ? '<span style="color:var(--ok-ink)">'+ic('check')+'</span>' : '<span class="hint">—</span>')+'</td>').join('')+'</tr>'
+  + '</tbody></table></div><p class="hint">'+Object.keys(ROLES).map(k => '<b>'+ROLES[k].l+'</b> : '+ROLES[k].d).join(' · ')+'</p>';
+};
+
+/* ---------- Journal d'audit ---------- */
+async function loadLog(){
+  try{ A.logRows = await TMDB.select('admin_log', 'select=at,actor_email,action,detail&order=at.desc&limit=500') || []; }catch(e){ A.logRows = []; toast(e.message, 'bad'); }
+  if(A.view === 'audit') render();
+}
+VIEWS.audit = () => {
+  if(!A.logRows){ loadLog(); return pageH('Journal d\'audit', 'Chargement…') + '<div class="card empty"><b>Chargement du journal…</b></div>'; }
+  const q = (A.q.audit || '').toLowerCase(), who = A.q.aw || '';
+  const list = A.logRows.filter(a => (!who || a.actor_email === who) && (!q || [a.action, a.detail, a.actor_email].join(' ').toLowerCase().includes(q)));
+  return pageH('Journal d\'audit', 'Les actions de l\'équipe enregistrées dans la base : connexions, accès, prix et taux. Le journal ne peut pas être modifié.', '<button class="btn btn-ghost" data-act="export-audit">'+ic('dl')+'Exporter (CSV)</button>')
+    + '<div class="bar"><input class="inp q" data-act="auditq" placeholder="Action, détail, membre" value="'+esc(A.q.audit || '')+'"><select class="inp" data-act="aw"><option value="">Tous les membres</option>'
+    + [...new Set(A.logRows.map(a => a.actor_email).filter(Boolean))].map(n => '<option'+(who === n ? ' selected' : '')+'>'+esc(n)+'</option>').join('')+'</select></div>'
+    + table(['Date', 'Membre', 'Action', 'Détail'], list.slice(0, 300).map(a => '<tr><td style="white-space:nowrap">'+fmt(Date.parse(a.at))+'</td><td class="mono" style="font-size:12px">'+esc(a.actor_email || '—')+'</td>'
+      + '<td><b>'+esc(a.action)+'</b></td><td style="color:var(--ink-2)">'+esc(a.detail || '')+'</td></tr>'), 'Aucune entrée');
+};
+
+/* ---------- Prix et taux (base Supabase) ----------
+   Les prix se règlent en FCFA. Pour chaque pays, ils sont convertis dans
+   la devise locale et arrondis (js/prix.js) : site, outil et serveur de
+   paiement lisent ces mêmes valeurs. */
+async function loadPrix(){
+  try{
+    const [pr, fx] = await Promise.all([TMDB.select('pricing', 'select=key,label,fcfa,credits,sort,updated_at&order=sort'), TMDB.select('fx_rates', 'select=currency,name,symbol,fcfa_per_unit,step,sort,updated_at&order=sort')]);
+    A.pricing = {pr:pr || [], fx:fx || []};
+  }catch(e){ A.pricing = {pr:[], fx:[]}; toast(e.message, 'bad'); }
+  if(A.view === 'settings') render();
+}
+function prixDraft(){
+  const prices = {}, fx = {};
+  A.pricing.pr.forEach(r => { const i = $('[data-pr="'+r.key+'"]'); prices[r.key] = {label:r.label, credits:r.credits, fcfa:i ? Math.max(0, Math.round(+i.value || 0)) : r.fcfa}; });
+  A.pricing.fx.forEach(r => { const a = $('[data-fx="'+r.currency+'"]'), b = $('[data-fxs="'+r.currency+'"]');
+    fx[r.currency] = {name:r.name, symbol:r.symbol, r:a ? (+a.value || Number(r.fcfa_per_unit)) : Number(r.fcfa_per_unit), step:b ? (+b.value || Number(r.step)) : Number(r.step)}; });
+  return {prices, fx};
+}
+const CC_OF_CUR = cur => Object.keys(TMPrix.CUR_OF).filter(c => TMPrix.CUR_OF[c] === cur);
+function prixPreview(){
+  if(!A.pricing) return;
+  const d = prixDraft(), keys = A.pricing.pr.map(r => r.key);
+  A.pricing.fx.forEach(r => { const el = $('[data-prev="'+r.currency+'"]'); if(!el) return; const cc = CC_OF_CUR(r.currency)[0] || 'BJ';
+    el.innerHTML = keys.map(k => { const c = TMPrix.calc(k, cc, d); return '<span class="mono" title="'+esc(c.label)+' · débité '+esc(c.chargedText)+'">'+esc(c.text)+'</span>'; }).join(' · '); });
+}
+function prixSection(){
+  if(!A.pricing){ loadPrix(); return '<section class="card card-pad"><h3 style="font-size:17px">Prix et taux</h3><p class="hint">Chargement…</p></section>'; }
+  const sup = A.me.role === 'super', dis = sup ? '' : ' disabled', geo = window.TMGeo ? TMGeo.COUNTRIES : [];
+  const countriesOf = cur => CC_OF_CUR(cur).map(c => (geo.find(g => g.id === c) || {n:c}).n).join(', ');
+  return '<section class="card card-pad"><div class="row" style="align-items:flex-start;gap:12px;margin-bottom:12px"><div class="grow"><h3 style="font-size:17px;margin-bottom:4px">Prix de référence (FCFA)</h3>'
+    + '<p class="hint" style="margin:0">Le prix que paient les pays du FCFA. Pour les autres pays, il est converti avec les taux ci-dessous puis arrondi. Le paiement est toujours encaissé en FCFA.</p></div>'
+    + (sup ? '<button class="btn btn-a" data-act="save-prix">'+ic('check')+'Enregistrer les prix et taux</button>' : '<span class="chip">Lecture seule · super admin</span>')+'</div>'
+    + '<div class="grid g3">'+A.pricing.pr.map(r => '<div class="field"><label for="pr_'+r.key+'">'+esc(r.label)+'</label><div class="row"><input class="inp mono" id="pr_'+r.key+'" data-pr="'+r.key+'" type="number" min="0" step="50" value="'+r.fcfa+'"'+dis+'><span class="hint">FCFA</span></div></div>').join('')+'</div></section>'
+    + '<section class="card card-pad" style="margin-top:14px"><h3 style="font-size:17px;margin-bottom:4px">Taux de conversion</h3>'
+    + '<p class="hint" style="margin:0 0 12px">« 1 unité = … FCFA » et le pas d\'arrondi des prix affichés (ex. 1 € → prix ronds en euros ; 10 DH → prix en dizaines de dirhams). L\'aperçu se met à jour pendant que tu tapes.</p>'
+    + '<div class="tbl-w"><table><thead><tr><th>Devise</th><th>Pays</th><th>1 unité = … FCFA</th><th>Arrondi</th><th>Aperçu des prix ('+A.pricing.pr.map(r => esc(r.label.split(' · ')[0])).join(' · ')+')</th></tr></thead><tbody>'
+    + A.pricing.fx.map(r => { const fixed = r.currency === 'XOF' || r.currency === 'XAF';
+        return '<tr><td><b>'+esc(r.name)+'</b><br><span class="hint mono">'+esc(r.currency)+' · '+esc(r.symbol)+'</span></td><td style="font-size:12.5px;color:var(--ink-2);max-width:220px">'+esc(countriesOf(r.currency))+'</td>'
+          + '<td><input class="inp mono" style="width:120px" data-fx="'+r.currency+'" type="number" min="0" step="any" value="'+Number(r.fcfa_per_unit)+'"'+(fixed ? ' disabled title="Le FCFA est la devise de référence"' : dis)+'></td>'
+          + '<td><input class="inp mono" style="width:100px" data-fxs="'+r.currency+'" type="number" min="0" step="any" value="'+Number(r.step)+'"'+(fixed ? ' disabled' : dis)+'></td>'
+          + '<td data-prev="'+r.currency+'" style="font-size:12.5px"></td></tr>'; }).join('')
+    + '</tbody></table></div></section>';
+}
+async function savePrix(){
+  if(A.me.role !== 'super') return toast('Réservé au super admin.', 'bad');
+  const d = prixDraft(), jobs = [];
+  A.pricing.pr.forEach(r => { const v = d.prices[r.key].fcfa; if(v !== r.fcfa) jobs.push(TMDB.update('pricing', 'key=eq.'+r.key, {fcfa:v})); });
+  A.pricing.fx.forEach(r => { const x = d.fx[r.currency]; if(x.r !== Number(r.fcfa_per_unit) || x.step !== Number(r.step)) jobs.push(TMDB.update('fx_rates', 'currency=eq.'+r.currency, {fcfa_per_unit:x.r, step:x.step})); });
+  if(!jobs.length) return toast('Aucun changement.');
+  try{ const res = await Promise.all(jobs);
+    if(res.some(x => !x || !x.length)) throw new Error('La base a refusé la modification : vérifie que ton compte est bien super admin.');
+    A.pricing = null; A.logRows = null; if(window.TMPrix) TMPrix.refresh(); render(); toast(jobs.length+' modification'+(jobs.length > 1 ? 's enregistrées' : ' enregistrée')+'. Le site affiche déjà les nouveaux prix.');
+  }catch(e){ toast(e.message, 'bad'); }
+}
+
+/* ---------- Paramètres ---------- */
+VIEWS.settings = () => { const s = D.settings, n = (k, l, unit) => '<div class="field"><label for="s_'+k+'">'+l+'</label><div class="row"><input class="inp mono" id="s_'+k+'" data-set="'+k+'" type="number" min="0" value="'+s[k]+'"><span class="hint" style="white-space:nowrap">'+unit+'</span></div></div>';
+  return pageH('Paramètres de la plateforme', 'Prix, taux de conversion, limites et liens. Chaque modification est journalisée.', '')
+    + prixSection()
+    + '<div class="demo-note" style="margin-top:18px">'+ic('info')+'<span><b>Règles et liens : données de démonstration.</b> Ces réglages ne sont pas encore branchés sur la base (phase 2) : ils n\'agissent pas sur le site.</span></div>'
+    + '<div class="grid g2" style="margin-top:12px"><section class="card card-pad"><h3 style="font-size:17px;margin-bottom:14px">Règles</h3><div class="grid g2">'
+    + n('monthly', 'Crédits offerts par mois', 'crédits') + n('expiry', 'Expiration des invitations', 'jours') + n('maxProjects', 'Projets par visionnaire', 'au maximum') + n('maxEngage', 'Projets par talent', 'au maximum') + '</div></section>'
+    + '<section class="card card-pad" style="grid-column:1/-1"><h3 style="font-size:17px;margin-bottom:14px">Réseaux sociaux et communauté</h3><div class="grid g3">'
+    + Object.keys(s.links).map(k => '<div class="field"><label for="l_'+k+'">'+k[0].toUpperCase()+k.slice(1)+'</label><input class="inp" id="l_'+k+'" data-link="'+k+'" value="'+esc(s.links[k])+'"></div>').join('')+'</div></section>'
+    + '<section class="card card-pad" style="grid-column:1/-1"><h3 style="font-size:17px;margin-bottom:6px">Données de démonstration</h3><p class="hint" style="margin:0 0 12px">Remet l\'espace équipe dans son état de départ (utilisateurs, dossiers, journal). Les comptes de l\'équipe sont aussi réinitialisés.</p><button class="btn btn-bad-ghost" data-act="reset-demo">'+ic('refresh')+'Réinitialiser la démo</button></section></div>';
+};
+
+/* ============================================================
+   Panneaux et fenêtres
+   ============================================================ */
+function drawer(title, chips, body, foot, wide){ return {title, chips, body, foot, wide}; }
+function openDrawer(fn){ A.drawer = fn; paintOverlay(); }
+function paintOverlay(){
+  const o = $('#ovl'); if(!o) return;
+  let h = '';
+  if(A.drawer){ const d = A.drawer(); if(d){ h += '<div class="drawer-bg" data-act="close-drawer"></div><aside class="drawer'+(d.wide ? ' wide' : '')+'" role="dialog" aria-modal="true" aria-label="'+esc(d.title.replace(/<[^>]+>/g,''))+'">'
+    + '<div class="dr-h"><h2>'+d.title+'</h2><span class="row" style="gap:6px">'+(d.chips || '')+'</span><span class="grow"></span><button class="iconbtn" data-act="close-drawer" aria-label="Fermer">'+ic('x')+'</button></div>'
+    + '<div class="dr-b">'+d.body+'</div>'+(d.foot ? '<div class="dr-f">'+d.foot+'</div>' : '')+'</aside>'; } }
+  if(A.modal) h += '<div class="modal-bg" data-act="close-modal"></div><div class="modal" role="dialog" aria-modal="true">'+A.modal+'</div>';
+  o.innerHTML = h;
+  const f = o.querySelector('.modal .inp, .modal select, .modal textarea'); if(f) setTimeout(() => f.focus(), 30);
+}
+function modal(html){ A.modal = html; paintOverlay(); }
+function closeModal(){ A.modal = null; paintOverlay(); }
+function motifModal(title, text, act, id, opts){
+  opts = opts || {};
+  modal('<h2>'+title+'</h2><p>'+text+'</p>'
+    + (opts.reasons ? '<div class="field" style="margin-bottom:10px"><label for="mR">Motif</label><select class="inp" id="mR">'+opts.reasons.map(r => '<option>'+esc(r)+'</option>').join('')+'</select></div>' : '')
+    + (opts.days ? '<div class="field" style="margin-bottom:10px"><label for="mD">Durée</label><select class="inp" id="mD"><option value="3">3 jours</option><option value="7" selected>7 jours</option><option value="30">30 jours</option></select></div>' : '')
+    + (opts.num ? '<div class="field" style="margin-bottom:10px"><label for="mN">'+opts.num+'</label><input class="inp mono" id="mN" type="number" value="3"></div>' : '')
+    + (opts.user ? '<div class="field" style="margin-bottom:10px"><label for="mU">Visionnaire</label><select class="inp" id="mU">'+D.users.filter(u => u.roles.includes('vis')).map(u => '<option value="'+u.id+'">'+esc(u.legal)+' · @'+esc(u.handle)+'</option>').join('')+'</select></div>' : '')
+    + '<div class="field"><label for="mT">'+(opts.label || 'Précisions (inscrites au journal)')+'</label><textarea class="inp" id="mT" placeholder="'+esc(opts.ph || '')+'">'+esc(opts.value || '')+'</textarea></div>'
+    + '<div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn '+(opts.danger ? 'btn-bad' : 'btn-a')+'" data-act="'+act+'" data-id="'+id+'">'+(opts.ok || 'Confirmer')+'</button></div>');
+}
+const motifVal = () => [($('#mR') || {}).value, ($('#mT') || {}).value.trim()].filter(Boolean).join(' · ');
+
+/* ============================================================
+   Événements
+   ============================================================ */
+let THEME = (() => { try{ const t = localStorage.getItem('tm-theme'); if(t === 'dark' || t === 'light') return t; }catch(e){} return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; })();
+document.addEventListener('submit', e => {
+  if(e.target.id === 'loginF'){ e.preventDefault(); doLogin(); }
+});
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if(!e.target.closest('.gsearch')){ const g = $('#gres'); if(g) g.hidden = true; }
+  if(!e.target.closest('.pop') && !e.target.closest('[data-act="me-menu"]')){ const p = $('.pop'); if(p) p.remove(); }
+  if(!t) return;
+  const a = t.dataset.act, id = t.dataset.id;
+  const need = (ok) => { if(!ok){ toast('Action réservée à un autre rôle.', 'bad'); } return ok; };
+  switch(a){
+    case 'lg-back': L = {step:'mail', email:L.email, busy:false, err:''}; renderLogin(); break;
+    case 'lg-resend': TMDB.sendCode(L.email, true).then(() => toast('Nouveau code envoyé.')).catch(err => toast(err.message, 'bad')); break;
+    case 'save-prix': savePrix(); break;
+    case 'go': A.view = t.dataset.v; A.sideOpen = false; A.drawer = null; render(); window.scrollTo(0, 0); break;
+    case 'side': A.sideOpen = !A.sideOpen; $('.side').classList.toggle('open', A.sideOpen); break;
+    case 'theme': THEME = THEME === 'dark' ? 'light' : 'dark'; try{ localStorage.setItem('tm-theme', THEME); }catch(err){} render(); break;
+    case 'me-menu': { const ex = $('.pop'); if(ex){ ex.remove(); break; } const p = document.createElement('div'); p.className = 'pop';
+      p.innerHTML = '<div style="padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:4px"><b>'+esc(A.me.name)+'</b><br><small class="hint">'+esc(A.me.email)+' · '+ROLES[A.me.role].l+'</small></div>'
+        + '<button data-act="pwd">'+ic('key')+'Changer mon mot de passe</button><button data-act="logout" style="color:var(--bad-ink)">'+ic('out')+'Se déconnecter</button>';
+      document.body.appendChild(p); break; }
+    case 'logout': { const p = $('.pop'); if(p) p.remove(); logout(); break; }
+    case 'pwd': { const p = $('.pop'); if(p) p.remove(); modal('<h2>Changer mon mot de passe</h2><div class="col"><div class="field"><label for="p1">Nouveau mot de passe</label><input class="inp" id="p1" type="password"></div><p class="hint" style="margin:0">8 caractères au moins.</p></div><div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-a" data-act="pwd-go">Enregistrer</button></div>'); break; }
+    case 'pwd-go': { const v = $('#p1').value; if(v.length < 8) return toast('8 caractères au moins.', 'bad'); A.me.pwd = v; log('Mot de passe modifié', A.me.email, ''); closeModal(); toast('Mot de passe modifié.'); break; }
+    case 'tab': A.tab[t.dataset.k] = t.dataset.v; if(t.dataset.k === 'support') A.ticket = null; render(); break;
+    case 'close-drawer': A.drawer = null; paintOverlay(); break;
+    case 'close-modal': closeModal(); break;
+    case 'zoom': { const z = document.createElement('div'); z.className = 'zoom'; z.innerHTML = '<img src="'+t.src+'" alt="">'; z.onclick = () => z.remove(); document.body.appendChild(z); break; }
+    case 'copy': copyText(t.dataset.v); break;
+    /* Vérifications */
+    case 'open-verif': { e.stopPropagation(); const v = D.verifs.find(x => x.id === id); if(!need(canSee('verifs'))) break; openDrawer(() => verifDrawer(v)); break; }
+    case 'v-ok': { const v = D.verifs.find(x => x.id === id); decideVerif(v, 'approved'); break; }
+    case 'v-no': motifModal('Refuser la vérification', 'L\'utilisateur reçoit le motif et peut renvoyer un dossier.', 'v-no-go', id, {reasons:['Nom différent du nom légal', 'Le selfie ne correspond pas à la pièce', 'Document expiré', 'Document illisible', 'Type de document non accepté', 'Suspicion de fraude', 'Autre'], ok:'Refuser le dossier', danger:true}); break;
+    case 'v-no-go': { const v = D.verifs.find(x => x.id === id); closeModal(); decideVerif(v, 'rejected', motifVal()); break; }
+    case 'v-more': motifModal('Demander un complément', 'Le message est envoyé à l\'utilisateur sur la plateforme.', 'v-more-go', id, {label:'Message à l\'utilisateur', value:'Merci de reprendre la photo de ta pièce d\'identité en pleine lumière, sans reflet, les quatre coins visibles.', ok:'Envoyer'}); break;
+    case 'v-more-go': { const v = D.verifs.find(x => x.id === id); const m = $('#mT').value.trim(); closeModal(); decideVerif(v, 'more', m, true); break; }
+    /* Utilisateurs */
+    case 'open-user': { e.stopPropagation(); const u = userBy(id); if(!u) break; if(!canSee('users')) return toast('Le module Utilisateurs n\'est pas ouvert à ton rôle.', 'bad');
+      log('Fiche utilisateur consultée', '@'+u.handle, 'Coordonnées affichées'); A.modal = null; openDrawer(() => userDrawer(userBy(id))); break; }
+    case 'add-note': { const u = userBy(id), v = $('#noteIn').value.trim(); if(!v) break; u.notes.unshift({at:Date.now(), by:staffName(), t:v}); log('Note interne ajoutée', '@'+u.handle, v); save(); paintOverlay(); break; }
+    case 'u-warn': motifModal('Avertir @'+userBy(id).handle, 'L\'avertissement s\'affiche dans ses notifications sur la plateforme.', 'u-act', id, {label:'Message d\'avertissement', ph:'Ex. : Les demandes d\'argent sont interdites sur TakaMatch.'}); A.pending = 'warn'; break;
+    case 'u-offline': A.pending = 'offline'; motifModal(userBy(id).online ? 'Mettre la fiche hors ligne' : 'Remettre la fiche en ligne', 'La fiche disparaît de l\'annuaire et des recherches tant qu\'elle est hors ligne.', 'u-act', id); break;
+    case 'u-suspend': A.pending = 'suspend'; motifModal('Suspendre @'+userBy(id).handle, 'Le compte ne peut plus se connecter pendant la durée choisie. Ses Ateliers sont prévenus.', 'u-act', id, {days:true, reasons:['Propos déplacés', 'Comportement inapproprié', 'Engagement non tenu à répétition', 'Contenu trompeur', 'Autre'], danger:true, ok:'Suspendre'}); break;
+    case 'u-ban': A.pending = 'ban'; motifModal('Bannir @'+userBy(id).handle, 'Définitif : le compte est fermé et ses fiches sont masquées. Les conversations sont conservées comme preuves.', 'u-act', id, {reasons:['Arnaque ou demande d\'argent', 'Usurpation d\'identité', 'Récidive après suspension', 'Contenu illégal', 'Autre'], danger:true, ok:'Bannir définitivement'}); break;
+    case 'u-restore': A.pending = 'restore'; motifModal('Réactiver le compte', 'Le compte retrouve l\'accès à la plateforme.', 'u-act', id, {ok:'Réactiver'}); break;
+    case 'u-unverify': A.pending = 'unverify'; motifModal('Retirer le badge vérifié', 'Le badge redevient gris (Non vérifié) sur la plateforme.', 'u-act', id, {danger:true, ok:'Retirer le badge'}); break;
+    case 'u-credits': A.pending = 'credits'; motifModal('Ajuster les crédits', 'Nombre positif pour ajouter, négatif pour retirer.', 'u-act', id, {num:'Crédits', ok:'Appliquer'}); break;
+    case 'u-act': { const u = userBy(id), m = motifVal(); if(!m && A.pending !== 'offline') return toast('Indique un motif.', 'bad');
+      userAction(A.pending, u, m || '—', A.pending === 'suspend' ? +$('#mD').value : A.pending === 'credits' ? +$('#mN').value : 0); break; }
+    case 'export-users': { download('takamatch-utilisateurs.csv', csv([['ID','Nom légal','Pseudo','E-mail','Téléphone','Ville','Profils','Vérifié','Statut','Inscrit le']].concat(D.users.map(u => [u.id, u.legal, '@'+u.handle, u.email, u.phone, u.city, u.roles.join('+'), u.verifiedId ? 'oui' : 'non', u.status, fmt(u.created, false)]))));
+      log('Export des utilisateurs (CSV)', D.users.length+' comptes', 'Données personnelles exportées'); toast('Export téléchargé. Il est inscrit au journal.'); break; }
+    /* Signalements */
+    case 'open-report': { e.stopPropagation(); const r = D.reports.find(x => x.id === id); if(!canSee('reports')) return toast('Le module Signalements n\'est pas ouvert à ton rôle.', 'bad'); A.modal = null; openDrawer(() => reportDrawer(r)); break; }
+    case 'r-take': { const r = D.reports.find(x => x.id === id); r.status = 'progress'; r.assigned = staffName(); log('Signalement pris en charge', r.id, ''); save(); render(); openDrawer(() => reportDrawer(r)); break; }
+    case 'r-decide': decideReport(D.reports.find(x => x.id === id), t.dataset.d); break;
+    case 'unlock-thread': if(!need(canDo('messages'))) break; modal('<h2>Ouvrir une conversation privée</h2><p>Accès exceptionnel, limité au traitement d\'un signalement ou d\'un litige. Ton nom, l\'heure et le motif sont inscrits au journal d\'audit.</p>'
+        + '<div class="field" style="margin-bottom:10px"><label for="mR">Cadre</label><select class="inp" id="mR"><option>'+esc(t.dataset.ctx)+'</option><option>Réquisition d\'une autorité</option></select></div>'
+        + '<div class="field"><label for="mT">Motif (obligatoire)</label><textarea class="inp" id="mT" placeholder="Ex. : vérifier la demande d\'argent décrite dans le signalement."></textarea></div>'
+        + '<div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-a" data-act="unlock-go" data-id="'+id+'">'+ic('eye')+'Ouvrir et journaliser</button></div>'); break;
+    case 'unlock-go': { const m = ($('#mT').value || '').trim(); if(m.length < 8) return toast('Décris le motif (8 caractères au moins).', 'bad');
+      const th = D.threads[id]; A.unlocked.add(id); log('Conversation privée ouverte', th.group ? 'Groupe '+th.group : '@'+th.a+' ↔ @'+th.b, $('#mR').value+' · '+m); closeModal(); break; }
+    /* Fiches */
+    case 'open-fiche': openDrawer(() => ficheDrawer(id)); break;
+    case 'fiche-mod': { (D.mod || (D.mod = {}))[id] = t.dataset.v; const n = (DATA.PROJECTS.find(p => p.id === id) || DATA.TALENTS.find(x => x.id === id)); log(t.dataset.v === 'hidden' ? 'Fiche masquée' : 'Fiche rétablie', n.title || n.name, ''); save(); render(); openDrawer(() => ficheDrawer(id)); toast(t.dataset.v === 'hidden' ? 'Fiche masquée de l\'annuaire.' : 'Fiche rétablie.'); break; }
+    /* Ateliers */
+    case 'open-team': openDrawer(() => teamDrawer(D.teams.find(x => x.id === id))); break;
+    case 't-resolve': { const tm = D.teams.find(x => x.id === id), n = ($('#tNote').value || '').trim(); if(!n) return toast('Écris la décision envoyée aux membres.', 'bad');
+      tm.state = 'active'; tm.notes.unshift({at:Date.now(), by:staffName(), t:'Litige clos : '+n}); tm.dispute = null; log('Litige clos', 'Atelier '+tm.project, n); save(); A.drawer = null; render(); toast('Litige clos. Les membres de l\'équipe sont prévenus.'); break; }
+    case 'tbl-more': { const more = A.more || (A.more = {}); more[t.dataset.k] = (more[t.dataset.k] || TBL_PAGE) + TBL_PAGE; rerender(); break; }
+    /* Paiements */
+    case 'refund': if((D.payments.find(x => x.id === id) || {}).status !== 'ok'){ toast('Ce paiement a déjà été remboursé.', 'bad'); render(); break; } motifModal('Rembourser '+id, 'Le remboursement part, via FedaPay, sur le même moyen de paiement (numéro mobile money ou carte). Les crédits ou l\'accès achetés sont retirés.', 'refund-go', id, {reasons:['Double débit', 'Service non rendu', 'Geste commercial', 'Erreur de produit', 'Autre'], ok:'Rembourser', danger:true}); break;
+    case 'refund-go': { const p = D.payments.find(x => x.id === id), m = motifVal();
+      /* Anti double remboursement (double clic, deux onglets ouverts). */
+      if(!p || p.status !== 'ok' || A.refunding === id){ closeModal(); render(); toast('Ce paiement a déjà été remboursé.', 'bad'); break; }
+      A.refunding = id; setTimeout(() => { if(A.refunding === id) A.refunding = null; }, 3000);
+      p.status = 'refunded'; p.refund = {by:staffName(), at:Date.now(), motif:m}; log('Remboursement', '@'+(userBy(p.uid) || {}).handle, p.id+' · '+fcfa(p.amount)+' · '+m); save(); closeModal(); render(); toast('Remboursement de '+fcfa(p.amount)+' lancé.'); break; }
+    case 'give-credits': A.pending = 'credits'; motifModal('Ajouter des crédits', 'Geste commercial ou correction. Inscrit au journal et visible dans les paiements.', 'give-go', '', {user:true, num:'Crédits', reasons:['Geste commercial', 'Correction d\'un incident', 'Partenariat', 'Autre'], ok:'Ajouter'}); break;
+    case 'give-go': { const u = userBy($('#mU').value); userAction('credits', u, motifVal(), +$('#mN').value); break; }
+    case 'export-pay': download('takamatch-paiements.csv', csv([['Date','Réf.','Utilisateur','Produit','Montant','Moyen','Pays','Prestataire','Statut']].concat(D.payments.map(p => [fmt(p.at), p.ref, '@'+((userBy(p.uid) || {}).handle || ''), p.label, p.amount, p.op, p.cc || '', p.provider || '', p.status])))); log('Export des paiements (CSV)', D.payments.length+' transactions', ''); break;
+    /* Support */
+    case 'ticket': A.ticket = id; { const x = D.tickets.find(k => k.id === id); if(x) x.live = false; } render(); break;
+    case 't-reply': { const x = D.tickets.find(k => k.id === id), v = ($('#tReply').value || '').trim(); if(!v) return toast('Écris ta réponse.', 'bad');
+      x.msgs.push({from:'staff', by:staffName(), t:v, at:Date.now()}); x.status = t.dataset.close ? 'closed' : 'waiting'; x.assigned = x.assigned || staffName(); x.live = false;
+      const u = userBy(x.uid); bus('support-reply', {email:u.email, handle:u.handle, text:v}); log('Réponse au support', x.id+' · @'+u.handle, v.slice(0, 80)); save(); A.ticket = id; render(); toast('Réponse envoyée à '+u.legal.split(' ')[0]+'.'); break; }
+    /* Équipe */
+    case 'staff-new': staffModal(); break;
+    case 'staff-edit': staffModal((A.staffRows || []).find(x => x.email === t.dataset.e)); break;
+    case 'staff-save': saveStaff(t.dataset.e || ''); break;
+    case 'staff-del': modal('<h2>Retirer l\'accès de '+esc(t.dataset.e)+' ?</h2><p>Cette personne ne pourra plus entrer dans l\'espace équipe. Ses actions restent dans le journal.</p><div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-bad" data-act="staff-del-go" data-e="'+esc(t.dataset.e)+'">Retirer l\'accès</button></div>'); break;
+    case 'staff-del-go': TMDB.rpc('staff_remove', {p_email:t.dataset.e}).then(() => { closeModal(); toast('Accès retiré.'); A.staffRows = null; A.logRows = null; render(); }).catch(err => toast(err.message, 'bad')); break;
+    case 'gen-pwd': $('#sfP').value = genPwd(); break;
+    /* Journal et paramètres */
+    case 'export-audit': download('takamatch-journal.csv', csv([['Date','Membre','Action','Détail']].concat((A.logRows || []).map(a => [fmt(Date.parse(a.at), true), a.actor_email || '', a.action, a.detail || ''])))); break;
+    case 'save-settings': { const ch = []; $$('[data-set]').forEach(i => { const k = i.dataset.set, v = +i.value; if(v !== D.settings[k]){ ch.push(k+' : '+D.settings[k]+' → '+v); D.settings[k] = v; } });
+      $$('[data-link]').forEach(i => { const k = i.dataset.link; if(i.value !== D.settings.links[k]){ ch.push(k+' : lien modifié'); D.settings.links[k] = i.value; } });
+      if(!ch.length) return toast('Aucun changement.'); log('Paramètres modifiés', 'Plateforme', ch.join(' ; ')); save(); render(); toast('Paramètres enregistrés.'); break; }
+    case 'reset-demo': modal('<h2>Réinitialiser la démo ?</h2><p>Toutes les données de l\'espace équipe reviennent à leur état de départ, y compris les comptes de l\'équipe et le journal.</p><div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-bad" data-act="reset-go">Réinitialiser</button></div>'); break;
+    case 'reset-go': try{ localStorage.removeItem(KEY); }catch(err){} D = seedState(); log('Démo réinitialisée', 'Espace équipe', ''); A.modal = null; A.drawer = null; render(); break;
+    case 'gres': { const u = userBy(id); $('#gres').hidden = true; $('#gq').value = ''; if(u){ log('Fiche utilisateur consultée', '@'+u.handle, 'Recherche globale'); openDrawer(() => userDrawer(userBy(id))); } break; }
+  }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(t.dataset && (t.dataset.pr || t.dataset.fx || t.dataset.fxs)){ prixPreview(); return; }
+  if(t.id === 'lgC'){ const d = t.value.replace(/\D/g, '').slice(0, 6); if(t.value !== d) t.value = d; if(d.length === 6) doLogin(); return; }
+  if(t.dataset.chk !== undefined || t.matches('[data-chk]')){ const all = $$('[data-chk]').every(c => c.checked); const b = $('#vOk'); if(b) b.disabled = !all; return; }
+  if(t.id === 'gq'){ const q = t.value.trim().toLowerCase(), g = $('#gres'); if(q.length < 2){ g.hidden = true; return; }
+    const res = D.users.filter(u => [u.legal, u.handle, u.email, u.phone].join(' ').toLowerCase().includes(q)).slice(0, 8);
+    g.innerHTML = res.length ? res.map(u => '<button data-act="gres" data-id="'+u.id+'">'+av(u)+'<span class="grow"><b style="display:block">'+esc(u.legal)+'</b><small class="hint">@'+esc(u.handle)+' · '+esc(u.email)+'</small></span>'+statusChip(u)+'</button>').join('') : '<p class="hint" style="padding:10px;margin:0">Aucun utilisateur.</p>';
+    g.hidden = false; return; }
+  const keep = (k, v) => { const pos = t.selectionStart; A.q[k] = v; render(); const n = $('[data-act="'+t.dataset.act+'"]'); if(n){ n.focus(); try{ n.setSelectionRange(pos, pos); }catch(err){} } };
+  if(t.dataset.act === 'uq') return keep('users', t.value);
+  if(t.dataset.act === 'payq') return keep('pay', t.value);
+  if(t.dataset.act === 'auditq') return keep('audit', t.value);
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.dataset.act === 'uf'){ A.q.uf = Object.assign({}, A.q.uf, {[t.dataset.k]:t.value}); render(); }
+  if(t.dataset.act === 'pf'){ A.q.pf = Object.assign({}, A.q.pf, {[t.dataset.k]:t.value}); render(); }
+  if(t.dataset.act === 'aw'){ A.q.aw = t.value; render(); }
+  if(t.dataset.act === 't-status'){ const x = D.tickets.find(k => k.id === t.dataset.id); x.status = t.value; log('Statut du ticket modifié', x.id, TST[t.value][0]); save(); render(); }
+});
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  if($('.zoom')){ $('.zoom').remove(); return; }
+  if(A.modal){ closeModal(); return; }
+  if(A.drawer){ A.drawer = null; paintOverlay(); }
+});
+
+/* ---------- Équipe : création et modification ---------- */
+/* L'accès est accordé par adresse e-mail : la personne reçoit son rôle à sa
+   première connexion sur l'espace équipe (code par e-mail, sans mot de passe). */
+function staffModal(s){
+  modal('<h2>'+(s ? 'Modifier l\'accès' : 'Ajouter un membre de l\'équipe')+'</h2><div class="col">'
+    + '<div class="field"><label for="sfN">Nom affiché</label><input class="inp" id="sfN" value="'+esc(s ? (s.name || '') : '')+'" placeholder="Prénom Nom"></div>'
+    + '<div class="field"><label for="sfE">Adresse e-mail</label><input class="inp" id="sfE" type="email" value="'+esc(s ? s.email : '')+'" placeholder="prenom@email.com"'+(s ? ' readonly' : '')+'></div>'
+    + '<div class="field"><label for="sfR">Rôle</label><select class="inp" id="sfR">'+Object.keys(ROLES).map(k => '<option value="'+k+'"'+(s && s.admin_role === k ? ' selected' : '')+'>'+ROLES[k].l+' — '+ROLES[k].d+'</option>').join('')+'</select></div>'
+    + '<p class="hint" style="margin:0">'+(s ? 'Le changement s\'applique à sa prochaine action.' : 'La personne se connecte sur cette même page avec son adresse : un code lui est envoyé par e-mail. Aucun mot de passe à transmettre.')+'</p></div>'
+    + '<div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-a" data-act="staff-save" data-e="'+esc(s ? s.email : '')+'">'+(s ? 'Enregistrer' : 'Donner l\'accès')+'</button></div>');
+}
+async function saveStaff(){
+  const n = $('#sfN').value.trim(), e = $('#sfE').value.trim().toLowerCase(), r = $('#sfR').value;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return toast('Adresse e-mail valide requise.', 'bad');
+  try{
+    const st = await TMDB.rpc('staff_upsert', {p_email:e, p_admin_role:r, p_name:n});
+    closeModal(); A.staffRows = null; A.logRows = null; render();
+    toast(st === 'invité' ? 'Accès prévu pour '+e+' : il sera actif à sa première connexion.' : 'Accès enregistré pour '+e+'.');
+  }catch(err){ toast(err.message, 'bad'); }
+}
+
+/* ============================================================
+   Lien avec la plateforme (TakaMatch.html ouvert dans le même navigateur)
+   ============================================================ */
+const BC = (() => { try{ return new BroadcastChannel('takamatch-staff'); }catch(e){ return null; } })();
+function bus(type, data){
+  const m = {id:uid()+Date.now().toString(36), type, data, at:Date.now(), from:'staff'};
+  D.seen.push(m.id);
+  try{ if(BC) BC.postMessage(m); }catch(e){}
+  try{ const q = JSON.parse(localStorage.getItem('tm-bus') || '[]'); q.push(m); localStorage.setItem('tm-bus', JSON.stringify(q.slice(-150))); }catch(e){}
+}
+function ensureUser(c){
+  let u = D.users.find(x => (c.email && x.email.toLowerCase() === String(c.email).toLowerCase()) || (c.handle && x.handle === c.handle));
+  if(!u){ u = {id:'U-'+(1000 + D.users.length), legal:((c.first || '')+' '+(c.last || '')).trim() || '@'+c.handle, handle:c.handle || 'nouveau', email:c.email || '', phone:c.phone || '—',
+      city:c.city || '—', sex:c.sex === 'f' ? 'f' : c.sex === 'm' ? 'm' : 'n', roles:c.roles || [c.role || 'tal'], primary:c.role || 'tal', created:Date.now(), lastSeen:Date.now(),
+      status:'active', credits:c.role === 'vis' ? 3 : 0, verifiedEmail:true, verifiedPhone:false, verifiedId:!!c.verifiedId, notes:[], online:true, completion:80, invitesSent:0, invitesRecv:0, matches:0, live:true};
+    D.users.unshift(u); }
+  return u;
+}
+function onPlatform(m){
+  if(!m || m.from !== 'app' || D.seen.includes(m.id)) return;
+  D.seen.push(m.id); if(D.seen.length > 400) D.seen = D.seen.slice(-300);
+  const d = m.data || {};
+  let msg = '';
+  if(m.type === 'signup'){ const u = ensureUser(d.user); msg = 'Nouvel inscrit : @'+u.handle; }
+  if(m.type === 'verify-request'){ const u = ensureUser(d.user);
+    D.verifs.unshift({id:'V-'+(3200 + D.verifs.length), uid:u.id, at:m.at, status:'pending', live:true, doc:d.doc || '', selfie:d.selfie || '', history:[]});
+    msg = 'Nouveau dossier de vérification : @'+u.handle; }
+  if(m.type === 'report'){ const by = ensureUser(d.by);
+    D.reports.unshift({id:'R-'+(2100 + D.reports.length), at:m.at, prio:/argent|arnaque|usurpation/i.test(d.reason) ? 'high' : 'medium', kind:d.target.kind || 'profil', reason:d.reason, by:by.handle,
+      target:String(d.target.handle || '').replace(/^@/,''), text:d.text, status:'new', live:true, notes:[]});
+    msg = 'Nouveau signalement contre '+d.target.handle; }
+  if(m.type === 'support'){ const u = ensureUser(d.by);
+    D.tickets.unshift({id:'S-'+(600 + D.tickets.length), at:m.at, uid:u.id, topic:d.topic || 'Message', status:'open', live:true, msgs:[{from:'user', t:d.text, at:m.at}]});
+    msg = 'Nouveau message au support de @'+u.handle; }
+  save();
+  if(A.me && msg){ toast(msg); const l = $('#live'); if(l){ l.classList.remove('pulse'); void l.offsetWidth; l.classList.add('pulse'); }
+    if(!A.modal){ const keep = A.drawer; render(); A.drawer = keep; paintOverlay(); } }
+}
+if(BC) BC.onmessage = e => onPlatform(e.data);
+addEventListener('storage', e => { if(e.key === 'tm-bus' && e.newValue){ try{ JSON.parse(e.newValue).forEach(onPlatform); }catch(err){} } });
+/* Au chargement : ce qui est arrivé pendant que l'espace équipe était fermé. */
+try{ JSON.parse(localStorage.getItem('tm-bus') || '[]').forEach(onPlatform); }catch(e){}
+
+/* ---------- Démarrage ---------- */
+render();
+/* Session déjà ouverte sur cet appareil : on revérifie le rôle dans la base. */
+(async () => { try{ if(await TMDB.ensure()) await enter(); }catch(e){} })();
+</script>
+</body>
+</html>

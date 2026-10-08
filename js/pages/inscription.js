@@ -278,15 +278,15 @@ function rulesData(kind){
 const ficheKind = () => ME.role === 'tal' ? 'tal' : 'vis';
 function ruleRows(kind){ kind = kind || ficheKind(); return TMRules.rows(kind, rulesData(kind)); }
 /* Format historique : [rempli, poids, ce qui manque, obligatoire, clé du champ] */
-function completionRows(){ return ruleRows().map(r => [r.ok, r.w, r.phrase, true, r.key, r]); }
+function completionRows(){ return ruleRows().map(r => [r.ok, r.w, r.phrase, !r.opt, r.key, r]); }
 function completion(){ return TMRules.pct(ruleRows()); }
 function persoRows(){ return ruleRows('perso').map(r => [r.ok, r.w, r.phrase, true, r.key, r]); }
 function persoPct(){ return TMRules.pct(ruleRows('perso')); }
 /* Sections encore incomplètes : tant qu'il en reste, pas de publication. */
-function requiredMissing(){ return completionRows().filter(x => !x[0]).map(x => x[2]); }
+function requiredMissing(){ return completionRows().filter(x => x[3] && !x[0]).map(x => x[2]); }
 const ficheReady = () => requiredMissing().length === 0;
 /* La première section incomplète du formulaire (sa clé data-k). */
-function firstMissingKey(){ const r = completionRows().find(x => !x[0] && x[4]); return r ? r[4] : ''; }
+function firstMissingKey(){ const r = completionRows().find(x => x[3] && !x[0] && x[4]); return r ? r[4] : ''; }
 function missing(){ return completionRows().filter(x => !x[0]).sort((a,b) => b[1]-a[1]).map(x => x[2]); }
 /* La couverture se choisit sur la fiche (photo ou icône) : il ne reste
    ici que la photo de profil, pour les deux rôles. */
@@ -767,7 +767,7 @@ function renderOnb(){
       +   rp('vis','💡','Visionnaire',"J'ai une idée ou un projet","Tu ne veux pas — ou ne peux pas — la porter seul. Bâtis ton équipe et deviens cofondateur·ice.")
       +   rp('tal','🛠️','Talent',"J'ai des compétences à faire valoir","Tu sais coder, designer, vendre, cadrer… mais tu attends le bon projet.")
       + '</div>'
-      + '<p class="hint" style="margin-top:14px">Tu pourras ajouter l\'autre profil plus tard : <span class="mono">3 000 FCFA</span>, une seule fois. Tes deux profils restent indépendants.</p>';
+      + '<p class="hint" style="margin-top:14px">Tu pourras ajouter l\'autre profil plus tard : <span class="mono">'+esc(window.TMPrix ? TMPrix.text('second') : '3 000 FCFA')+'</span>, une seule fois. Tes deux profils restent indépendants.</p>';
     foot = onbFoot(a);
   }
 
@@ -921,7 +921,7 @@ function talentFields(){
 function projectFields(){
   const m = ME, p = m.project;
   return '<p class="fiche-note"><b>*</b> section obligatoire pour que ta fiche soit mise en ligne.</p>'
-  + '<p class="hint">'+ic('info')+' Ta première fiche projet est incluse. Tu peux porter jusqu\'à 3 projets : <span class="mono">5 000 FCFA</span> par emplacement supplémentaire, une seule fois.</p>'
+  + '<p class="hint">'+ic('info')+' Ta première fiche projet est incluse. Tu peux porter jusqu\'à 3 projets : <span class="mono">'+esc(window.TMPrix ? TMPrix.text('slot') : '5 000 FCFA')+'</span> par emplacement supplémentaire, une seule fois.</p>'
   + fsec('file', 'Titre du projet', true, '<input class="inp" id="ptitle" data-k="p.title" maxlength="34" placeholder="Le nom de ton projet" value="'+esc(p.title)+'">')
   + fsec('compass', 'Les secteurs du projet', true,
       '<div class="opt-wrap">'+SECTORS.map(s=>optBtn('f-multi','p.sectors',s.id,s.g+' '+esc(s.l),p.sectors.includes(s.id))).join('')+'</div>',
@@ -937,7 +937,7 @@ function projectFields(){
       'Affiché sur ta fiche : le talent sait à quoi s\'attendre avant d\'accepter.')
   + fsec('zap', 'Le Hook', true, area('hook','p.hook',400,"Le problème que tu résous, en une ou deux phrases. Un chiffre vaut mieux qu'une intention.",p.hook,MINS.hook), "Impact : capte l'attention en trois secondes. "+MINS.hook+" caractères au moins.")
   + fsec('rocket', 'La Vision', true, area('vision','p.vision',320,'Ce que le projet devient dans cinq ans si tout va bien.',p.vision,MINS.vision), "Impact : permet au talent d'adhérer à ton ambition. "+MINS.vision+" caractères au moins.")
-  + fsec('trend', 'La Traction', true, area('traction','p.traction',320,'Prototype, utilisateurs, premiers revenus, partenariats signés… ce qui prouve que ça avance déjà.',p.traction,MINS.traction), "Impact : c'est la section qui fait la différence entre une idée et un projet. "+MINS.traction+" caractères au moins.")
+  + fsec('trend', 'La Traction', false, area('traction','p.traction',320,'Prototype, utilisateurs, premiers revenus, partenariats signés… ce qui prouve que ça avance déjà.',p.traction,MINS.traction), "Facultatif, mais compte pour atteindre 100 % de remplissage ("+MINS.traction+" caractères au moins pour compter). Impact : c'est la section qui fait la différence entre une idée et un projet.")
   + fsec('target', 'Les Défis', true, area('challenges','p.challenges',320,"Ce qui te bloque aujourd'hui et pour quoi tu cherches de l'aide.",p.challenges,MINS.challenges), "Impact : aide le talent à voir où il apporterait de la valeur. "+MINS.challenges+" caractères au moins.")
   + fsec('link', 'Lien externe', true, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'"'+(p.noLink ? ' disabled' : '')+'>'
       + noneBox('p.noLink', p.noLink, 'Mon projet n\'a pas encore de site ni de page'), 'Site, page Facebook, LinkedIn, vidéo de démonstration…');
@@ -1008,7 +1008,7 @@ function readyNote(){
     "Tu ne vois que des fiches talent ; seuls les talents voient tes fiches projet.",
     "Une personne arrivée par ton lien ou ton code QR peut lire ta fiche, pas t'inviter.",
     "Tes invitations expirent au bout de 10 jours sans réponse.",
-    "Ta première fiche projet est incluse. Tu peux porter jusqu'à 3 projets : 5 000 FCFA par emplacement supplémentaire, une seule fois.",
+    "Ta première fiche projet est incluse. Tu peux porter jusqu'à 3 projets : "+(window.TMPrix ? TMPrix.text('slot') : '5 000 FCFA')+" par emplacement supplémentaire, une seule fois.",
   ];
   return '<div class="note-card">'+ic('eye')+'<div><b>Qui voit quoi</b><ul>'+li.map(x => '<li>'+esc(x)+'</li>').join('')+'</ul></div></div>';
 }
@@ -1154,7 +1154,9 @@ function syncFiche(){
       : left + ' caractère' + (left > 1 ? 's' : '') + ' restant' + (left > 1 ? 's' : '');
     /* En rouge sous le minimum, mais seulement après être sorti de la case
        ou après un clic sur « Publier » : jamais pendant qu'on écrit. */
-    const bad = need > 0 && (t.dataset.touched === '1' || O.tried);
+    /* Section facultative (Traction) : rouge seulement si on a commencé à l'écrire. */
+    const optional = (ruleRows().find(r => r.key === t.dataset.k) || {}).opt;
+    const bad = need > 0 && (t.dataset.touched === '1' || O.tried) && !(optional && !t.value.trim());
     t.classList.toggle('err', bad); t.setAttribute('aria-invalid', bad);
     el.classList.toggle('bad', bad);
   });
@@ -1201,7 +1203,7 @@ function markSections(sel, rows, tried){
     const ctl = form.querySelector('[data-k="'+r.key+'"]'); if(!ctl) return;
     const sec = ctl.closest('.fsec'); if(!sec) return;
     const text = ctl.tagName === 'TEXTAREA', input = ctl.tagName === 'INPUT' && ctl.type !== 'checkbox';
-    const show = !r.ok && (tried || sec.dataset.touched === '1');
+    const show = !r.ok && (tried || sec.dataset.touched === '1') && !(r.opt && !r.started);
     sec.classList.toggle('fsec-bad', show);
     sec.classList.toggle('fsec-bad-opt', show && !text && !input);
     if(input){ ctl.classList.toggle('err', show); ctl.setAttribute('aria-invalid', show); }
@@ -1317,7 +1319,7 @@ function listFr(a){
 }
 function showWhy(go){
   const w = $('#why'); if(!w) return;
-  const rows = ruleRows().filter(r => !r.ok);
+  const rows = ruleRows().filter(r => !r.ok && !r.opt);
   if(!rows.length){ w.hidden = true; return; }
   const first = rows[0], rest = rows.slice(1).map(r => r.phrase);
   const txt = first.label + ' : ' + first.msg + (rest.length ? ' Il reste aussi ' + listFr(rest) + '.' : '');

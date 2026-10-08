@@ -30,7 +30,8 @@
      Chaque ligne : id, label (titre), phrase (« ce qui manque »), w (poids), ok, msg (texte rouge), key (champ). */
   function rows(kind, d){
     d = d || {}; var p = d.project || {}, R = [];
-    function add(id, label, phrase, w, ok, msg, key){ R.push({id:id, label:label, phrase:phrase, w:w, ok:!!ok, msg:ok ? '' : msg, key:key || ''}); }
+    /* opt : section facultative — elle compte dans le pourcentage mais ne bloque pas la publication. */
+    function add(id, label, phrase, w, ok, msg, key, opt, started){ R.push({id:id, label:label, phrase:phrase, w:w, ok:!!ok, msg:ok ? '' : msg, key:key || '', opt:!!opt, started:!!started}); }
     var sk = d.skills || [], se = d.sectors || [];
     if(kind === 'tal'){
       add('name', 'Nom et prénoms', 'ton nom', 6, d.first && d.last, 'Indique ton nom.');
@@ -60,7 +61,9 @@
       add('offer', 'Ce que tu proposes', 'ce que tu proposes aux talents', 6, p.offer, 'Choisis ce que tu proposes.', 'p.offer');
       add('hook', 'Le Hook', 'le Hook (' + MIN.hook + ' caractères min.)', 14, len(p.hook) >= MIN.hook, textMsg(p.hook, MIN.hook), 'p.hook');
       add('vision', 'La Vision', 'la Vision (' + MIN.vision + ' caractères min.)', 10, len(p.vision) >= MIN.vision, textMsg(p.vision, MIN.vision), 'p.vision');
-      add('traction', 'La Traction', 'la Traction (' + MIN.traction + ' caractères min.)', 10, len(p.traction) >= MIN.traction, textMsg(p.traction, MIN.traction), 'p.traction');
+      add('traction', 'La Traction', 'la Traction (facultative)', 10, len(p.traction) >= MIN.traction,
+        len(p.traction) ? textMsg(p.traction, MIN.traction) + ' La Traction est facultative, mais elle ne compte pour tes 100 % qu\'à partir de ' + MIN.traction + ' caractères.'
+                        : 'Facultative, mais elle compte pour atteindre 100 % de remplissage.', 'p.traction', true, len(p.traction) > 0);
       add('challenges', 'Les Défis', 'les Défis (' + MIN.challenges + ' caractères min.)', 8, len(p.challenges) >= MIN.challenges, textMsg(p.challenges, MIN.challenges), 'p.challenges');
       add('link', 'Lien externe', 'le lien externe', 8, p.noLink || linkOk(p.link), linkMsg(p.link, p.noLink, 'le lien de ton projet'), 'p.link');
     }

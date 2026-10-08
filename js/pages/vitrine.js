@@ -9,12 +9,16 @@ const SITE_PAY = {
 const SITE_TZ = {'Africa/Porto-Novo':'BJ','Africa/Lome':'TG','Africa/Abidjan':'CI','Africa/Dakar':'SN','Africa/Ouagadougou':'BF','Africa/Bamako':'ML','Africa/Niamey':'NE',
   'Africa/Accra':'GH','Africa/Lagos':'NG','Africa/Douala':'CM','Europe/Paris':'FR'};
 const SITE_CC = (() => {
+  if(window.TMPrix) return TMPrix.cc();
   try{ const z = SITE_TZ[Intl.DateTimeFormat().resolvedOptions().timeZone]; if(z) return z; }catch(e){}
   const r = ((navigator.language || '').split('-')[1] || '').toUpperCase();
   return r || 'BJ';
 })();
 /* Pays hors zone mobile money FedaPay : on montre les moyens du Bénin + carte. */
-function sitePayOps(){ return SITE_PAY[SITE_CC] || (['GH','NG','CM','FR'].includes(SITE_CC) ? [] : SITE_PAY.BJ); }
+function sitePayOps(){ return SITE_PAY[SITE_CC] || []; }
+/* Prix dans la devise du visiteur (js/prix.js). */
+const priceTxt = k => window.TMPrix ? TMPrix.text(k, SITE_CC) : '';
+const priceAmt = (k, small) => { const r = window.TMPrix && TMPrix.get(k, SITE_CC); return r ? TMPrix.num(r.local)+'<small>'+esc(TMPrix.symbol(SITE_CC))+(small ? ' '+small : '')+'</small>' : ''; };
 function sitePayList(card){
   const l = sitePayOps().map(x => x[0]).concat(card);
   return l.length > 1 ? l.slice(0, -1).join(', ')+' ou '+l[l.length - 1] : l[0];
@@ -467,8 +471,8 @@ function sitePricing(){
     +     '<p style="font-size:13.5px;line-height:1.6;color:var(--ink-2)">Publier ta fiche projet et explorer restent gratuits. Seul l\'envoi d\'une invitation consomme un crédit.</p>'
     +     '<button class="btn btn-vis btn-block" data-act="open-onb" data-role="vis" style="margin-top:auto">Publier mon projet</button></div>'
     +   '<div class="price-c"><div class="lbl">Packs de crédits (pour les <span class="gold">Visionnaires</span>)</div>'
-    +     '<div class="amt">2 000<small>FCFA les 3</small></div>'
-    +     '<p style="font-size:13.5px;line-height:1.6;color:var(--ink-2)">10 pour 5 000 FCFA, 30 pour 12 000 FCFA. Réglés par '+sitePayList('carte bancaire')+'.</p>'
+    +     '<div class="amt">'+priceAmt('credits_essai', 'les 3')+'</div>'
+    +     '<p style="font-size:13.5px;line-height:1.6;color:var(--ink-2)">10 pour '+priceTxt('credits_elan')+', 30 pour '+priceTxt('credits_campagne')+'. Réglés par '+sitePayList('carte bancaire')+'.</p>'
     +     sitePayBadges()+'</div>'
     + '</div>'
     + '<div class="panel" style="margin-top:16px;padding:22px;display:flex;gap:14px;align-items:flex-start">'
@@ -602,7 +606,7 @@ function siteRoles(){
     +         '<div class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i></div>'
     +         '<p>Des invitations rares, donc sérieuses. Ensuite, des packs prépayés via '+sitePayList('carte bancaire')+'.</p></div>'
     +       '<div data-show="tal"><div class="lbl">Pour les talents</div>'
-    +         '<div class="num tnum">0<small>FCFA, pour toujours</small></div>'
+    +         '<div class="num tnum">0<small>'+esc(window.TMPrix ? TMPrix.symbol(SITE_CC) : 'FCFA')+', pour toujours</small></div>'
     +         '<div class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>'
     +         '<p>Explore, publie ta fiche, postule et réponds aux invitations sans limite.</p></div>'
     +     '</div>'
@@ -667,7 +671,7 @@ function siteCompare(){
 
 function siteFaq(){
   const faq = [
-    ["Puis-je être visionnaire et talent à la fois ?","Oui. Un seul compte, deux profils indépendants : matchs, invitations, conversations et Ateliers restent séparés ; ton nom, ton e-mail, ta ville, ton sexe et ton niveau de confiance sont communs. Le premier profil est gratuit, le second se débloque une fois pour 3 000 FCFA. Ensuite tu bascules sans limite depuis le menu de ton profil, et l'interface change de couleur pour que tu saches toujours où tu es."],
+    ["Puis-je être visionnaire et talent à la fois ?","Oui. Un seul compte, deux profils indépendants : matchs, invitations, conversations et Ateliers restent séparés ; ton nom, ton e-mail, ta ville, ton sexe et ton niveau de confiance sont communs. Le premier profil est gratuit, le second se débloque une fois pour "+priceTxt('second')+". Ensuite tu bascules sans limite depuis le menu de ton profil, et l'interface change de couleur pour que tu saches toujours où tu es."],
     ["Que voit-on de moi avant un match ?","Ton pseudo, tes compétences, ta ville, ton rythme, ta signature personnelle et ta photo, floutée. Ni ton nom, ni tes coordonnées. Sans photo, ce sont tes initiales sur ta couleur. Ton sexe (Masculin, Féminin ou Ne pas préciser) ne s'affiche qu'après le match et ne compte ni dans le score ni dans les filtres."],
     ["Qui peut voir ma fiche ?","Les talents ne voient que des fiches projet, les visionnaires que des fiches talent : jamais une fiche de ton propre camp. Depuis une fiche projet, un talent peut aussi ouvrir la fiche perso du visionnaire (« Voir sa fiche perso ») : tes compétences, ton parcours, ta signature. Un autre visionnaire ne la voit jamais. Côté visionnaire, tout se gère dans « Mes fiches », en deux onglets : « Fiche Projet » et « Ma fiche perso ». Quelqu'un sans compte qui arrive par le lien ou le code QR de ta fiche peut la lire, mais pas t'inviter ; il apparaît dans tes statistiques comme « visiteur non identifié ». La fiche perso n'a pas de statistiques : c'est ta fiche projet qui est suivie."],
     ["Un projet peut-il me rémunérer ?","Chaque visionnaire indique sur sa fiche ce qu'il propose aux talents : parts uniquement (des parts au capital, sans rémunération au départ), parts + petite rémunération (un défraiement dès le début) ou rémunération prévue (un revenu est prévu pour le cofondateur). Le filtre « Avec rémunération » t'aide à les trouver."],
@@ -676,7 +680,7 @@ function siteFaq(){
     ["Comment faire vérifier mon profil ?","Depuis tes paramètres : une pièce d'identité et un selfie suffisent. Ils sont supprimés après 30 jours ; seul le palier « Identité vérifiée » reste affiché sur ta fiche."],
     ["Pourquoi mon nom est-il verrouillé après l'inscription ?","Parce qu'un engagement de cofondation doit être opposable. Ton nom légal reste privé, mais il ne change pas — c'est ce qui rend les documents signés dans l'Atelier valables."],
     ["Qu'est-ce qui se passe si personne ne répond ?","Une invitation sans réponse expire au bout de 10 jours, et le crédit est rendu au visionnaire. Chaque profil affiche son délai de réponse habituel, pour que tu saches à quoi t'attendre avant d'en dépenser une."],
-    ["Combien de projets puis-je porter ou rejoindre ?","Un visionnaire porte jusqu'à 3 projets : la première fiche projet est incluse, chaque emplacement de plus coûte 5 000 FCFA une seule fois et reste acquis même si tu supprimes la fiche. Un talent rejoint au plus 3 projets à la fois ; pour en rejoindre un autre, il doit d'abord « Quitter le projet » dans l'un des trois."],
+    ["Combien de projets puis-je porter ou rejoindre ?","Un visionnaire porte jusqu'à 3 projets : la première fiche projet est incluse, chaque emplacement de plus coûte "+priceTxt('slot')+" une seule fois et reste acquis même si tu supprimes la fiche. Un talent rejoint au plus 3 projets à la fois ; pour en rejoindre un autre, il doit d'abord « Quitter le projet » dans l'un des trois."],
     ["Le pacte d'associés est-il un vrai document ?","Oui. C'est un modèle de droit OHADA prérempli depuis vos décisions, relu par un juriste avant de vous être remis. Il ne remplace pas un conseil personnalisé, mais il vaut infiniment mieux qu'un contrat copié sur Internet."],
   ];
   return '<section class="sec" id="faq"><div class="site-in"><div class="faqg">'
@@ -997,6 +1001,8 @@ document.addEventListener('keydown', e => {
 /* Repasser en grand écran ferme le menu mobile. */
 window.addEventListener('resize', () => { if(innerWidth > 1060 && ovEl().dataset.kind === 'menu' && !ovEl().hidden) ovClose(); });
 renderSite();
+/* Prix modifiés dans l'admin : la page se remet à jour toute seule. */
+window.addEventListener('tm-prix', () => { try{ renderSite(); }catch(e){} });
 
 "use strict";
 /* ============================================================
