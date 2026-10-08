@@ -133,96 +133,11 @@ const STATUS = [
 const refL = (list, id) => (list.find(x => x.id === id) || {l:'—'}).l;
 const AVAIL = [{id:'dispo',l:'Disponible'},{id:'limite',l:'Disponibilité limitée'},{id:'non',l:'Indisponible'}];
 
-/* ---------- Données de démonstration ----------
-   Prénoms, villes et sujets réels d'Afrique de l'Ouest : un annuaire
-   crédible se juge sur ses détails, pas sur du Lorem ipsum.          */
-const TALENTS = [
-  {id:'TM-TAL-4187', handle:'offline_first', name:'Axel Assogba', city:'Cotonou, Bénin', skills:['dev-mobile','dev-front'], level:'inter', pace:'serieux', pay:'equity', avail:'dispo', verified:true, seen:2, sectors:['health','fintech'], bio:"Je construis des apps Flutter qui marchent en 3G et hors-ligne. J'ai déjà livré deux produits pour des PME béninoises. Je cherche un projet santé ou paiement où le mobile est le cœur, pas un accessoire.", portfolio:'axel-assogba.dev', rate:'Répond sous 12 h', hue:210},
-  {id:'TM-TAL-5092', handle:'pixel_atlantique', name:'Nadia Kponou', city:'Cotonou, Bénin', skills:['design','brand'], level:'expert', pace:'serieux', pay:'mixte', avail:'dispo', verified:true, seen:1, sectors:['edtech','ecommerce','medias'], bio:"8 ans de design produit, dont 4 sur des interfaces à faible bande passante. Je pose des design systems que des équipes juniors savent tenir. Je ne fais pas de « jolis écrans », je fais des parcours qui convertissent.", portfolio:'nadiakponou.design', rate:'Répond sous 24 h', hue:280},
-  {id:'TM-TAL-3341', handle:'sat_agro', name:'Ibrahim Sanogo', city:'Bamako, Mali', skills:['data','dev-back'], level:'expert', pace:'plein', pay:'equity', avail:'dispo', verified:true, seen:1, sectors:['agritech','saas','greentech'], bio:"Data scientist, ex-CIRAD. Je travaille sur l'imagerie satellite appliquée au rendement agricole. Je veux fonder, pas consulter — je cherche un porteur qui connaît le terrain mieux que moi.", portfolio:'github.com/isanogo', rate:'Répond sous 6 h', hue:150},
-  {id:'TM-TAL-7728', handle:'zero_budget', name:'Chimène Dossou', city:'Porto-Novo, Bénin', skills:['growth','contenu'], level:'inter', pace:'serieux', pay:'mixte', avail:'dispo', verified:false, seen:3, sectors:['ecommerce','medias','artisanat'], bio:"J'ai fait passer une boutique Instagram de 400 à 28 000 abonnés en 11 mois, avec 0 FCFA de budget pub. Acquisition organique, contenu vidéo, WhatsApp Business. Je sais vendre en Afrique de l'Ouest.", portfolio:'', rate:'Répond sous 48 h', hue:20},
-  {id:'TM-TAL-2205', handle:'api_lagune', name:'Yao Kouassi', city:'Abidjan, Côte d\'Ivoire', skills:['dev-back','saas'], level:'expert', pace:'side', pay:'equity', avail:'limite', verified:true, seen:5, sectors:['fintech','saas','logistique'], bio:"Architecte back-end, Node et PostgreSQL. J'ai tenu une API à 4 M de requêtes/jour pour un agrégateur de paiement. Je peux donner 10 h par semaine, sérieusement, pas en dilettante.", portfolio:'yaok.dev', rate:'Répond sous 24 h', hue:195},
-  {id:'TM-TAL-6614', handle:'savoir_dire_non', name:'Fatou Ndiaye', city:'Dakar, Sénégal', skills:['produit','vente'], level:'expert', pace:'plein', pay:'equity', avail:'dispo', verified:true, seen:1, sectors:['edtech','health','impact'], bio:"Product manager, 6 ans dont 3 dans une edtech passée de 0 à 120 000 utilisateurs. Je sais dire non à des fonctionnalités. Je cherche un projet à impact où la distribution est le vrai problème.", portfolio:'linkedin.com/in/fndiaye', rate:'Répond sous 8 h', hue:330},
-  {id:'TM-TAL-8830', handle:'huit_mois', name:'Kevin Aholou', city:'Cotonou, Bénin', skills:['dev-front','design'], level:'deb', pace:'plein', pay:'mixte', avail:'dispo', verified:false, seen:1, sectors:['edtech','medias'], bio:"Sorti d'Epitech Bénin il y a 8 mois. React, TypeScript, Tailwind. Je code tous les jours et j'apprends vite. Je cherche un projet où je peux devenir bon en étant mal à l'aise.", portfolio:'kevin-aholou.vercel.app', rate:'Répond sous 4 h', hue:255},
-  {id:'TM-TAL-1907', handle:'clause_ohada', name:'Grâce Tossou', city:'Cotonou, Bénin', skills:['juridique','finance'], level:'expert', pace:'side', pay:'mixte', avail:'limite', verified:true, seen:4, sectors:['fintech','immobilier','impact'], bio:"Juriste d'affaires, droit OHADA. Je monte des statuts de SAS, des pactes d'associés et des clauses de vesting qui tiennent devant un tribunal béninois. La plupart des startups signent des documents copiés sur Internet.", portfolio:'', rate:'Répond sous 36 h', hue:10},
-  {id:'TM-TAL-4456', handle:'borgou_terrain', name:'Moussa Traoré', city:'Parakou, Bénin', skills:['terrain','vente'], level:'inter', pace:'serieux', pay:'mixte', avail:'dispo', verified:true, seen:2, sectors:['agritech','greentech','logistique'], bio:"Agronome de formation, 6 ans sur le terrain dans le Borgou. Je connais 40 coopératives par leur nom. Si votre produit agri n'a jamais été testé dans un champ, je suis la personne qu'il vous manque.", portfolio:'', rate:'Répond sous 24 h', hue:95},
-  {id:'TM-TAL-9912', handle:'trois_langues', name:'Léa Hounkpatin', city:'Cotonou, Bénin', skills:['contenu','brand'], level:'inter', pace:'serieux', pay:'equity', avail:'dispo', verified:false, seen:6, sectors:['artisanat','medias','ecommerce'], bio:"Je raconte des histoires en fon, en français et en anglais. Vidéo courte, podcast, newsletter. J'ai construit une communauté de 12 000 personnes autour de la culture béninoise sans jamais payer un seul post.", portfolio:'lea-h.com', rate:'Répond sous 18 h', hue:300},
-  {id:'TM-TAL-3078', handle:'apres_300', name:'Serge Mensah', city:'Lomé, Togo', skills:['finance','vente'], level:'expert', pace:'side', pay:'equity', avail:'limite', verified:true, seen:3, sectors:['fintech','saas','impact'], bio:"Ex-analyste en capital-risque. J'ai vu 300 dossiers et j'en ai financé 7. Je sais ce qui fait dire non à un investisseur. Je rejoins un projet par an, en tant que cofondateur finance.", portfolio:'', rate:'Répond sous 48 h', hue:220},
-  {id:'TM-TAL-5563', handle:'batterie_faible', name:'Aïcha Bello', city:'Niamey, Niger', skills:['dev-mobile','dev-back'], level:'inter', pace:'plein', pay:'equity', avail:'dispo', verified:true, seen:1, sectors:['health','impact','edtech'], bio:"React Native et Node. J'ai construit une app de suivi de vaccination utilisée dans 14 centres de santé au Niger. Les contraintes de connexion et de batterie, je les connais par cœur.", portfolio:'github.com/abello', rate:'Répond sous 10 h', hue:170},
-];
+/* ---------- Annuaire ----------
+   Rempli depuis la base au démarrage (js/pages/app-db.js). */
+const TALENTS = [];
 
-const PROJECTS = [
-  {id:'TM-VIS-4102', ownerHandle:'carnet_de_nuit', title:'Kèkè Santé', owner:'Dr. Sylvain Agbodjan', ownerCity:'Cotonou, Bénin', ownerVerified:true, sectors:['health','impact'], glyph:'🩺', hue:196, seeking:['dev-mobile','produit','data'], pace:'serieux', pay:'equity', likes:47, seen:1,
-    hook:"Au Bénin, un patient sur trois quitte une consultation sans ordonnance lisible et sans dossier. Kèkè Santé donne à chaque centre de santé un carnet patient numérique qui fonctionne sans connexion et se synchronise la nuit.",
-    vision:"Devenir le dossier médical partagé de l'Afrique de l'Ouest francophone, porté par les centres de santé eux-mêmes plutôt que par les ministères.",
-    traction:"4 centres pilotes à Cotonou et Abomey-Calavi. 1 840 dossiers créés en 5 mois. Une infirmière-chef formée par centre. Taux de ré-usage à 30 jours : 71 %.",
-    assets:"Agrément de recherche du ministère de la Santé. 6 M FCFA de subvention de la Fondation Orange. Un serveur mutualisé offert par une PME locale pour 18 mois.",
-    challenges:"Je suis médecin, pas développeur. L'application actuelle est un prototype Glide qui atteint ses limites. Il me faut quelqu'un qui prenne la technique en main et devienne cofondateur, pas prestataire.",
-    link:'kekesante.bj'},
-  {id:'TM-VIS-7715', ownerHandle:'tracer_ananas', title:'Gbèdji Agro', owner:'Rachelle Sohou', ownerCity:'Allada, Bénin', ownerVerified:true, sectors:['agritech','ecommerce'], glyph:'🍍', hue:45, seeking:['dev-back','terrain','growth'], pace:'plein', pay:'mixte', likes:31, seen:2,
-    hook:"L'ananas pain de sucre béninois se vend 4 fois moins cher que le costaricien alors qu'il est meilleur, parce qu'aucun acheteur européen ne peut prouver d'où il vient. Gbèdji trace chaque lot du champ au conteneur.",
-    vision:"Faire de la traçabilité un actif exportable : chaque coopérative béninoise capable de vendre en direct à un importateur, sans intermédiaire qui capte 60 % de la marge.",
-    traction:"3 coopératives équipées, 112 producteurs enregistrés, 9 tonnes tracées sur la campagne 2025. Un acheteur néerlandais a signé une lettre d'intention pour 40 tonnes.",
-    assets:"Partenariat signé avec l'ATDA Pôle 7. Matériel de terrain (28 téléphones) financé. Un entrepôt à Allada mis à disposition.",
-    challenges:"Le back-end actuel est une feuille Google Sheets avec des scripts. Il tombe dès qu'on dépasse 200 lots. Je cherche un cofondateur technique et quelqu'un qui sache tenir la relation avec les coopératives.",
-    link:'gbedji.africa'},
-  {id:'TM-VIS-2288', ownerHandle:'six_secondes', title:'Tchèko Pay', owner:'Ousmane Barry', ownerCity:'Cotonou, Bénin', ownerVerified:true, sectors:['fintech','impact'], glyph:'💳', hue:212, seeking:['dev-back','juridique','vente'], pace:'plein', pay:'equity', likes:64, seen:1,
-    hook:"70 % des commerces de Dantokpa refusent le mobile money parce que l'USSD prend 45 secondes et bloque la file. Tchèko Pay encaisse en 6 secondes avec un QR imprimé et un SMS de confirmation, sans smartphone côté client.",
-    vision:"Devenir la caisse par défaut du commerce informel ouest-africain : un marchand, un QR, zéro matériel, zéro abonnement.",
-    traction:"210 marchands actifs à Dantokpa et Godomey. 18 M FCFA de volume transigé en novembre. Rétention marchand à 60 jours : 78 %.",
-    assets:"Convention d'agrégation signée avec MTN MoMo. Dossier d'agrément EME déposé à la BCEAO. 12 M FCFA levés en amorçage auprès de business angels béninois.",
-    challenges:"Mon associé technique est parti en septembre. J'ai besoin d'un cofondateur back-end qui ne panique pas devant un audit BCEAO, et d'un juriste pour finir l'agrément.",
-    link:'tchekopay.com'},
-  {id:'TM-VIS-9034', ownerHandle:'huit_minutes', title:'Lafia Learn', owner:'Prudence Gbaguidi', ownerCity:'Parakou, Bénin', ownerVerified:false, sectors:['edtech','impact'], glyph:'📻', hue:28, seeking:['contenu','dev-mobile','produit'], pace:'serieux', pay:'mixte', likes:22, seen:3,
-    hook:"Dans le Nord-Bénin, un élève de terminale a en moyenne 2 heures d'électricité par jour mais 4 heures de batterie de téléphone. Lafia Learn délivre tout le programme du BAC en audio de 8 minutes, téléchargeable en une fois.",
-    vision:"Que réviser ne dépende plus ni du courant, ni de la data, ni d'avoir un professeur à moins de 30 km.",
-    traction:"340 élèves testeurs à Parakou et Djougou. 61 % ont écouté plus de 10 épisodes. Taux de réussite du groupe test au BAC blanc : 54 % contre 38 % pour le groupe témoin.",
-    assets:"Studio prêté par la radio Deeman FM. 9 professeurs volontaires du lycée Mathieu Bouké. Catalogue de 40 épisodes déjà enregistrés en français et en dendi.",
-    challenges:"Je suis enseignante. Je sais produire du contenu, pas une application. Et je ne sais pas comment passer de 340 à 30 000 élèves sans budget marketing.",
-    link:''},
-  {id:'TM-VIS-6641', ownerHandle:'km_a_vide', title:'Zemidjan+', owner:'Kossi Adjovi', ownerCity:'Cotonou, Bénin', ownerVerified:true, sectors:['logistique','impact'], glyph:'🛵', hue:130, seeking:['data','dev-mobile','terrain'], pace:'serieux', pay:'equity', likes:38, seen:1,
-    hook:"Un zémidjan de Cotonou roule 90 km par jour et fait 40 % de ces kilomètres à vide. Zemidjan+ regroupe les courses et les livraisons sur un même trajet, avec une répartition calculée hors-ligne sur le téléphone du conducteur.",
-    vision:"Transformer 200 000 motos-taxis en réseau logistique urbain, sans les transformer en employés précaires d'une plateforme.",
-    traction:"Coopérative de 64 conducteurs à Akpakpa. 1 100 courses groupées testées. Revenu moyen par conducteur : +23 % sur 6 semaines.",
-    assets:"Accord avec l'Union des conducteurs de taxi-moto d'Akpakpa. Un algorithme de regroupement déjà prototypé en Python.",
-    challenges:"Le prototype tourne sur mon ordinateur, pas sur les téléphones. Il me faut quelqu'un qui sache embarquer un modèle sur des Android à 25 000 FCFA, et quelqu'un pour tenir le terrain quand je ne peux pas.",
-    link:'zemidjan.plus'},
-  {id:'TM-VIS-3390', ownerHandle:'panier_direct', title:'Adjara Market', owner:'Estelle Quenum', ownerCity:'Porto-Novo, Bénin', ownerVerified:true, sectors:['artisanat','ecommerce'], glyph:'🧺', hue:340, seeking:['growth','dev-front','contenu'], pace:'side', pay:'mixte', likes:19, seen:4,
-    hook:"Une vannière d'Adjara vend un panier 1 500 FCFA au marché. Le même panier part à 34 € dans une boutique parisienne. Adjara Market met les artisans en vente directe auprès de la diaspora, avec paiement en euros et expédition groupée.",
-    vision:"Que l'artisanat béninois se vende à son prix, à l'artisan qui l'a fait, sans passer par trois revendeurs.",
-    traction:"47 artisans référencés, 310 commandes livrées vers la France et la Belgique en 2025. Panier moyen 68 €. Marge reversée à l'artisan : 61 %.",
-    assets:"Accord logistique avec un transitaire à Cotonou. Base de 2 400 clients diaspora. Photos professionnelles de 180 produits déjà réalisées.",
-    challenges:"L'acquisition stagne : je vends surtout à des gens qui me connaissent. Je n'ai jamais fait de publicité et le site est un template Shopify qui charge en 9 secondes depuis l'Europe.",
-    link:'adjara.market'},
-  {id:'TM-VIS-8807', ownerHandle:'sans_lampant', title:'Solar Box', owner:'Wilfried Hounsou', ownerCity:'Djougou, Bénin', ownerVerified:false, sectors:['greentech','impact','fintech'], glyph:'☀️', hue:50, seeking:['finance','terrain','dev-back'], pace:'plein', pay:'equity', likes:29, seen:2,
-    hook:"Un ménage rural béninois dépense 4 500 FCFA par mois en pétrole lampant et en recharge de téléphone. Un kit solaire coûte 85 000 FCFA — inaccessible d'un coup, évident à 3 500 FCFA par mois. Solar Box fait le pont par paiement échelonné verrouillé à distance.",
-    vision:"Électrifier 100 000 foyers du Nord-Bénin par le crédit d'usage plutôt que par la subvention.",
-    traction:"146 kits installés dans l'Atacora. Taux de remboursement à 6 mois : 91 %. Trois techniciens formés sur place.",
-    assets:"Stock de 200 kits négocié auprès d'un fabricant kenyan. Agrément d'IMF partenaire pour porter le crédit. Atelier à Djougou.",
-    challenges:"Le verrouillage à distance est fait à la main, par SMS, un par un. Et je n'ai aucune idée de comment structurer un véhicule de financement pour acheter 2 000 kits d'avance.",
-    link:''},
-  {id:'TM-VIS-1156', ownerHandle:'parcelle_onze', title:'Doko Data', owner:'Armand Gnonlonfoun', ownerCity:'Cotonou, Bénin', ownerVerified:true, sectors:['agritech','saas'], glyph:'🛰️', hue:175, seeking:['data','vente','produit'], pace:'serieux', pay:'equity', likes:26, seen:5,
-    hook:"Les assureurs agricoles ouest-africains refusent d'assurer les petits producteurs parce qu'ils ne savent pas mesurer une perte de récolte à distance. Doko Data transforme l'imagerie Sentinel-2 en indice de rendement parcelle par parcelle.",
-    vision:"Devenir la source de vérité qui rend l'assurance indicielle viable sur des parcelles de moins d'un hectare.",
-    traction:"Modèle validé sur 3 200 parcelles de maïs au Bénin et au Togo, erreur moyenne 11 %. Un assureur régional en phase de test payant.",
-    assets:"Accès académique aux archives Copernicus. Jeu de données terrain de 5 ans acheté à l'INRAB. Une lettre d'intention d'un réassureur.",
-    challenges:"Je sais faire le modèle, pas le vendre. Je n'ai jamais négocié avec une compagnie d'assurance et je ne sais pas à quoi doit ressembler le produit qu'ils achètent vraiment.",
-    link:'dokodata.io'},
-  {id:'TM-VIS-5528', ownerHandle:'sept_minutes', title:'Vodun Studio', owner:'Marielle Ahouansou', ownerCity:'Ouidah, Bénin', ownerVerified:true, sectors:['medias','artisanat'], glyph:'🎬', hue:288, seeking:['contenu','brand','finance'], pace:'side', pay:'mixte', likes:41, seen:2,
-    hook:"Les enfants béninois grandissent avec des dessins animés japonais et américains. Vodun Studio adapte les contes du panthéon vodun en séries animées de 7 minutes, en français et en fon.",
-    vision:"Un studio d'animation béninois dont les personnages sont connus de Lagos à Abidjan, et dont les licences se vendent à l'étranger plutôt que l'inverse.",
-    traction:"Pilote de 7 minutes sorti en mars : 340 000 vues cumulées YouTube et TikTok. Sélectionné au FESPACO section animation.",
-    assets:"Équipe de 4 animateurs formés à l'ISMA. Bible graphique de 11 personnages. Préachat d'une chaîne panafricaine pour 6 épisodes.",
-    challenges:"Nous sommes des artistes. Personne dans l'équipe ne sait monter un plan de financement de série, ni négocier une licence. Et notre marque n'existe que dans nos têtes.",
-    link:'vodun.studio'},
-  {id:'TM-VIS-7043', ownerHandle:'vendue_deux_fois', title:'Kaba Foncier', owner:'Isidore Dansou', ownerCity:'Abomey-Calavi, Bénin', ownerVerified:false, sectors:['immobilier','impact'], glyph:'📜', hue:15, seeking:['juridique','dev-front','terrain'], pace:'serieux', pay:'mixte', likes:17, seen:7,
-    hook:"À Abomey-Calavi, une parcelle sur cinq est vendue deux fois. Kaba Foncier croise le registre ANDF, les actes de vente et un relevé GPS pour dire en 48 h si un terrain est litigieux avant que l'argent ne change de main.",
-    vision:"Rendre la vérification foncière aussi banale qu'un contrôle technique de véhicule.",
-    traction:"230 vérifications réalisées, 38 litiges détectés avant signature. 4 notaires prescripteurs. Revenu : 25 000 FCFA par dossier.",
-    assets:"Accès conventionné à la base ANDF. Deux géomètres partenaires. Un dossier type validé par un notaire de Cotonou.",
-    challenges:"Tout est manuel, je ne traite que 12 dossiers par semaine. Et le montage juridique de la responsabilité — si je me trompe, qui paie ? — n'est pas réglé.",
-    link:''},
-];
+const PROJECTS = [];
 
 /* ---------- État ---------- */
 const DEFAULT_ME = {
@@ -396,30 +311,12 @@ Object.assign(P, {
 });
 
 /* ---------- Le compte de démonstration ---------- */
-const DEMO_ME = Object.assign(structuredClone(DEFAULT_ME), {
-  first:'Franck', last:'Birezo', email:'franck.b@exemple.com', handle:'franck_b', city:'Cotonou, Bénin',
-  role:'tal', avatarHue:205,
-  skills:['produit','design','dev-front'], sectors:['health','fintech','edtech'],
-  level:'expert', diploma:'master', status:'freelance', pace:'serieux',
-  bio:"Product designer depuis 7 ans. J'ai conçu le parcours de paiement d'une fintech béninoise utilisée par 60 000 personnes. Je cherche un projet santé ou paiement où je tiens le produit de bout en bout.",
-  portfolio:'', portfolioTitle:'',
-  talentOn:true, talentPromptSeen:true,
-  project:{
-    title:'Sika Tontine', glyph:'💳', photo:'', likes:14, sectors:['fintech','impact'], seeking:['dev-back','juridique','growth'],
-    hook:"Au Bénin, 4 adultes sur 10 cotisent à une tontine, mais tout se tient dans un cahier et sur WhatsApp. Quand la trésorière disparaît, l'argent part avec elle. Sika Tontine tient le registre, rappelle les échéances et verse par mobile money.",
-    vision:"Devenir le registre de confiance de l'épargne informelle en Afrique de l'Ouest, sans demander à personne d'ouvrir un compte en banque.",
-    traction:"27 tontines pilotes à Cotonou et Bohicon, 412 membres, 38 M FCFA de cotisations enregistrées en 6 mois. Aucune cotisation perdue.",
-    assets:"Convention de test avec une IMF de Bohicon. Prototype Android fonctionnel. 3 M FCFA d'épargne personnelle engagée.",
-    challenges:'', link:'',
-  },
-  online:true, verifiedEmail:true, verifiedPhone:true, verifiedId:false, refs:0,
-  credits:2, creditsMax:3,
-});
+const DEMO_ME = structuredClone(DEFAULT_ME);
 S.me = structuredClone(DEMO_ME);
 Object.assign(S, {
   invFilter:'all', showArch:false, loading:false, atelierId:null, ateliers:{},
   prefs:{inv:true, msg:true, match:true, weekly:false, sms:false},
-  payments:[{d:'04/09/2026', l:'Pack Essai · 3 crédits', a:2000, op:'MTN MoMo'}],
+  payments:[],
   reported:new Set(), likes:new Set(), fv:null,
 });
 
@@ -593,7 +490,7 @@ function stat(icon, k, v, d, up){
 function vAccueil(){
   const c = completion(isTalMode() ? 'tal' : 'vis'), me = S.me, tal = isTalMode();
   const q = QUOTES[new Date().getDate() % QUOTES.length];
-  const ranked = pool().filter(x => !isUnlocked(x.id)).map(x => ({x, s:scoreOf(x)})).sort((a,b)=>b.s.total-a.s.total).slice(0,4);
+  const ranked = pool().filter(x => !x.hidden && !isUnlocked(x.id)).map(x => ({x, s:scoreOf(x)})).sort((a,b)=>b.s.total-a.s.total).slice(0,4);
   const newInv = S.invitesRecv.filter(i=>i.status==='new').length;
   const unread = S.threads.filter(t=>t.unread && !t.archived).length;
   const msgs = S.threads.reduce((a,t)=>a+t.msgs.length,0);
@@ -1400,13 +1297,7 @@ const COVER = 'assets/images/couverture-projet.jpg';
    ============================================================ */
 
 /* ---------- Couvertures : photo ajoutée par le porteur, sinon icône de secteur ---------- */
-const PHOTOS = {
-  'TM-VIS-4102':{p:'50% 22%', z:'150% auto'},
-  'TM-VIS-2288':{p:'50% 88%', z:'180% auto'},
-  'TM-VIS-7715':{p:'15% 55%', z:'130% auto'},
-  'TM-VIS-5528':{p:'85% 18%', z:'200% auto'},
-  'TM-VIS-6641':{p:'50% 80%'},
-};
+const PHOTOS = {};
 PROJECTS.forEach(x => { x.glyph = sector(x.sectors[0]).g; });
 function photoOf(x){
   if(!x) return null;
@@ -1423,43 +1314,10 @@ function projCover(x){
 }
 
 /* ---------- Profils Talent des porteurs de projet ---------- */
-const OWNERS = {
-  'TM-VIS-4102':{skills:['terrain','produit'], level:'expert', avail:'limite', sectors:['health','impact'], rate:'Répond sous 24 h', portfolio:'',
-    bio:"Médecin généraliste depuis 12 ans, dont 5 en centre de santé périurbain. Je connais le quotidien des infirmières et ce qu'elles n'utiliseront jamais. Je peux aider d'autres projets santé sur le terrain et la réglementation."},
-  'TM-VIS-7715':{skills:['terrain','vente'], level:'inter', avail:'dispo', sectors:['agritech','logistique'], rate:'Répond sous 12 h', portfolio:'',
-    bio:"Ingénieure agronome, 8 ans avec les coopératives du plateau d'Allada. Je sais négocier avec un acheteur européen et avec un chef de village le même jour."},
-  'TM-VIS-2288':{skills:['vente','finance'], level:'expert', avail:'limite', sectors:['fintech','saas'], rate:'Répond sous 6 h', portfolio:'linkedin.com/in/obarry',
-    bio:"Ancien responsable commercial d'un agrégateur de paiement. J'ai signé plus de 400 marchands à Cotonou. Je sais ce qu'un commerçant accepte de payer, et ce qu'il refuse."},
-  'TM-VIS-9034':{skills:['contenu','rh'], level:'inter', avail:'limite', sectors:['edtech','medias'], rate:'Répond sous 36 h', portfolio:'',
-    bio:"Professeure de SVT depuis 10 ans. Je produis des cours audio, je forme des enseignants et j'anime une communauté d'élèves sur WhatsApp."},
-  'TM-VIS-6641':{skills:['data','terrain'], level:'inter', avail:'dispo', sectors:['logistique','greentech'], rate:'Répond sous 12 h', portfolio:'github.com/kadjovi',
-    bio:"Statisticien, ancien de l'INSAE. J'ai prototypé l'algorithme de regroupement de Zemidjan+ en Python. Données de mobilité, enquêtes terrain, tableaux de bord."},
-  'TM-VIS-3390':{skills:['brand','vente'], level:'inter', avail:'dispo', sectors:['artisanat','ecommerce'], rate:'Répond sous 24 h', portfolio:'',
-    bio:"Ancienne acheteuse pour une boutique parisienne. Je sais présenter un produit artisanal pour qu'il se vende à son prix, et à qui."},
-  'TM-VIS-8807':{skills:['terrain','finance'], level:'inter', avail:'dispo', sectors:['greentech','impact'], rate:'Répond sous 48 h', portfolio:'',
-    bio:"Technicien solaire et ancien agent de microfinance. J'ai installé 146 kits dans l'Atacora et je sais pourquoi un ménage rembourse, ou non."},
-  'TM-VIS-1156':{skills:['data','dev-back'], level:'expert', avail:'limite', sectors:['agritech','saas'], rate:'Répond sous 24 h', portfolio:'dokodata.io/equipe',
-    bio:"Docteur en télédétection. Je transforme des images satellites en indicateurs utilisables. Python, Google Earth Engine, PostGIS."},
-  'TM-VIS-5528':{skills:['contenu','brand'], level:'expert', avail:'limite', sectors:['medias','artisanat'], rate:'Répond sous 24 h', portfolio:'vodun.studio/equipe',
-    bio:"Réalisatrice d'animation formée à l'ISMA. Direction artistique, écriture de séries courtes, production à petit budget."},
-  /* TM-VIS-7043 (Kaba Foncier) : profil Talent non renseigné, volontairement. */
-};
+const OWNERS = {};
 
 /* ---------- Projets portés par certains talents (côté Visionnaire) ---------- */
-const TALENT_PROJECTS = {
-  'TM-TAL-3341':{title:'Sahel Sat', sectors:['agritech','greentech'], seeking:['terrain','vente'], pace:'plein', pay:'equity', hue:60,
-    hook:"Les coopératives du Mali n'ont aucun moyen de prouver une mauvaise récolte à leur banque. Sahel Sat fournit un relevé satellite mensuel par parcelle, lisible en bambara et en français.",
-    vision:"Que chaque coopérative du Sahel négocie son crédit avec des données, pas avec des promesses.",
-    traction:"Prototype testé sur 80 parcelles autour de Ségou. Deux caisses de microfinance intéressées.", assets:'', challenges:"Je sais faire le modèle, pas le vendre aux coopératives.", link:''},
-  'TM-TAL-6614':{title:'Kalama', sectors:['edtech','impact'], seeking:['dev-mobile','contenu'], pace:'serieux', pay:'mixte', hue:40,
-    hook:"Au Sénégal, un enseignant sur trois prépare ses cours sans manuel. Kalama propose des fiches de cours validées par des inspecteurs, imprimables en noir et blanc.",
-    vision:"Le manuel scolaire gratuit de l'Afrique francophone, écrit par ses enseignants.",
-    traction:"1 200 enseignants inscrits en 4 mois, uniquement par bouche-à-oreille.", assets:"Partenariat avec deux inspections académiques de Dakar.", challenges:'', link:''},
-  'TM-TAL-1907':{title:'Statuts Express', sectors:['saas','impact'], seeking:['dev-front','growth'], pace:'side', pay:'mixte', hue:20,
-    hook:"Créer une SAS au Bénin coûte en moyenne 350 000 FCFA d'honoraires. Statuts Express génère des statuts OHADA relus par une juriste pour 45 000 FCFA.",
-    vision:"Rendre la création d'entreprise formelle accessible à tous les porteurs de projet de l'espace OHADA.",
-    traction:"38 sociétés créées en 2025 avec un simple formulaire et un tableur.", assets:'', challenges:"Tout est fait à la main : il faut un vrai produit.", link:''},
-};
+const TALENT_PROJECTS = {};
 function talentProjectOf(t){
   const p = TALENT_PROJECTS[t.id]; if(!p) return null;
   return Object.assign({id:'TP-'+t.id, owner:t.name, ownerHandle:t.handle, ownerCity:t.city, ownerVerified:t.verified, glyph:sector(p.sectors[0]).g}, p);
@@ -1639,16 +1497,14 @@ const SEX_L = {m:'Masculin', f:'Féminin', n:'Ne pas préciser'};
 const g = (sex, m, f, n) => sex === 'f' ? f : sex === 'm' ? m : (n == null ? m : n);
 
 /* ---------- Sexe des personnes de la démo ---------- */
-const SEX_TAL = {'TM-TAL-4187':'m','TM-TAL-5092':'f','TM-TAL-3341':'m','TM-TAL-7728':'f','TM-TAL-2205':'m','TM-TAL-6614':'f',
-  'TM-TAL-8830':'n','TM-TAL-1907':'f','TM-TAL-4456':'m','TM-TAL-9912':'f','TM-TAL-3078':'m','TM-TAL-5563':'f'};
+const SEX_TAL = {};
 TALENTS.forEach(t => { t.sex = SEX_TAL[t.id] || 'n'; });
-const SEX_OWN = {'TM-VIS-4102':'m','TM-VIS-7715':'f','TM-VIS-2288':'m','TM-VIS-9034':'f','TM-VIS-6641':'m','TM-VIS-3390':'f',
-  'TM-VIS-8807':'m','TM-VIS-1156':'n','TM-VIS-5528':'f','TM-VIS-7043':'m'};
+const SEX_OWN = {};
 PROJECTS.forEach(p => { p.ownerSex = SEX_OWN[p.id] || 'n'; });
 Object.keys(OWNERS).forEach(k => { OWNERS[k].sex = SEX_OWN[k] || 'n'; });
 S.me.sex = S.me.sex || 'm'; DEMO_ME.sex = 'm';
 /* Deux talents déjà engagés sur 3 projets (côté Visionnaire). */
-const FULL = new Set(['TM-TAL-8830','TM-TAL-9912']);
+const FULL = new Set();
 
 /* ============================================================
    Le modèle d'équipe
@@ -1687,7 +1543,7 @@ function propose(t, kind, label){
 }
 /* Côté porteur, les talents de la démo valident d'eux-mêmes au bout d'un moment. */
 function simulateValidation(t, p){
-  const tals = talentsOf(t); if(!tals.length) return;
+  const tals = talentsOf(t).filter(m => !(window.TMData && TMData.on) || TMData.isDemo(m.id)); if(!tals.length) return;
   const who = tals[(Math.random()*tals.length)|0];
   setTimeout(() => {
     if(!t.props.includes(p) || p.val[who.id]) return;
@@ -2051,22 +1907,12 @@ NAV.find(n => n.id === 'fiche').short = {tal:'Ma fiche', vis:'Mes fiches'};
 const PHOTO_M = 'assets/images/photo-demo-homme.jpg';
 const PHOTO_F = 'assets/images/photo-demo-femme.jpg';
 /* Jamais deux fois le même visage dans une même équipe. */
-const FACE = {'TM-TAL-5092':'f', 'TM-TAL-5563':'f', 'TM-TAL-1907':'f', 'TM-TAL-4187':'m', 'TM-TAL-2205':'m',
-  'P-TM-VIS-7715':'f', 'TM-VIS-7715':'f', 'P-TM-VIS-2288':'m', 'TM-VIS-2288':'m'};
-const faceOf = id => (id === 'me' && S.me.photo) ? S.me.photo : FACE[id] === 'f' ? PHOTO_F : FACE[id] === 'm' ? PHOTO_M : null;
+const FACE = {};
+const faceOf = id => (window.TM_FACE && window.TM_FACE(id)) || ((id === 'me' && S.me.photo) ? S.me.photo : FACE[id] === 'f' ? PHOTO_F : FACE[id] === 'm' ? PHOTO_M : null);
 const LOCKPIN = '<span class="lockpin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">'+P.lock+'</svg></span>';
 
 /* ---------- Les fiches projet du compte de démonstration ---------- */
-const DEMO_PROJECTS = [
-  Object.assign(structuredClone(DEMO_ME.project), {id:'PRJ-SIKA', pace:'serieux', pay:'mixte', online:true}),
-  {id:'PRJ-KANVO', title:'Kanvô', glyph:'🎨', photo:'', likes:6, sectors:['artisanat','ecommerce'], seeking:['design','growth','vente'],
-    hook:"Les tisserands de kanvô d'Abomey vendent un pagne tissé main 25 000 FCFA au marché. La diaspora le cherche à 120 € et ne sait pas où l'acheter. Kanvô met chaque tisserand en boutique en ligne, avec paiement mobile money et envoi groupé.",
-    vision:"Faire du kanvô béninois un textile reconnu à l'étranger, vendu au bon prix par ceux qui le tissent.",
-    traction:"14 tisserands partenaires à Abomey, 62 pagnes vendus en précommande à la diaspora de Paris et Bruxelles.",
-    assets:"Un local de stockage prêté par la mairie d'Abomey. Un transitaire partenaire à Cotonou.",
-    challenges:"Les photos sont faites au téléphone et la boutique n'a pas d'identité. Il me faut quelqu'un pour la marque et les ventes.",
-    link:'', pace:'side', pay:'equity', online:true},
-];
+const DEMO_PROJECTS = [];
 function blankProject(){
   return {id:'PRJ-'+uid().slice(1,7).toUpperCase(), title:'', glyph:'💡', photo:'', likes:0, sectors:[], seeking:[],
     hook:'', vision:'', traction:'', assets:'', challenges:'', link:'', noLink:false, pace:'serieux', pay:'equity', online:false};
@@ -2081,7 +1927,7 @@ function attachProjectGetter(me){
 function initAccount(){
   const m = S.me;
   delete m.avail; delete m.pay; delete m.project;
-  m.projects = structuredClone(DEMO_PROJECTS); m.projIdx = 0;
+  m.projects = [blankProject()]; m.projIdx = 0;
   attachProjectGetter(m);
   m.visUnlocked = false; m.visSince = null; m.slots = 1;
   S.ctxs = {}; S.prof = {}; S.fPay = ''; S.pubView = 'membre';
@@ -2232,157 +2078,9 @@ const removedDays = id => S.removed && S.removed[id] ? dAgo(S.removed[id]) : nul
    Données de démonstration, par contexte
    ============================================================ */
 function seedDemo(){
-  const tal = isTalMode(), pid = tal ? null : S.me.project.id;
-  S.teams = {}; S.left = new Set(); S.removed = {}; S.pendingJoin = null; S.takTab = null;
-  S.matches = []; S.threads = []; S.invitesRecv = []; S.invitesSent = []; S.activeThread = null; S.atelierId = null;
-  const get = id => itemById(id);
-  const talent = id => TALENTS.find(t => t.id === id);
-  if(tal){
-    const K = get('TM-VIS-4102'), L = get('TM-VIS-9034'), V = get('TM-VIS-5528');
-    S.matches = [{id:K.id, fresh:false, min:12*1440}, {id:L.id, fresh:false, min:20*1440}];
-    S.left.add(V.id);
-    const aicha = memberTal(talent('TM-TAL-5563'));
-    const k = newTeam(K.id, K.title, K.glyph, [memberOwner(K), memberMe('tal'), aicha]);
-    k.since = daysAgo(12, 10, 4);
-    k.equity = {me:15, [aicha.id]:15}; k.vesting = '4 ans, 1 an de cliff';
-    [0,1,2].forEach((i,j) => { k.milestones[i].done = true; k.milestones[i].d = daysAgo([11,9,8][j], 18); });
-    k.roles = {produit:'me', tech:aicha.id, finance:'P-'+K.id, terrain:'P-'+K.id, juridique:''};
-    k.props = [
-      {id:uid(), kind:'capital', t:'Capital : Sylvain 70 %, Franck 15 %, Aïcha 15 %', d:daysAgo(3,19), val:{[aicha.id]:true}},
-      {id:uid(), kind:'jalon-2', t:'Jalon 03 franchi : qui décide quoi', d:daysAgo(8,18), val:{[aicha.id]:true}},
-      {id:uid(), kind:'vesting', t:'Vesting : 4 ans, 1 an de cliff', d:daysAgo(5,11), val:{me:true, [aicha.id]:true}},
-    ];
-    k.objectives = [
-      {id:uid(), t:'Version test hors-ligne dans 2 centres', tasks:[
-        {id:uid(), t:'Protocole de test avec les infirmières-chefs', owner:'P-'+K.id, due:daysAgo(5,18), status:'done'},
-        {id:uid(), t:'Maquettes du parcours infirmière', owner:'me', due:inDays(1), status:'doing'},
-        {id:uid(), t:'Synchronisation nocturne (prototype)', owner:aicha.id, due:daysAgo(2,18), status:'doing'},
-        {id:uid(), t:'Recruter 2 centres pilotes à Abomey-Calavi', owner:'P-'+K.id, due:inDays(6), status:'todo'},
-      ]},
-      {id:uid(), t:'Dossier Fondation Orange, phase 2', tasks:[
-        {id:uid(), t:'Budget prévisionnel sur 18 mois', owner:'P-'+K.id, due:inDays(10), status:'todo'},
-        {id:uid(), t:'Démo vidéo de 2 minutes', owner:'me', due:inDays(12), status:'todo'},
-      ]},
-    ];
-    k.group = [
-      {from:'P-'+K.id, txt:'Bienvenue à vous deux. Ici on se dit tout, les bonnes et les mauvaises nouvelles.', d:daysAgo(11,9,2)},
-      {from:'me', txt:'Merci Sylvain. Je commence les maquettes dès lundi.', d:daysAgo(9,20,15)},
-      {from:aicha.id, txt:'La synchro nocturne marche sur mon téléphone, pas encore sur les vieux Android. Je creuse.', d:daysAgo(3,22,40)},
-      {from:'P-'+K.id, txt:'J\'ai proposé la répartition du capital. Validez ou dites-moi ce qui vous gêne.', d:daysAgo(3,19,5)},
-      {from:aicha.id, txt:'Validé de mon côté.', d:daysAgo(2,8,30)},
-    ];
-    k.unreadGroup = 2;
-    [['Pacte : relecture juriste à prévoir après le jalon 05', '', daysAgo(2,19)], ['Capital proposé par Sylvain', 'Sylvain 70 %, Franck 15 %, Aïcha 15 %.', daysAgo(3,19)],
-     ['Jalon franchi : qui décide quoi', '', daysAgo(8,18)], ['Aïcha rejoint l\'équipe', '', daysAgo(10,9)], ['Match confirmé : Franck rejoint Kèkè Santé', "L'Atelier est ouvert.", daysAgo(12,10)]]
-      .forEach(e => k.log.push({t:e[0], m:e[1], d:e[2]}));
-    const l = newTeam(L.id, L.title, L.glyph, [memberOwner(L), memberMe('tal')]);
-    l.since = daysAgo(20, 15); l.equity = {me:25};
-    l.milestones[0].done = true; l.milestones[0].d = daysAgo(18, 17);
-    l.objectives = [{id:uid(), t:'Passer de 340 à 1 000 élèves', tasks:[
-      {id:uid(), t:'Stratégie de diffusion par les radios locales', owner:'me', due:inDays(4), status:'todo'},
-      {id:uid(), t:'Enregistrer 10 nouveaux épisodes', owner:'P-'+L.id, due:inDays(9), status:'doing'}]}];
-    teamLog(l, 'Jalon franchi : visio de 45 minutes', '', daysAgo(18,17)); teamLog(l, 'Match confirmé : Franck rejoint Lafia Learn', '', daysAgo(20,15));
-    l.log.reverse();
-    S.teams[K.id] = k; S.teams[L.id] = l; S.atelierId = K.id;
-    S.threads = [
-      {id:K.id, unread:true, archived:false, msgs:[
-        {me:false, txt:"Bonjour Franck, merci pour ton message. Ta lecture de nos défis est juste. On se cale 45 minutes cette semaine ?", d:daysAgo(12,10,4)},
-        {me:true, txt:"Avec plaisir. Jeudi 18 h, ça te va ?", d:daysAgo(12,10,22), read:true},
-        {me:false, txt:"Avant le groupe, une question entre nous : tu peux tenir 18 h par semaine jusqu'en décembre ?", d:daysAgo(0,8,47)}]},
-      {id:L.id, unread:false, archived:false, msgs:[
-        {me:false, txt:"Merci d'avoir rejoint Lafia Learn. Je t'envoie les chiffres d'écoute.", d:daysAgo(19,11)},
-        {me:true, txt:"Parfait, je regarde ce week-end.", d:daysAgo(19,12), read:true}]},
-      {id:V.id, unread:false, archived:true, ro:true, msgs:[
-        {me:true, txt:"Je préfère me retirer pour me concentrer sur deux projets. Bonne route à Vodun Studio.", d:daysAgo(30,16,40), read:true}]},
-    ];
-  } else if(pid === 'PRJ-SIKA'){
-    const yao = memberTal(talent('TM-TAL-2205')), grace = memberTal(talent('TM-TAL-1907'));
-    S.matches = [{id:yao.id, fresh:false, min:9*1440}, {id:grace.id, fresh:false, min:14*1440}];
-    const p = S.me.project;
-    const t = newTeam(pid, p.title || 'Ton projet', p.glyph, [memberMe('vis'), yao, grace]);
-    t.since = daysAgo(14, 9);
-    t.equity = {[yao.id]:15, [grace.id]:10}; t.vesting = '4 ans, 1 an de cliff';
-    [0,1].forEach((i,j) => { t.milestones[i].done = true; t.milestones[i].d = daysAgo([12,10][j], 18); });
-    t.roles = {produit:'me', tech:yao.id, finance:'me', terrain:'', juridique:grace.id};
-    t.props = [
-      {id:uid(), kind:'capital', t:'Capital : Franck 75 %, Yao 15 %, Grâce 10 %', d:daysAgo(4,20), val:{[yao.id]:true}},
-      {id:uid(), kind:'roles', t:'Rôles : technique à Yao, juridique à Grâce', d:daysAgo(6,10), val:{[yao.id]:true, [grace.id]:true}},
-    ];
-    t.objectives = [
-      {id:uid(), t:'Agrément IMF et statuts de la SAS', tasks:[
-        {id:uid(), t:'Rédiger les statuts OHADA', owner:grace.id, due:inDays(3), status:'doing', signaled:true},
-        {id:uid(), t:'Rencontrer l\'IMF de Bohicon', owner:'me', due:inDays(2), status:'todo'}]},
-      {id:uid(), t:'Version 2 de l\'app', tasks:[
-        {id:uid(), t:'API de rapprochement mobile money', owner:yao.id, due:daysAgo(1,18), status:'doing'},
-        {id:uid(), t:'Parcours de rappel des échéances', owner:'me', due:inDays(8), status:'todo'}]},
-    ];
-    t.group = [
-      {from:'me', txt:'Bienvenue Yao et Grâce. On avance par petites validations, et Takam veille.', d:daysAgo(9,9)},
-      {from:grace.id, txt:'Statuts prêts à relire. Je les ai signalés terminés dans le plan.', d:daysAgo(7,18)},
-      {from:yao.id, txt:'L\'API MTN renvoie des doublons sur les remboursements. J\'ai besoin de deux jours de plus.', d:daysAgo(2,21)},
-    ];
-    t.unreadGroup = 1;
-    [['Grâce a signalé les statuts terminés', 'En attente de ta confirmation.', daysAgo(1,18)], ['Capital proposé', 'Franck 75 %, Yao 15 %, Grâce 10 %.', daysAgo(4,20)],
-     ['Rôles validés par toute l\'équipe', '', daysAgo(5,10)], ['Grâce rejoint l\'équipe', '', daysAgo(9,9)], ['Yao rejoint l\'équipe', '', daysAgo(14,9)]]
-      .forEach(e => t.log.push({t:e[0], m:e[1], d:e[2]}));
-    S.teams[pid] = t; S.atelierId = pid;
-    S.threads = [
-      {id:yao.id, unread:true, archived:false, msgs:[
-        {me:false, txt:"Merci pour l'invitation. J'ai lu ta fiche : la partie traction m'a convaincu.", d:daysAgo(14,10)},
-        {me:true, txt:"Bienvenue dans l'équipe. On parle de l'API jeudi ?", d:daysAgo(14,11), read:true},
-        {me:false, txt:"Je t'envoie une démo des doublons ce soir, entre nous avant le groupe.", d:daysAgo(0,8,47)}]},
-      {id:grace.id, unread:false, archived:false, msgs:[
-        {me:false, txt:"Ravie de rejoindre Sika Tontine. Les statuts OHADA, c'est mon terrain.", d:daysAgo(9,10)},
-        {me:true, txt:"Parfait. Première étape : la SAS, avant l'agrément.", d:daysAgo(9,11), read:true}]},
-    ];
-  } else if(pid === 'PRJ-KANVO'){
-    const nadia = memberTal(talent('TM-TAL-5092'));
-    S.matches = [{id:nadia.id, fresh:false, min:6*1440}];
-    const p = S.me.project;
-    const t = newTeam(pid, p.title, p.glyph, [memberMe('vis'), nadia]);
-    t.since = daysAgo(6, 11); t.equity = {[nadia.id]:20};
-    t.milestones[0].done = true; t.milestones[0].d = daysAgo(4, 18);
-    t.roles = {produit:'me', tech:'', finance:'me', terrain:'me', juridique:''};
-    t.objectives = [{id:uid(), t:'Boutique en ligne pour les fêtes', tasks:[
-      {id:uid(), t:'Identité de marque et logo', owner:nadia.id, due:inDays(5), status:'doing'},
-      {id:uid(), t:'Séance photo chez 5 tisserands', owner:'me', due:inDays(9), status:'todo'}]}];
-    teamLog(t, 'Match confirmé : Nadia rejoint Kanvô', "L'Atelier est ouvert.", daysAgo(6,11));
-    teamLog(t, 'Jalon franchi : visio de 45 minutes', '', daysAgo(4,18));
-    S.teams[pid] = t; S.atelierId = pid;
-    S.threads = [{id:nadia.id, unread:false, archived:false, msgs:[
-      {me:false, txt:"Le kanvô mérite mieux que des photos au téléphone. Je vous propose trois pistes de marque d'ici vendredi.", d:daysAgo(6,12)},
-      {me:true, txt:"Merci Nadia. Je réunis les tisserands samedi pour la séance photo.", d:daysAgo(5,9), read:true}]}];
-  }
-  /* Invitations : parmi les fiches encore libres, classées par compatibilité. */
-  const r = pool().filter(x => !isUnlocked(x.id) && !FULL.has(x.id)).map(x => ({x, s:scoreOf(x)})).sort((a,b) => b.s.total - a.s.total).map(o => o.x);
-  if(tal || pid === 'PRJ-SIKA'){
-    const N1 = r[0], N2 = r[1], P1 = r[2], D1 = r[6];
-    S.invitesRecv = [
-      {id:N1.id, status:'new', min:35, msg: tal ? "Ta fiche correspond exactement à ce qui nous bloque côté produit. On en parle cette semaine ?" : "Votre traction m'a convaincu. Je peux donner 18 h par semaine dès le mois prochain."},
-      {id:N2.id, status:'new', min:8*1440+280, msg: tal ? "On cherche quelqu'un qui tienne le produit, pas un prestataire. Ton parcours fintech nous intéresse." : "Le problème de la trésorière qui disparaît, je l'ai vécu. Disponible pour échanger."},
-    ];
-    S.invitesSent = [
-      {id:P1.id, status:'sent', min:2*1440, msg: tal ? "Votre section Défis me parle : j'ai déjà mené ce type de refonte sur une app de paiement." : "Votre expérience correspond au blocage décrit dans ma fiche."},
-      {id:D1.id, status:'declined', min:9*1440, msg:''},
-    ];
-  } else if(pid === 'PRJ-KANVO'){
-    S.invitesRecv = [{id:r[0].id, status:'new', min:3*1440, msg:"L'artisanat en ligne, c'est exactement ce que je veux faire. Je peux tenir les ventes à la diaspora."}];
-    S.invitesSent = [{id:r[1].id, status:'sent', min:1440, msg:"Ton profil correspond à la partie ventes de Kanvô."}];
-  }
-  S.invitesSent = S.invitesSent.concat(S.matches.map(m => ({id:m.id, status:'accepted', min:m.min + 1440, msg:''})));
-  S.activeThread = S.threads[0] ? S.threads[0].id : null;
-  /* Ce qui appartient au profil entier : notifications, favoris, J'aime. */
-  if(!S.prof[S.me.role]){
-    const t0 = curTeam(), tk = t0 ? takam(t0) : null;
-    S.notifs = [
-      tk ? {i:'takam', t:'Takam · '+t0.title, s:(tk.me[0] || tk.team[0] || {t:'Tout est à jour.'}).t, min:20, read:false} : null,
-      S.invitesRecv[0] ? {i:'link', t:'Nouvelle invitation reçue', s:titleOf(itemById(S.invitesRecv[0].id))+' veut te parler', min:35, read:false} : null,
-      t0 && t0.members.length >= 3 ? {i:'chat', t:'Nouveaux messages dans le groupe', s:t0.title, min:90, read:false} : null,
-      {i:'eye', t:'Ta fiche a été consultée', s:'12 fois cette semaine', min:220, read:true},
-    ].filter(Boolean);
-    S.favs = new Set(r.length > 4 ? [r[3].id, r[4].id] : []);
-    S.likes = new Set(); S.reported = new Set();
-  }
+  Object.assign(S, {teams:{}, left:new Set(), removed:{}, pendingJoin:null, takTab:null,
+    matches:[], threads:[], invitesRecv:[], invitesSent:[], activeThread:null, atelierId:null});
+  if(!S.prof[S.me.role]){ S.notifs = []; S.favs = new Set(); S.likes = new Set(); S.reported = new Set(); }
 }
 
 /* ============================================================
@@ -2507,7 +2205,7 @@ function ficheWinInner(){
    ============================================================ */
 function filtered(){
   const q = S.q.trim().toLowerCase(), tal = isTalMode();
-  let list = pool().slice();
+  let list = pool().filter(x => !x.hidden);
   if(S.tab === 'favoris') list = list.filter(x => S.favs.has(x.id));
   if(q) list = list.filter(x => {
     const hay = tal
@@ -3020,7 +2718,7 @@ function demoReset(){
   if(!isTalMode()){ saveCtx(); S.me.role = 'tal'; loadCtx(); }
   const m = S.me;
   m.visUnlocked = false; m.visSince = null; m.slots = 1;
-  m.projects = structuredClone(DEMO_PROJECTS); m.projIdx = 0;
+  m.projects = [blankProject()]; m.projIdx = 0;
   Object.keys(S.ctxs).filter(k => k !== 'tal').forEach(k => delete S.ctxs[k]); delete S.prof.vis;
   S.payments = S.payments.filter(x => !/Second profil|Emplacement projet/.test(x.l));
   resetUi(); saveBaseline(); S._painted = null; go('parametres');
@@ -4522,6 +4220,7 @@ document.addEventListener('click', async e => {
   const fi = $('#idF'), fs = $('#idS');
   const doc = await shrinkImage(fi && fi.files[0]), selfie = await shrinkImage(fs && fs.files[0]);
   S.me.verifyPending = true;
+  if(window.TMData && TMData.on) TMData.verify(fi && fi.files[0], fs && fs.files[0]);
   tmBus('verify-request', {user:tmUserCard(), doc, selfie});
   closeLayer(); render();
   success('Dossier envoyé', 'L\'équipe TakaMatch vérifie que ta pièce d\'identité et ton selfie correspondent à ton nom légal. Réponse sous <b>48 h</b> ; le badge '+vBadge(isTalMode() ? 'tal' : 'vis', true)+' s\'affiche dès la validation.');

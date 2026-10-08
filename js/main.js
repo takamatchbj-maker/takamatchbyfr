@@ -153,7 +153,6 @@ window.TM_SHELL = true;
    Les comptes vivent dans la base Supabase (js/supabase.js) :
    app.html charge le profil de la personne connectée et renvoie
    vers la connexion s'il n'y a pas de session.
-   app.html?demo=1 ouvre le compte de démonstration.
    ============================================================ */
 (function(){
   'use strict';
@@ -193,7 +192,7 @@ window.TM_SHELL = true;
 
   async function startApp(){
     var q = new URLSearchParams(location.search);
-    if(q.get('demo') === '1' || !window.TMDB){ send({type:'account', acc:DEMO}); return; }
+    if(!window.TMDB){ send({type:'account', acc:DEMO}); return; }
     var s = null;
     try{ s = await TMDB.ensure(); }catch(e){}
     if(!s){ goTo('onb', true, '?mode=login'); return; }
@@ -256,7 +255,6 @@ window.TM_SHELL = true;
         if(d.login) put('tm-app-welcome', 'Content de te revoir.');
         goTo('app', true); break;
       case 'logout':
-        if(new URLSearchParams(location.search).get('demo') === '1'){ put('tm-flash', 'Tu as quitté la démonstration.'); goTo('site', true); break; }
         leave('Tu es déconnecté. À bientôt sur TakaMatch.'); break;
       case 'deleted':
         /* La suppression définitive est faite par l'équipe (données, fichiers, paiements). */

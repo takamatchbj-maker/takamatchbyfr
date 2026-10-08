@@ -161,6 +161,9 @@
     insert: function(table, values){
       return api('/rest/v1/' + table, {method:'POST', body:values, headers:{Prefer:'return=representation'}});
     },
+    remove: function(table, match){
+      return api('/rest/v1/' + table + '?' + match, {method:'DELETE'});
+    },
     rpc: function(fn, args){ return api('/rest/v1/rpc/' + fn, {method:'POST', body:args || {}}); },
 
     /* Fichiers : renvoie l'adresse publique (espaces avatars / covers). */
