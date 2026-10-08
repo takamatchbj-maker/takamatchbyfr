@@ -949,9 +949,12 @@ kbd{
     flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:var(--r-sm);
     font-size:10.5px;font-weight:600;color:var(--ink-3);position:relative;transition:color var(--t-fast);
   }
-  .tabbar button.on{color:var(--a-700)}
-  .tabbar .ic{width:21px;height:21px}
-  .tabbar .cnt{position:absolute;top:3px;right:calc(50% - 20px);min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--bad);color:var(--on-bad);font-size:9.5px;font-weight:800;display:grid;place-items:center}
+  .tabbar button.on{color:var(--a-700);font-weight:700}
+  .tabbar .ic{width:21px;height:21px;box-sizing:content-box;padding:4px 16px;border-radius:99px;transition:background var(--t-fast),color var(--t-fast)}
+  /* Onglet actif : pastille colorée derrière l'icône et trait au-dessus, comme la barre latérale sur ordinateur. */
+  .tabbar button.on .ic{background:var(--a-100);color:var(--a-700)}
+  .tabbar button.on::before{content:"";position:absolute;top:-7px;left:50%;width:30px;height:3px;border-radius:0 0 3px 3px;background:var(--a-600);transform:translateX(-50%)}
+  .tabbar .cnt{position:absolute;top:1px;right:calc(50% - 30px);min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--bad);color:var(--on-bad);font-size:9.5px;font-weight:800;display:grid;place-items:center}
   .toasts{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   .g3,.g2{grid-template-columns:1fr}
   .hide-m{display:none!important}
