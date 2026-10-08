@@ -1,0 +1,1626 @@
+/* ============================================================
+   TakaMatch — page vitrine
+   Styles propres à index.html.
+   ============================================================ */
+
+button{background:none;border:0;cursor:pointer;padding:0}
+
+ul{margin:0;padding:0;list-style:none}
+
+:focus-visible{outline:2px solid var(--a-600);outline-offset:2px;border-radius:var(--r-xs)}
+
+::selection{background:var(--a-200);color:var(--ink)}
+
+.scroll::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+
+.scroll::-webkit-scrollbar-track{background:transparent}
+
+/* ============================================================
+   Primitives — DESIGN.md §6
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:40px;padding:0 18px;border-radius:var(--r-md);
+  font-weight:600;font-size:14px;white-space:nowrap;letter-spacing:-.005em;
+  transition:background var(--t-fast),border-color var(--t-fast),color var(--t-fast),opacity var(--t-fast);
+  border:1px solid transparent;
+}
+
+/* Une seule action pleine par vue ; pas d'ombre portée sur les boutons. */
+.btn-a{background:var(--a-600);color:var(--a-on);border-color:var(--a-edge)}
+
+/* L'invitation est l'action qui coûte : le bouton la propose sans
+   l'imposer, et ne prend la couleur de marque pleine qu'au survol. */
+.btn-soft{background:var(--a-50);color:var(--a-700);border-color:var(--a-200)}
+
+.btn-soft:hover:not(:disabled){background:var(--a-600);color:var(--a-on);border-color:var(--a-edge)}
+
+.btn-soft:disabled{background:var(--surface-2);color:var(--ink-3);border-color:var(--line)}
+
+.btn-ghost{background:var(--surface);border-color:var(--line-strong);color:var(--ink)}
+
+.btn-ghost:hover:not(:disabled){background:var(--surface-2)}
+
+.btn-quiet{color:var(--ink-2)}
+
+.btn-quiet:hover:not(:disabled){background:var(--surface-3);color:var(--ink)}
+
+.btn-danger{background:var(--bad-bg);color:var(--bad-ink)}
+
+.btn-sm{height:32px;padding:0 13px;font-size:13.5px;gap:6px}
+
+.btn-lg{height:48px;padding:0 24px;font-size:15px}
+
+/* Les cartes se distinguent par leur contenu, pas par un habillage commun. */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg)}
+
+.card-pad{padding:var(--s3)}
+
+.chip{
+  display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;
+  border-radius:var(--r-sm);background:var(--surface-3);color:var(--ink-2);
+  font-size:12.5px;font-weight:500;white-space:nowrap;
+}
+
+.chip-a{background:var(--a-50);color:var(--a-700);box-shadow:inset 0 0 0 1px var(--a-200)}
+
+.chip-ok{background:var(--ok-bg);color:var(--ok-ink)}
+
+.chip-warn{background:var(--warn-bg);color:var(--warn-ink)}
+
+.chip-bad{background:var(--bad-bg);color:var(--bad-ink)}
+
+/* Le pseudo public : c'est une donnée, donc du monospace. */
+.handle{
+  font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--ink-2);
+  letter-spacing:-.02em;
+}
+
+/* Ces deux pastilles vivent sur une couverture en dégradé : leur fond est
+   clair dans les deux thèmes, leur encre reste donc sombre. Liée au token
+   --ink, elle devenait blanche sur blanc en mode sombre. */
+.chip-handle{
+  background:rgba(250,249,245,.94);color:#1F1E1B;font-family:var(--mono);
+  font-size:12px;font-weight:500;height:24px;box-shadow:inset 0 0 0 1px rgba(31,30,27,.14);
+}
+
+/* Pseudo dans les aperçus de fiche : pastille noire, encre blanche, pour ne
+   jamais se confondre avec les pastilles secteur blanches des couvertures. */
+.chip-pseudo{
+  display:inline-flex;align-items:center;height:21px;padding:0 7px;border-radius:var(--r-sm);
+  background:#15130F;color:#fff;font-family:var(--mono);font-size:11.5px;font-weight:500;
+  letter-spacing:-.02em;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+}
+
+:root[data-theme="dark"] .chip-pseudo{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip-pseudo{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}}
+
+/* Libellé court devant les compétences d'une fiche. */
+.sk-lbl{font-size:12px;font-weight:600;color:var(--ink-3);white-space:nowrap}
+
+.chip-onart{
+  background:rgba(250,249,245,.95);color:#1F1E1B;
+  box-shadow:inset 0 0 0 1px rgba(31,30,27,.12);
+}
+
+/* Libellé de section : bas de casse, pas de capitales traquées (DESIGN.md §2). */
+.lbl{font-size:13px;font-weight:600;color:var(--ink-3);letter-spacing:0}
+
+.dim{color:var(--ink-3)}
+
+.hr{height:1px;background:var(--line);border:0;margin:0}
+
+.field > label{font-size:14px;font-weight:500;color:var(--ink-2)}
+
+.field .req{color:var(--bad);margin-left:2px}
+
+.inp{
+  width:100%;height:44px;padding:0 14px;border-radius:var(--r-md);
+  background:var(--surface-3);border:1px solid var(--line);color:var(--ink);
+  font-size:15px;
+  transition:border-color var(--t-fast),box-shadow var(--t-fast),background var(--t-fast);
+}
+
+textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line-height:1.6}
+
+.inp::placeholder{color:var(--ink-4)}
+
+.inp:hover{border-color:var(--line-strong)}
+
+.inp:focus{outline:none;border-color:var(--a-600);background:var(--surface);box-shadow:0 0 0 2px var(--a-glow)}
+
+.hint{font-size:13px;color:var(--ink-3);line-height:1.5}
+
+.opt{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);
+  cursor:pointer;transition:border-color var(--t-fast),background var(--t-fast),color var(--t-fast);
+  font-size:14px;font-weight:450;text-align:left;
+}
+
+.opt:hover{border-color:var(--line-strong);background:var(--surface-2)}
+
+.opt[aria-pressed="true"]{border-color:var(--a-600);background:var(--a-50);color:var(--a-700);font-weight:600}
+
+.opt .box{
+  width:17px;height:17px;flex:0 0 auto;margin-top:2px;border-radius:var(--r-xs);
+  border:1.5px solid var(--line-strong);display:grid;place-items:center;
+  transition:background var(--t-fast),border-color var(--t-fast);
+}
+
+.opt[aria-pressed="true"] .box{background:var(--a-600);border-color:var(--a-edge)}
+
+.opt.radio .box{border-radius:50%}
+
+/* Dans le formulaire de fiche, l'option se réduit à son contrôle et à
+   son libellé : une grille de douze cases encadrées se lisait mal, et
+   la bordure n'apportait rien qu'un cadre de plus. */
+.opt-plain{
+  border-color:transparent;background:transparent;
+  padding:9px 8px;align-items:center;min-height:40px;
+}
+
+.opt-plain:hover{background:var(--surface-2);border-color:transparent}
+
+.opt-plain[aria-pressed="true"]{background:transparent;border-color:transparent;color:var(--a-700);font-weight:600}
+
+.opt-plain .box{margin-top:0}
+
+.opt-grid .opt{align-items:center;min-height:44px}
+
+.opt-grid .opt .box{margin-top:0}
+
+.toggle{
+  width:42px;height:24px;border-radius:99px;background:var(--line-strong);position:relative;
+  transition:background var(--t) var(--ease);flex:0 0 auto;
+}
+
+.toggle::after{
+  content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;
+  background:var(--surface);transition:transform var(--t) var(--ease);
+}
+
+.toggle[aria-pressed="true"]{background:var(--a-600)}
+
+.toggle.ok[aria-pressed="true"]{background:var(--ok)}
+
+/* ============================================================
+   Structure applicative
+   ============================================================ */
+.app{height:100%;display:flex;flex-direction:column;opacity:0;transition:opacity var(--t-slow) var(--ease)}
+
+.app.on{opacity:1}
+
+.topbar{
+  flex:0 0 auto;height:60px;display:flex;align-items:center;gap:10px;
+  padding:0 var(--s2);background:var(--surface);border-bottom:1px solid var(--line);
+  position:relative;z-index:40;
+}
+
+.topbar::after{
+  content:"";position:absolute;inset:auto 0 -1px 0;height:2px;
+  background:var(--a-600);opacity:0;transition:opacity var(--t-slow);
+}
+
+.topbar.busy::after{opacity:1}
+
+.logo{display:flex;align-items:center;gap:1px;font-family:var(--disp);font-weight:600;font-size:18px;letter-spacing:-.02em;flex:0 0 auto}
+
+.logo span{padding:2px 7px;border-radius:var(--r-sm);line-height:1.15}
+
+/* Le mot-marque garde ses couleurs de marque : en sombre, le bleu
+   d'accent s'éclaircit et le blanc ne tenait plus dessus. */
+.logo .t{background:#0A65AE;color:#fff}
+
+.logo .m{background:var(--vis-500);color:#3D2B00}
+
+.shell{flex:1;display:flex;min-height:0}
+
+.side{
+  flex:0 0 244px;background:var(--surface);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;padding:var(--s2) 12px;gap:2px;overflow-y:auto;position:relative;
+}
+
+.nav{
+  display:flex;align-items:center;gap:11px;height:40px;padding:0 12px;border-radius:var(--r-md);
+  color:var(--ink-2);font-weight:500;font-size:14.5px;width:100%;position:relative;
+  transition:background var(--t-fast),color var(--t-fast);
+}
+
+.nav:hover{background:var(--surface-3);color:var(--ink)}
+
+.nav.on{background:var(--a-50);color:var(--a-700);font-weight:600;box-shadow:inset 2px 0 0 var(--a-600)}
+
+.nav .ic{width:18px;height:18px;flex:0 0 auto}
+
+.nav .cnt{
+  margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:var(--r-sm);
+  background:var(--bad);color:var(--on-bad);font-size:11.5px;font-weight:600;display:grid;place-items:center;
+}
+
+.side-foot{margin-top:auto;padding-top:12px;position:relative;z-index:1}
+
+.baseline{font-size:13px;color:var(--ink-3);padding:10px 12px 2px;font-family:var(--disp);font-style:italic}
+
+.main{flex:1;overflow-y:auto;min-width:0;position:relative}
+
+.wrap{max-width:1160px;margin:0 auto;padding:var(--s4) var(--s3) var(--s7)}
+
+.page-h{display:flex;align-items:flex-start;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3)}
+
+.page-h h1{font-size:30px;line-height:1.18}
+
+.page-h .sub{color:var(--ink-2);margin-top:4px;font-size:15px}
+
+.page-h .spacer{flex:1;min-width:0}
+
+.acc{color:var(--a-700)}
+
+.acc2{color:var(--tal-700)}
+
+:root[data-role="tal"] .acc2{color:var(--vis-700)}
+
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:var(--s3);border-bottom:1px solid var(--line)}
+
+.tab{
+  height:38px;padding:0 14px;font-weight:500;font-size:14.5px;
+  color:var(--ink-3);display:inline-flex;align-items:center;gap:7px;position:relative;white-space:nowrap;
+  transition:color var(--t-fast);
+}
+
+.tab:hover{color:var(--ink)}
+
+.tab.on{color:var(--ink);font-weight:600}
+
+.tab.on::after{content:"";position:absolute;inset:auto 10px -1px 10px;height:2px;background:var(--a-600)}
+
+.tab .cnt{min-width:19px;height:19px;padding:0 5px;border-radius:var(--r-sm);background:var(--bad);color:var(--on-bad);font-size:11px;font-weight:600;display:grid;place-items:center}
+
+@keyframes shimmer{to{background-position:200% 0}}
+
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.25}}
+
+.skel{
+  background:linear-gradient(90deg,var(--surface-3) 25%,var(--surface-2) 50%,var(--surface-3) 75%);
+  background-size:200% 100%;animation:shimmer 1.3s linear infinite;border-radius:var(--r-sm);
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+.col{display:flex;flex-direction:column;gap:10px}
+
+/* Teinte de sujet — elle ne dit plus le thème du projet, elle dit le
+   rôle de celui qu'on regarde : bleu pour un talent, or pour un
+   visionnaire. Les valeurs viennent des deux rampes de marque. La
+   variation d'un sujet à l'autre se joue à l'intérieur de la famille,
+   par l'angle et la profondeur — jamais en changeant de teinte. */
+.tint{
+  background:linear-gradient(var(--ta,138deg), var(--t1), var(--t2));
+  color:var(--t-on,#fff);
+}
+
+.pcard{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;
+  display:flex;flex-direction:column;transition:transform var(--t) var(--ease),box-shadow var(--t) var(--ease),border-color var(--t-fast);
+}
+
+.pcard:hover{border-color:var(--line-strong);background:var(--surface-2)}
+
+.pcard .cover{height:118px;position:relative;display:grid;place-items:center;overflow:hidden}
+
+.vbadge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;white-space:nowrap;line-height:1;vertical-align:middle}
+
+.vbadge svg{width:15px;height:15px;flex:0 0 auto}
+
+.vb-tal svg{fill:#007CD8}
+
+.vb-tal span{color:var(--tal-700)}
+
+.vb-vis svg{fill:#E2A70F}
+
+.vb-vis span{color:var(--vis-700)}
+
+.vb-off svg{fill:#D3CEC3}
+
+.vb-off span{color:var(--ink-3);font-weight:500}
+
+:root[data-theme="dark"] .vb-tal svg{fill:#3FA3EE}
+
+:root[data-theme="dark"] .vb-vis svg{fill:#FFD741}
+
+:root[data-theme="dark"] .vb-off svg{fill:#4F4A42}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .vb-tal svg{fill:#3FA3EE}:root:not([data-theme="light"]) .vb-vis svg{fill:#FFD741}:root:not([data-theme="light"]) .vb-off svg{fill:#4F4A42}}
+
+.photo{position:relative;background-size:cover!important;background-repeat:no-repeat!important;background-color:var(--vis-200)}
+
+.photo::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(160deg,rgba(255,215,65,.32),rgba(255,215,65,.08) 62%,rgba(255,215,65,0));mix-blend-mode:multiply}
+
+.photo > *{z-index:1}
+
+.pcard .cover .tags{position:absolute;top:9px;left:9px;right:62px;display:flex;gap:5px;flex-wrap:nowrap;overflow:hidden}
+
+.pcard .cover .tags .chip{flex:0 1 auto;min-width:0;display:block;line-height:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.pcard .body{padding:13px 15px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
+
+.pcard .who{
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+  font-size:13px;color:var(--ink-3);line-height:1.3;
+}
+
+.pcard .who .sep{color:var(--ink-3)}
+
+.pcard .ex{font-size:13px;color:var(--ink-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.pcard .chips{display:flex;gap:5px;flex-wrap:wrap}
+
+/* ---- Variante Talent : une personne se présente par son portrait ----
+   Le bandeau ne sert plus qu'à porter la teinte ; le portrait rond le
+   chevauche, et tout ce qui identifie la personne se range dessous,
+   centré sur l'axe du portrait. Le cerne fait un pixel : il détache le
+   portrait du bandeau sans l'encadrer. */
+.pcard.person .cover{height:78px;overflow:visible;display:block}
+
+.pcard.person .portrait{
+  position:absolute;left:50%;bottom:-37px;transform:translateX(-50%);
+  width:74px;height:74px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface);
+}
+
+.pcard.person .portrait .av{width:72px;height:72px;font-size:21px}
+
+.pcard.person .body{padding-top:50px;align-items:center;text-align:center;gap:8px}
+
+/* En mode Focus, même geste sur la bannière haute. */
+.detail .hero.portrait-hero{height:132px;overflow:visible}
+
+/* Ici le portrait s'aligne à gauche, sur l'axe du nom qui le suit. */
+.detail .hero .portrait{
+  position:absolute;left:22px;bottom:-40px;
+  width:82px;height:82px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface);
+}
+
+.detail .hero.portrait-hero + .meta{padding-top:50px}
+
+/* Le score et les boutons sont ancrés en bas : d'une carte à l'autre
+   ils tombent sur la même ligne, quel que soit le nombre de jetons. */
+.pcard .sc-line{margin-top:auto;padding-top:2px}
+
+.pcard .foot{padding-top:4px;display:flex;gap:8px;align-items:center}
+
+.iconbtn{
+  width:30px;height:30px;border-radius:var(--r-md);display:grid;place-items:center;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-3);
+  transition:all var(--t-fast) var(--ease);
+}
+
+.iconbtn:hover{color:var(--ink);border-color:var(--line-strong);background:var(--surface-2)}
+
+.iconbtn.on{background:var(--bad-bg);border-color:transparent;color:var(--bad)}
+
+.iconbtn .ic{width:15px;height:15px}
+
+.iconbtn-lg{width:38px;height:38px}
+
+.iconbtn-lg .ic{width:18px;height:18px}
+
+/* Le bouton de profil fait exactement la hauteur des boutons d'icône
+   voisins, sinon la barre du haut a deux lignes de base. */
+#meBtn{height:38px;box-sizing:border-box}
+
+/* Toasts */
+.toasts{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));
+  z-index:120;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:calc(100% - 32px);
+}
+
+.toast{
+  display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--r-md);
+  background:var(--ink);color:var(--ground);font-size:14px;font-weight:500;
+  box-shadow:var(--shadow-pop);animation:pop .3s var(--ease) both;pointer-events:auto;max-width:100%;
+}
+
+.toast .ic{width:17px;height:17px;flex:0 0 auto}
+
+.toast.out{animation:fadeout .3s var(--ease-in) forwards}
+
+@keyframes fadeout{to{opacity:0;transform:translateY(8px) scale(.96)}}
+
+/* Crédits d'invitation — la rareté, rendue tangible */
+.credits{background:linear-gradient(160deg,var(--a-50),var(--surface) 65%);border-color:var(--a-200)}
+
+.gauge i{flex:1;height:6px;border-radius:var(--r-xs);background:var(--surface-3);transition:background .5s var(--ease)}
+
+.gauge i.on{background:var(--a-600)}
+
+.momo{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--ink-3)}
+
+.momo b{padding:2px 6px;border-radius:var(--r-xs);font-size:11px}
+
+.momo .mtn{background:#FFCC00;color:#1A1A1A}
+
+.momo .moov{background:#0077A8;color:#fff}
+
+.momo .celtiis{background:#E4002B;color:#fff}
+
+.momo{flex-wrap:wrap}
+
+.momo .wave{background:#1DC8FF;color:#0B2540}
+
+.momo .orange{background:#FF7900;color:#111}
+
+.momo .free{background:#CD0F14;color:#fff}
+
+.momo .mixx{background:#2B1C6E;color:#fff}
+
+.momo .airtel{background:#ED1C24;color:#fff}
+
+.momo .card{background:var(--ink);color:var(--ground)}
+
+@media (max-width:860px){
+  .toolbar > *{flex:1 1 auto}
+  .toolbar .seg{flex:0 0 auto}
+  .shell{padding:0;gap:0}
+  .side{
+    position:fixed;top:10px;bottom:10px;left:10px;z-index:92;width:250px;flex:0 0 250px;
+    transform:translateX(-100%);transition:transform var(--t) var(--ease),visibility var(--t);
+    padding-top:calc(14px + env(safe-area-inset-top,0px));
+    box-shadow:var(--shadow-3);
+    visibility:hidden; /* hors écran : ni cliquable, ni atteignable au clavier */
+  }
+  .side.open{transform:none;visibility:visible;box-shadow:var(--shadow-3)}
+  .wrap{padding:18px 16px 100px}
+  .page-h h1{font-size:22px}
+  .focus{grid-template-columns:1fr}
+  .msg-l{grid-template-columns:1fr;height:auto}
+  .msg-l .thread-list{max-height:210px}
+  .msg-l .chat{height:min(66vh,540px)}
+  .msg-l.viewing .thread-list{display:none}
+  .tabbar{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
+    border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));
+  }
+  .tabbar button{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:var(--r-sm);
+    font-size:10.5px;font-weight:600;color:var(--ink-3);position:relative;transition:color var(--t-fast);
+  }
+  .tabbar button.on{color:var(--a-700)}
+  .tabbar .ic{width:21px;height:21px}
+  .tabbar .cnt{position:absolute;top:3px;right:calc(50% - 20px);min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--bad);color:var(--on-bad);font-size:9.5px;font-weight:800;display:grid;place-items:center}
+  .toasts{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .g3,.g2{grid-template-columns:1fr}
+  .hide-m{display:none!important}
+}
+
+@media (max-width:560px){
+  .deck{grid-template-columns:1fr}
+  .opt-grid{grid-template-columns:1fr}
+  .modal .mf{flex-direction:column-reverse}
+  .modal .mf .btn{width:100%}
+}
+
+/* ============================================================
+   Page vitrine
+   ============================================================ */
+.site{height:100%;overflow-y:auto;background:var(--ground);scroll-behavior:smooth}
+
+.site-in{max-width:1120px;margin:0 auto;padding:0 22px}
+
+/* En-tête flottant : une capsule détachée du bord, posée sur le hero.
+   C'est un calque flottant — il a donc droit au grand rayon et à
+   l'ombre (DESIGN.md §5–6). Le verre reprend le papier, pas la nuit :
+   en thème sombre, les tokens en font d'eux-mêmes une capsule nocturne. */
+.site-hd{
+  position:sticky;top:0;z-index:30;
+  /* La capsule ne réserve pas sa hauteur : le hero et ses halos
+     remontent jusqu'en haut et passent derrière le verre. */
+  height:0;overflow:visible;
+  pointer-events:none;
+}
+
+.site-hd .bar{
+  pointer-events:auto;position:relative;top:calc(12px + env(safe-area-inset-top,0px));
+  /* Logo | liens centrés dans l'espace restant | actions. */
+  display:flex;align-items:center;gap:16px;
+  height:62px;padding:0 8px 0 22px;border-radius:var(--r-pill);
+  background:color-mix(in srgb,var(--surface) 72%,transparent);
+  backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);
+  border:1px solid var(--line);
+  transition:background var(--t),border-color var(--t),box-shadow var(--t);
+}
+
+.site-hd.stuck .bar{
+  background:color-mix(in srgb,var(--surface) 90%,transparent);
+  border-color:var(--line-strong);box-shadow:var(--shadow-2);
+}
+
+.site-hd .end{display:flex;align-items:center;gap:8px;margin-left:auto;flex:0 0 auto}
+
+.site-hd .brand{flex:0 0 auto}
+
+/* La capsule s'élargit sur ordinateur pour laisser respirer les liens. */
+.site-hd .site-in{max-width:1284px}
+
+/* Dans une capsule, les boutons épousent sa courbe. */
+.site-hd .btn,.site-hd .iconbtn{border-radius:var(--r-pill)}
+
+.site-hd .btn{height:40px;padding:0 18px;font-size:14px}
+
+.site-hd .iconbtn{width:40px;height:40px;background:transparent;border-color:transparent}
+
+.site-hd .iconbtn:hover{background:var(--surface-3);border-color:transparent}
+
+/* Mot-marque de l'en-tête : deux disques qui se chevauchent — l'idée
+   et la compétence — puis le nom, « Match » à l'or de marque. */
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);justify-self:start}
+
+.brand:hover{text-decoration:none}
+
+.brand-mk{position:relative;width:28px;height:18px;flex:0 0 auto}
+
+.brand-mk::before,.brand-mk::after{content:"";position:absolute;top:0;width:18px;height:18px;border-radius:50%}
+
+.brand-mk::before{left:0;background:var(--vis-500)}
+
+.brand-mk::after{right:0;background:var(--tal-500);box-shadow:0 0 0 2px var(--surface)}
+
+.brand-wm{font-family:var(--disp);font-weight:600;font-size:19px;letter-spacing:-.02em;line-height:1}
+
+.brand-wm b{font-weight:600;color:var(--vis-700)}
+
+/* Logo officiel (plaques bleu/or) : hauteur fixe, largeur proportionnelle. */
+.brand-logo{display:block;height:34px;width:auto;max-width:none}
+
+@media (max-width:860px){.brand-logo{height:28px}}
+
+.ft-logo{display:block;height:72px;width:auto;max-width:100%;margin-bottom:14px}
+
+:root[data-theme="dark"] .brand-mk::after{box-shadow:none;mix-blend-mode:screen}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .brand-mk::after{box-shadow:none;mix-blend-mode:screen}
+}
+
+.site-nav{display:flex;justify-content:center;gap:34px;flex:1 1 auto;min-width:0}
+
+.site-nav a{white-space:nowrap}
+
+@media (max-width:1180px){.site-nav{gap:22px}}
+
+/* Sous cette largeur, quatre liens et trois actions ne tiennent plus :
+   les liens se retirent, comme sur mobile. */
+@media (max-width:1060px){.site-nav{display:none}}
+
+.site-nav a{
+  position:relative;padding:6px 0;font-size:14px;font-weight:500;color:var(--ink-2);
+  text-decoration:none;transition:color var(--t-fast);
+}
+
+/* Le filet de survol reprend le dégradé or → bleu du titre du hero. */
+.site-nav a::after{
+  content:"";position:absolute;left:0;right:100%;bottom:0;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--vis-600),var(--tal-600));
+  transition:right var(--t) var(--ease);
+}
+
+.site-nav a:hover{color:var(--ink);text-decoration:none}
+
+.site-nav a:hover::after{right:0}
+
+/* Les ancres s'arrêtent sous la capsule, pas derrière. */
+.sec{scroll-margin-top:84px}
+
+@media (max-width:860px){
+  .site-hd .bar{padding:0 6px 0 16px;height:56px}
+  .site-hd .btn{height:38px;padding:0 14px;font-size:13.5px}
+  .site-hd .iconbtn{width:38px;height:38px}
+}
+
+@media (max-width:440px){
+  .site-hd .site-in{padding:0 12px}
+  .site-hd .bar{gap:6px;padding-left:14px}
+  .brand-wm{font-size:17px}
+  .site-hd .end{gap:4px}
+  .site-hd .btn{padding:0 11px;font-size:13px}
+}
+
+.lg-s{display:none}
+
+@media (max-width:374px){
+  .lg-l{display:none} .lg-s{display:inline}
+  .brand-wm{font-size:16px}
+  .site-hd .site-in{padding:0 8px}
+  .site-hd .bar{padding:0 4px 0 12px;gap:4px}
+  .site-hd .end{gap:3px}
+  .site-hd .iconbtn{width:34px}
+  .site-hd .btn{padding:0 8px;font-size:12.5px}
+  .site-hd .iconbtn{width:32px}
+}
+
+.sec{padding:76px 0;position:relative}
+
+.sec-tight{padding:54px 0}
+
+/* Pas de pastille en capitales traquées au-dessus de chaque titre : un
+   simple libellé, et seulement là où il porte une information. */
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--ink-3)}
+
+.sec-h{max-width:660px;margin-bottom:34px}
+
+.sec-h h2{font-size:clamp(26px,3.4vw,36px);line-height:1.2;margin:12px 0 12px}
+
+.sec-h p{font-size:16px;line-height:1.65;color:var(--ink-2)}
+
+.sec-h.mid{margin-left:auto;margin-right:auto;text-align:center}
+
+.hero{padding:140px 0 68px;position:relative;overflow:hidden}
+
+.hero-bg{position:absolute;inset:-60px 0 auto 0;height:720px;pointer-events:none;z-index:0;overflow:hidden}
+
+.hero-bg i{position:absolute;border-radius:50%;filter:blur(92px);display:block}
+
+.hero-bg .b1{width:580px;height:580px;background:var(--vis-500);left:-180px;top:-70px;opacity:.55}
+
+.hero-bg .b2{width:640px;height:640px;background:var(--tal-500);right:-200px;top:-130px;opacity:.38}
+
+/* Éclaircie centrale : elle prend la couleur du fond (--ground) et la
+   suit si elle change. Discrète en grand écran, plus présente quand
+   les deux halos se rejoignent derrière le texte. */
+.hero-bg .b3{width:560px;height:520px;left:50%;top:120px;margin-left:-280px;background:var(--ground);opacity:.55;filter:blur(70px)}
+
+@media (max-width:1000px){.hero-bg .b3{opacity:.8;width:520px;margin-left:-260px}}
+
+@media (max-width:620px){.hero-bg .b3{opacity:.92;width:440px;height:600px;margin-left:-220px;top:110px;filter:blur(56px)}}
+
+:root[data-theme="dark"] .hero-bg .b1{opacity:.22}
+
+:root[data-theme="dark"] .hero-bg .b2{opacity:.20}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .hero-bg .b1{opacity:.22}
+  :root:not([data-theme="light"]) .hero-bg .b2{opacity:.20}
+}
+
+/* v8 — Halos vivants : l'or et le bleu dérivent lentement, sur des
+   rythmes différents pour ne jamais se synchroniser. L'éclaircie
+   centrale (b3) reste fixe : le texte garde son fond calme. */
+.hero-bg .b1{animation:haloVis 14s ease-in-out infinite alternate;will-change:transform}
+
+.hero-bg .b2{animation:haloTal 17s ease-in-out infinite alternate;will-change:transform}
+
+@keyframes haloVis{
+  0%  {transform:translate(0,0) scale(1)}
+  33% {transform:translate(140px,70px) scale(1.12)}
+  66% {transform:translate(60px,160px) scale(.92)}
+  100%{transform:translate(170px,20px) scale(1.06)}
+}
+
+@keyframes haloTal{
+  0%  {transform:translate(0,0) scale(1)}
+  33% {transform:translate(-150px,90px) scale(.9)}
+  66% {transform:translate(-50px,180px) scale(1.12)}
+  100%{transform:translate(-170px,40px) scale(1.02)}
+}
+
+/* Les halos descendent plus bas qu'avant : un fondu en pied de calque
+   évite qu'ils ne soient coupés net au bord inférieur. */
+.hero-bg{-webkit-mask-image:linear-gradient(to bottom,#000 62%,transparent 100%);mask-image:linear-gradient(to bottom,#000 62%,transparent 100%)}
+
+@keyframes haloVisM{0%{transform:none}50%{transform:translate(70px,60px) scale(1.1)}100%{transform:translate(30px,120px) scale(.94)}}
+
+@keyframes haloTalM{0%{transform:none}50%{transform:translate(-70px,80px) scale(.92)}100%{transform:translate(-30px,130px) scale(1.08)}}
+
+@media (max-width:620px){
+  .hero-bg .b1{animation-name:haloVisM}
+  .hero-bg .b2{animation-name:haloTalM}
+}
+
+@media (prefers-reduced-motion:reduce){.hero-bg .b1,.hero-bg .b2{animation:none}}
+
+.hero-in{position:relative;z-index:1;text-align:center;max-width:940px;margin:0 auto}
+
+.hero h1{
+  font-size:clamp(32px,5.2vw,56px);line-height:1.14;letter-spacing:-.02em;margin:18px 0 20px;
+  font-weight:600;text-wrap:pretty;
+}
+
+/* Dégradé de marque sur la seconde ligne. Les deux bornes sont sombres en
+   thème clair et claires en thème sombre : le texte reste lisible partout. */
+.hero h1 .g{
+  background:linear-gradient(96deg,var(--vis-700) 4%,var(--vis-600) 26%,var(--tal-600) 78%);
+  /* En oklab, l'or rejoint le bleu sans traverser la zone grise du sRGB.
+     La première déclaration sert de repli aux navigateurs plus anciens. */
+  background:linear-gradient(96deg in oklab,var(--vis-700) 4%,var(--vis-600) 26%,var(--tal-600) 78%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+
+.hero .lead{font-size:clamp(15px,2vw,18.5px);line-height:1.62;color:var(--ink-2);max-width:60ch;margin:0 auto}
+
+.figs{display:flex;justify-content:center;flex-wrap:wrap;margin-top:44px;row-gap:22px}
+
+.fig{text-align:center;padding:0 30px;position:relative}
+
+/* Filets de séparation entre les chiffres : fins, droits, centrés. */
+.fig + .fig::before{content:"";position:absolute;left:0;top:50%;width:1px;height:34px;transform:translateY(-50%);background:var(--line-strong)}
+
+@media (max-width:640px){
+  .figs{display:grid;grid-template-columns:1fr 1fr}
+  .fig{padding:0 12px}
+  .fig:nth-child(3)::before{display:none}
+}
+
+.fig b{display:block;font-family:var(--disp);font-size:32px;font-weight:600;letter-spacing:-.015em}
+
+.fig span{font-size:12.5px;font-weight:600;color:var(--ink-3)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:30px}
+
+.feat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}
+
+@media (max-width:900px){.feat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+@media (max-width:560px){.feat{grid-template-columns:minmax(0,1fr)}}
+
+.feat-i .glyph{font-size:24px;display:block;margin-bottom:9px}
+
+.feat-i h4{font-family:var(--disp);font-size:15.5px;font-weight:700;margin-bottom:6px}
+
+.feat-i p{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+
+.price{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:16px;align-items:start}
+
+.price-c{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2xl);padding:28px;
+  display:flex;flex-direction:column;gap:14px;position:relative;
+}
+
+.price-c.pc-tal{border-color:var(--tal-500)}
+
+.price-c.pc-tal .lbl{color:var(--tal-700)}
+
+.price-c.pc-vis{border-color:var(--vis-600)}
+
+.price-c.pc-vis .lbl{color:var(--vis-700)}
+
+.price-c .amt{font-family:var(--disp);font-size:32px;font-weight:700;letter-spacing:-.04em;line-height:1}
+
+.price-c .amt small{font-size:13px;font-weight:600;color:var(--ink-3);letter-spacing:0;margin-left:3px}
+
+.site-ft{border-top:1px solid var(--line);padding:38px 0 46px;margin-top:20px}
+
+.site-ft .cols3{display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start}
+
+.site-ft .lnks{display:flex;flex-direction:column;gap:9px}
+
+.site-ft .lnks a{font-size:14px;color:var(--ink-2);text-decoration:none}
+
+.site-ft .lnks a:hover{color:var(--ink)}
+
+.ft-soc{display:flex;flex-wrap:wrap;gap:8px;max-width:232px}
+
+.site-ft .ft-soc a.fs{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;text-decoration:none;transition:transform .15s,filter .15s}
+
+.site-ft .ft-soc a.fs:hover{color:#fff;transform:translateY(-2px);filter:brightness(1.08)}
+
+.site-ft .ft-soc a.fs:focus-visible{outline:2px solid var(--a-600);outline-offset:2px}
+
+.ft-soc svg{width:19px;height:19px;fill:currentColor}
+
+.fs-facebook{background:#1877F2}
+
+.fs-linkedin{background:#0A66C2}
+
+.fs-youtube{background:#FF0000}
+
+.fs-instagram{background:linear-gradient(45deg,#F58529 0%,#DD2A7B 45%,#8134AF 75%,#515BD4 100%)}
+
+.fs-tiktok{background:linear-gradient(120deg,#25F4EE 0%,#010101 22%,#010101 78%,#FE2C55 100%)}
+
+.confetti{position:fixed;inset:0;z-index:130;pointer-events:none}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Score de compatibilité — la mécanique de matching, rendue lisible */
+.score{display:flex;align-items:center;gap:8px}
+
+.score .n{font-family:var(--mono);font-weight:600;font-size:14px;letter-spacing:-.03em}
+
+.score .bar{flex:1;min-width:48px;height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+
+.score .bar i{display:block;height:100%;border-radius:99px;transition:width .9s var(--ease)}
+
+.s-hi .n{color:var(--ok-ink)}
+
+ .s-hi .bar i{background:var(--ok)}
+
+.s-mid .n{color:var(--warn-ink)}
+
+ .s-mid .bar i{background:var(--warn)}
+
+.s-lo .n{color:var(--ink-3)}
+
+ .s-lo .bar i{background:var(--line-strong)}
+
+.score-why{display:flex;flex-direction:column;gap:7px}
+
+.score-why .w{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:12.5px;align-items:center}
+
+.score-why .w b{font-weight:600;color:var(--ink-2)}
+
+.score-why .w .pts{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+
+.score-why .w.hit b{color:var(--ink)}
+
+.score-why .w.hit .pts{color:var(--ok-ink)}
+
+/* ============================================================
+   Ajouts v3 — éléments repris de la seconde maquette et
+   retraduits dans ce système : papier, sérif, rayons courts,
+   filets, accent rare. Chaque bloc dit ce qu'il adapte.
+   ============================================================ */
+
+/* Encre sur les boutons de rôle. En sombre, le bleu s'éclaircit :
+   le blanc ne tient plus dessus, l'encre devient nuit. */
+:root{--tal-on:#fff}
+
+:root[data-theme="dark"]{--tal-on:#08283F}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tal-on:#08283F}}
+
+/* Boutons de rôle : or pour le visionnaire, bleu pour le talent. */
+/* Couleurs fixées par la marque, identiques dans les deux thèmes.
+   Fonds clairs : l'encre est sombre, jamais blanche. */
+.btn-vis{background:#FFE890;color:#3D2B00;border-color:#FFD741;--fx:rgba(255,215,65,.85)}
+
+.btn-tal{background:#95C8EF;color:#08283F;border-color:#007CD8;--fx:rgba(0,124,216,.6)}
+
+.btn .arr{transition:transform var(--t) var(--ease)}
+
+.btn:hover .arr{transform:translateX(4px)}
+
+.btn .emo{font-size:16px;line-height:1}
+
+/* Dégradé de titre bleu → or. La borne or est le palier 700 : sur le
+   papier, le 600 tombait sous 3:1. En sombre, les deux s'éclaircissent. */
+.gt{
+  background:linear-gradient(96deg,var(--tal-600) 8%,var(--vis-700) 92%);
+  background:linear-gradient(96deg in oklab,var(--tal-600) 8%,var(--vis-700) 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+
+.gold{color:var(--vis-700)}
+
+/* ---------- 1–2. Hero : titre orchestré, actions, confiance ---------- */
+/* Le seul moment chorégraphié de la page : chaque ligne monte depuis
+   un masque, se précise, puis la seconde laisse filer un reflet lent. */
+.hero h1 .ln{display:block;overflow:hidden;padding:0 .04em .1em;margin-bottom:-.1em}
+
+.hero h1 .ln > span{display:inline-block;animation:lnUp 1.1s var(--ease) both}
+
+.hero h1 .ln:nth-child(2) > span{animation-delay:.14s}
+
+@keyframes lnUp{from{transform:translateY(108%);opacity:0;filter:blur(8px)}to{transform:none;opacity:1;filter:none}}
+
+.hero h1 .ln .g{
+  background:linear-gradient(96deg,var(--vis-700) 0%,var(--vis-600) 22%,var(--tal-600) 50%,var(--vis-600) 78%,var(--vis-700) 100%);
+  background:linear-gradient(96deg in oklab,var(--vis-700) 0%,var(--vis-600) 22%,var(--tal-600) 50%,var(--vis-600) 78%,var(--vis-700) 100%);
+  background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:lnUp 1.1s .14s var(--ease) both, sheen 10s 1.4s linear infinite;
+}
+
+@keyframes sheen{to{background-position:-200% 0}}
+
+.hero .eyebrow{animation:rise .7s .05s var(--ease) both}
+
+.hero .lead{animation:rise .8s .45s var(--ease) both}
+
+.hero-ctas{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:32px;animation:rise .8s .6s var(--ease) both}
+
+.hero-ctas .btn{min-width:200px}
+
+.trust-l{
+  display:flex;align-items:center;justify-content:center;gap:12px;margin-top:24px;
+  font-size:13.5px;color:var(--ink-3);animation:rise .8s .75s var(--ease) both;flex-wrap:wrap;
+}
+
+.stack{display:inline-flex}
+
+.stack i{
+  width:30px;height:30px;border-radius:50%;margin-left:-9px;display:grid;place-items:center;
+  font-style:normal;font-family:var(--mono);font-weight:600;font-size:12px;
+  box-shadow:0 0 0 2px var(--ground);
+}
+
+.stack i:first-child{margin-left:0}
+
+.stack .sv{background:var(--vis-500);color:#3D2B00}
+
+.stack .st{background:var(--tal-600);color:var(--tal-on)}
+
+.stack .sp{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong)}
+
+.hero .figs{animation:rise .8s .9s var(--ease) both}
+
+@media (max-width:520px){.hero-ctas .btn{flex:1 1 100%}}
+
+/* ---------- 3. Bande des secteurs ----------
+   Pas de fond nuit : le papier, deux filets, et un fondu aux bords. */
+.mq{
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  background:var(--surface);padding:18px 0;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+}
+
+.mq-track{display:flex;width:max-content;animation:mq 46s linear infinite}
+
+.mq:hover .mq-track{animation-play-state:paused}
+
+.mq-track span{
+  display:inline-flex;align-items:center;gap:44px;padding-right:44px;white-space:nowrap;
+  font-family:var(--disp);font-size:17px;font-weight:600;color:var(--ink-3);letter-spacing:-.01em;
+}
+
+.mq-track span::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--vis-500)}
+
+.mq-track span:nth-child(even)::after{background:var(--tal-500)}
+
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- 5. Étapes illustrées ---------- */
+.stp-g{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+@media (max-width:900px){.stp-g{grid-template-columns:1fr}}
+
+.stp{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+  padding:24px;display:flex;flex-direction:column;gap:10px;outline:none;
+  transition:transform var(--t) var(--ease),box-shadow var(--t) var(--ease),border-color var(--t-fast);
+}
+
+.stp:hover,.stp:focus-visible{transform:translateY(-4px);box-shadow:var(--shadow-2);border-color:var(--line-strong)}
+
+.stp .n{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--ink-3)}
+
+.stp h3{font-size:19px}
+
+.stp p{font-size:14px;line-height:1.6;color:var(--ink-2)}
+
+.mini{
+  margin-top:auto;height:170px;border-radius:var(--r-lg);background:var(--surface-2);
+  border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;position:relative;
+}
+
+.stp .mini{margin-top:auto}
+
+.stp p{padding-bottom:14px}
+
+/* Scène 1 — les deux casquettes */
+.pk{display:flex;gap:10px}
+
+.pk > div{
+  width:94px;height:110px;border-radius:var(--r-lg);padding:11px;font-size:12px;font-weight:600;line-height:1.3;
+  display:flex;flex-direction:column;justify-content:space-between;transition:transform var(--t-slow) var(--ease);
+}
+
+.pk .py{background:linear-gradient(160deg,var(--vis-50),var(--vis-100));color:var(--vis-700);border:1px solid var(--vis-200)}
+
+.pk .pb{background:linear-gradient(160deg,#007CD8,#035587);color:#fff;transform:scale(1.06);box-shadow:var(--shadow-2)}
+
+.pk .ck{width:19px;height:19px;border-radius:50%;border:1.5px solid currentColor;display:grid;place-items:center}
+
+.pk .pb .ck{background:var(--ok);border-color:var(--ok)}
+
+.pk .ck svg{width:11px;height:11px}
+
+.stp:hover .pk .py,.stp:focus-visible .pk .py{transform:scale(1.06)}
+
+.stp:hover .pk .pb,.stp:focus-visible .pk .pb{transform:scale(1)}
+
+/* Scène 2 — l'anneau de complétion */
+.ringw{position:relative;display:grid;place-items:center}
+
+.ring{width:118px;height:118px}
+
+.ring circle{fill:none;stroke-width:10}
+
+.ring .bg{stroke:var(--surface-3)}
+
+.ring .fg{stroke:url(#tmRg);stroke-linecap:round;stroke-dasharray:314.16;stroke-dashoffset:298.4;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1.8s var(--ease)}
+
+.ring.done .fg{stroke-dashoffset:22}
+
+/* Jauge de complétion : la couleur du rôle, du foncé au clair. Jamais un mélange bleu et or. */
+.ring .s0{stop-color:#0A5C99}
+
+.ring .s1{stop-color:#8DC4EE}
+
+:root[data-theme="dark"] .ring .s0{stop-color:#2C8FD3}
+
+:root[data-theme="dark"] .ring .s1{stop-color:#9CD1FA}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ring .s0{stop-color:#2C8FD3}:root:not([data-theme="light"]) .ring .s1{stop-color:#9CD1FA}}
+
+.ringw b{position:absolute;font-family:var(--mono);font-weight:600;font-size:22px;letter-spacing:-.03em}
+
+/* Scène 3 — le dévoilement */
+.unl{display:flex;flex-direction:column;align-items:center;gap:9px}
+
+.unl .ph{width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FFE890,#C9941A);filter:blur(5px);transition:filter var(--t-slow) var(--ease)}
+
+.unl .nm{font-size:17px;font-weight:600;height:24px;display:flex;align-items:center}
+
+.unl .is-mask{font-family:var(--mono);letter-spacing:.12em}
+
+.unl .is-real{display:none;font-family:var(--disp)}
+
+.unl .lk{font-size:12px;color:var(--ink-3);display:flex;gap:5px;align-items:center}
+
+.unl .lk svg.ic{width:13px;height:13px}
+
+.stp:hover .unl .ph,.stp:focus-visible .unl .ph{filter:none}
+
+.stp:hover .unl .is-mask,.stp:focus-visible .unl .is-mask{display:none}
+
+.stp:hover .unl .is-real,.stp:focus-visible .unl .is-real{display:inline}
+
+/* ---------- 4. Bascule Visionnaire / Talent ----------
+   La section porte sa propre couleur de rôle, indépendante du
+   rôle actif du visiteur : --ra et ses paliers. */
+.roles{--ra:var(--vis-500);--ra-on:#3D2B00;--ra-50:var(--vis-50);--ra-100:var(--vis-100);--ra-200:var(--vis-200);--ra-700:var(--vis-700)}
+
+.roles[data-r="tal"]{--ra:var(--tal-600);--ra-on:var(--tal-on);--ra-50:var(--tal-50);--ra-100:var(--tal-100);--ra-200:var(--tal-200);--ra-700:var(--tal-700)}
+
+.roles[data-r="vis"] [data-show="tal"],.roles[data-r="tal"] [data-show="vis"]{display:none}
+
+.roles [data-show].fadein{animation:rise var(--t-slow) var(--ease) both}
+
+.rsw{
+  position:relative;display:inline-grid;grid-template-columns:1fr 1fr;padding:4px;margin-bottom:28px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+}
+
+.rsw button{
+  position:relative;z-index:1;height:42px;padding:0 24px;border-radius:var(--r-md);
+  font-weight:600;font-size:14.5px;color:var(--ink-3);transition:color var(--t);
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+
+.rsw button[aria-pressed="true"]{color:var(--ra-on)}
+
+.rsw .knob{
+  position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:var(--r-md);
+  background:var(--ra);transition:transform var(--t-slow) var(--ease),background var(--t);
+}
+
+.roles[data-r="tal"] .knob{transform:translateX(100%)}
+
+.rgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:stretch}
+
+@media (max-width:900px){.rgrid{grid-template-columns:1fr}}
+
+.rpanel{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2xl);
+  padding:clamp(24px,4vw,40px);position:relative;overflow:hidden;
+}
+
+.rpanel > *{position:relative}
+
+.rpanel h3{font-size:clamp(24px,2.8vw,32px);line-height:1.18;margin-bottom:12px}
+
+.rpanel h3 em{font-style:normal;color:var(--ra-700);display:block}
+
+.rpanel > div > p{color:var(--ink-2);max-width:40ch;font-size:15px}
+
+.feats{display:grid;gap:10px;margin-top:24px}
+
+.feats li{
+  display:flex;gap:13px;align-items:flex-start;padding:13px 15px;border-radius:var(--r-lg);
+  background:var(--ra-50);border:1px solid var(--ra-100);transition:background var(--t),border-color var(--t);
+}
+
+.feats li i{
+  flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--ra);color:var(--ra-on);
+  display:grid;place-items:center;font-style:normal;font-family:var(--mono);font-size:12px;font-weight:600;
+  transition:background var(--t),color var(--t);
+}
+
+.feats b{display:block;font-weight:600;font-size:14.5px}
+
+.feats span{font-size:13.5px;color:var(--ink-2);line-height:1.5}
+
+.rside{display:grid;gap:16px;grid-template-rows:1fr auto}
+
+.rquote{
+  border-radius:var(--r-2xl);padding:28px;position:relative;overflow:hidden;
+  background:linear-gradient(150deg,var(--ra-100),var(--surface) 78%);
+  border:1px solid var(--ra-200);
+  transition:background var(--t),border-color var(--t);
+  display:flex;flex-direction:column;
+}
+
+.rquote .qi{color:var(--ra-700);margin-bottom:12px}
+
+.rquote .qi svg.ic{width:26px;height:26px}
+
+.rquote p{font-family:var(--disp);font-size:clamp(20px,2.4vw,27px);font-weight:500;line-height:1.35;letter-spacing:-.01em}
+
+.rquote small{display:block;margin-top:auto;padding-top:16px;font-size:13px;color:var(--ink-3);font-family:var(--disp);font-style:italic}
+
+.rcred{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2xl);padding:24px}
+
+.rcred .num{font-family:var(--disp);font-size:42px;font-weight:600;letter-spacing:-.03em;line-height:1.1;color:var(--ra-700);margin-top:6px}
+
+.rcred .num small{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink-3);letter-spacing:0;margin-left:4px}
+
+.rcred .gauge i.on{background:var(--ra)}
+
+.rcred p{font-size:13px;color:var(--ink-3);line-height:1.5}
+
+/* ---------- 6. Confidentialité progressive ---------- */
+.pgrid{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center}
+
+@media (max-width:900px){.pgrid{grid-template-columns:1fr;gap:32px}}
+
+.lyrs{display:grid;gap:10px}
+
+.lyr{
+  display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:var(--r-lg);
+  border:1px solid var(--line);background:var(--surface);
+  transition:background var(--t-slow),border-color var(--t-slow);
+}
+
+.lyr i{
+  flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-md);display:grid;place-items:center;
+  font-style:normal;font-family:var(--mono);font-weight:600;font-size:13px;
+  background:var(--surface-3);color:var(--ink-3);transition:background var(--t-slow),color var(--t-slow);
+}
+
+.lyr b{display:block;font-weight:600;font-size:14.5px}
+
+.lyr span{font-size:13px;color:var(--ink-2);line-height:1.45}
+
+.lyr.lit{border-color:var(--vis-300);background:var(--vis-50)}
+
+.lyr.lit i{background:var(--vis-500);color:#3D2B00}
+
+.demo{
+  position:relative;border-radius:var(--r-2xl);padding:22px;border:1px solid var(--line);
+  background:linear-gradient(150deg,var(--tal-50),var(--surface) 55%,var(--vis-50));
+}
+
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:22px;box-shadow:var(--shadow-2)}
+
+.tcard .top{display:flex;align-items:center;gap:16px}
+
+.tcard .ph{
+  width:68px;height:68px;border-radius:50%;flex:0 0 auto;
+  background:radial-gradient(circle at 40% 35%,#BFDEF5 0,#007CD8 55%,#035587 100%);
+  filter:blur(7px);transition:filter .9s var(--ease);
+}
+
+.tcard .nm{font-weight:600;font-size:18px;line-height:1.3}
+
+.tcard .nm .is-mask{font-family:var(--mono);letter-spacing:.14em}
+
+.tcard .nm small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-3);letter-spacing:0;font-family:var(--sans)}
+
+.tcard dl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 14px}
+
+.tcard dl div{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 11px;min-width:0}
+
+.tcard dt{font-size:11.5px;font-weight:600;color:var(--ink-3)}
+
+.tcard dd{margin:1px 0 0;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.tcard dd.mono{font-size:13px;letter-spacing:-.02em}
+
+.chip-tal{background:var(--tal-50);color:var(--tal-700);box-shadow:inset 0 0 0 1px var(--tal-200)}
+
+.tcard .lockrow{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+  border-top:1px dashed var(--line-strong);padding-top:14px;margin-top:16px;font-size:13px;color:var(--ink-3);
+}
+
+.tcard .lockrow > span{display:inline-flex;align-items:center;gap:6px}
+
+.demo:not(.matched) .is-real,.demo:not(.matched) .contact{display:none!important}
+
+.demo.matched .tcard .ph{filter:none}
+
+.demo.matched .is-mask,.demo.matched .locked{display:none!important}
+
+.demo.matched .is-real{display:inline}
+
+.demo.matched small.is-real{display:block}
+
+.demo.matched .contact{display:inline-flex;color:var(--ok-ink);font-weight:600}
+
+.demo .actions{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;align-items:center}
+
+.demo .hint{font-size:13px;color:var(--ink-3)}
+
+@media (max-width:520px){
+  .tcard dl{grid-template-columns:1fr 1fr}
+  .tcard dl div:first-child{grid-column:span 2}
+  .tcard .nm .is-mask{letter-spacing:.06em}
+  .tcard .ph{width:56px;height:56px}
+}
+
+.tcard .nm{min-width:0}
+
+.tcard .nm .is-mask{white-space:nowrap}
+
+/* ---------- 7. Avant / après ---------- */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+@media (max-width:760px){.cmp{grid-template-columns:1fr}}
+
+.cmp > div{border-radius:var(--r-2xl);padding:clamp(24px,3.5vw,36px);position:relative;overflow:hidden}
+
+.cmp .before{background:var(--surface);border:1px solid var(--line)}
+
+.cmp .after{
+  background:linear-gradient(155deg,var(--tal-100),var(--tal-50) 50%,var(--surface));
+  border:1px solid var(--tal-200);
+}
+
+.cmp .after::after{
+  content:"";position:absolute;right:-110px;top:-110px;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,var(--vis-300),transparent 65%);opacity:.55;pointer-events:none;
+}
+
+.cmp h3{font-size:21px;margin-bottom:20px;position:relative;z-index:1}
+
+.cmp ul{display:grid;gap:13px;position:relative;z-index:1}
+
+.cmp li{display:flex;gap:12px;font-size:15px;line-height:1.55;align-items:flex-start}
+
+.cmp li .b{flex:0 0 auto;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;margin-top:1px}
+
+.cmp li .b svg{width:11px;height:11px}
+
+.cmp .before li{color:var(--ink-2)}
+
+.cmp .before li .b{background:var(--surface-3);color:var(--ink-4)}
+
+.cmp .after li{color:var(--ink)}
+
+.cmp .after li .b{background:var(--vis-500);color:#3D2B00}
+
+/* Montée à l'entrée — réservée à ces deux cartes. */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+
+.rv.in{opacity:1;transform:none}
+
+.rv.d2{transition-delay:.12s}
+
+/* ---------- 8. FAQ en deux colonnes ---------- */
+.faqg{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px;align-items:start}
+
+@media (max-width:900px){.faqg{grid-template-columns:1fr;gap:18px}}
+
+.faqg .sec-h{margin-bottom:0;position:sticky;top:96px}
+
+@media (max-width:900px){.faqg .sec-h{position:static}}
+
+.faqg .sec-h h2{font-size:clamp(30px,4vw,46px);line-height:1.1}
+
+.fq{border-bottom:1px solid var(--line)}
+
+.fq summary{
+  list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;
+  padding:20px 0;font-weight:600;font-size:16.5px;line-height:1.4;
+}
+
+.fq summary::-webkit-details-marker{display:none}
+
+.fq .pm{
+  flex:0 0 auto;width:32px;height:32px;border-radius:50%;border:1px solid var(--line-strong);
+  display:grid;place-items:center;position:relative;color:var(--ink);
+  transition:background var(--t),border-color var(--t),transform var(--t-slow) var(--ease);
+}
+
+.fq .pm::before,.fq .pm::after{content:"";position:absolute;width:12px;height:2px;background:currentColor;border-radius:2px}
+
+.fq .pm::after{transform:rotate(90deg);transition:transform var(--t-slow) var(--ease)}
+
+.fq summary:hover .pm{background:var(--surface-3)}
+
+.fq[open] .pm{background:var(--ink);border-color:var(--ink);color:var(--ground);transform:rotate(180deg)}
+
+.fq[open] .pm::after{transform:rotate(0)}
+
+.fq p{font-size:14.5px;line-height:1.7;color:var(--ink-2);padding:0 48px 22px 0;max-width:64ch}
+
+@media (max-width:520px){.fq p{padding-right:0}}
+
+/* ---------- 9. Appel final ----------
+   Les halos du hero reviennent fermer la page : pas d'aplat, un écho. */
+.fin{position:relative;overflow:hidden;text-align:center;padding:clamp(80px,11vw,130px) 0}
+
+.fin-glow{position:absolute;inset:0;pointer-events:none;-webkit-mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
+
+.fin-glow i{position:absolute;top:50%;border-radius:50%;filter:blur(96px);display:block}
+
+.fin-glow .b1{width:560px;height:460px;left:calc(50% - 560px);background:var(--vis-500);opacity:.45;animation:breathe 9s ease-in-out infinite}
+
+.fin-glow .b2{width:600px;height:480px;left:50%;background:var(--tal-500);opacity:.32;animation:breathe 11s ease-in-out infinite reverse}
+
+@keyframes breathe{0%,100%{transform:translateY(-50%) scale(1)}50%{transform:translateY(-50%) scale(1.14)}}
+
+:root[data-theme="dark"] .fin-glow .b1{opacity:.22}
+
+:root[data-theme="dark"] .fin-glow .b2{opacity:.22}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .fin-glow .b1{opacity:.22}
+  :root:not([data-theme="light"]) .fin-glow .b2{opacity:.22}
+}
+
+.fin .site-in{position:relative}
+
+.fin h2{font-size:clamp(32px,5.4vw,64px);line-height:1.1;letter-spacing:-.022em;max-width:21ch;margin:16px auto 20px}
+
+.fin p{font-size:17px;line-height:1.65;color:var(--ink-2);max-width:36em;margin:0 auto}
+
+.fin .hero-ctas{margin-top:34px;animation:none}
+
+@media (max-width:520px){.fin-glow i{width:340px!important;height:320px!important}.fin-glow .b1{left:calc(50% - 300px)}.fin-glow .b2{left:calc(50% - 40px)}}
+
+/* Fusée du libellé de hero : légèrement redressée, à l'or de marque. */
+.hero-ey{display:inline-block;text-wrap:balance;text-align:center}
+
+@media (max-width:520px){.hero-ey{max-width:30ch}}
+
+.hero-ey svg.ic{width:17px;height:17px;color:var(--vis-700);transform:rotate(-15deg);vertical-align:-3px;margin-right:6px;display:inline-block}
+
+/* Illustrations des fiches projet + voile or du rôle visionnaire. */
+.pcard .cover.art{display:block;background:#F2EFE7}
+
+.pcard .cover.art .art-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+.pcard .cover.art::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,215,65,.26),rgba(255,215,65,.06) 62%,rgba(255,215,65,0));mix-blend-mode:multiply}
+
+.pcard .cover.art .tags{z-index:1}
+
+.pcard .cover .likes{z-index:1;display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(255,255,255,.92);color:#26323F;font-family:var(--mono)}
+
+.pcard .offer{font-size:12px;font-weight:600;color:var(--ink-3)}
+
+/* ---------- v5 ---------- */
+/* Bouton « Commencer » : dégradé or → bleu, qui glisse au survol. */
+.btn-go{
+  background:linear-gradient(100deg,#FFD741 0%,#007CD8 50%,#FFD741 100%);
+  background-size:200% 100%;background-position:0 0;
+  color:#FFFFFF;border-color:transparent;
+  /* Ombre légère : détache le blanc de la partie or du dégradé. */
+  text-shadow:0 1px 2px rgba(20,24,31,.55),0 0 8px rgba(20,24,31,.28);
+  transition:background-position .6s var(--ease),filter var(--t-fast);
+}
+
+.btn-go:hover{background-position:100% 0}
+
+/* Boutons de rôle animés (hero, appel final) — repris de la seconde
+   maquette. Exception assumée à la règle « pas d'ombre sur les boutons ». */
+.btn-fx{position:relative;overflow:hidden;isolation:isolate;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,filter var(--t-fast)}
+
+.btn-fx::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.6) 50%,transparent 70%);
+  transform:translateX(-120%);transition:transform .7s var(--ease)}
+
+.btn-fx:hover{transform:translateY(-2px);box-shadow:0 14px 30px -12px var(--fx)}
+
+.btn-fx:hover::after{transform:translateX(120%)}
+
+/* Soulèvement seul, pour le bouton de la carte citation. */
+.btn-lift{transition:transform .3s var(--ease),filter var(--t-fast)}
+
+.btn-lift:hover{transform:translateY(-2px)}
+
+.rq-cta{margin-top:22px}
+
+/* ---------- Nos convictions ---------- */
+.conv-g{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:start}
+
+@media (max-width:900px){.conv-g{grid-template-columns:1fr;gap:28px}}
+
+.conv-t{display:flex;flex-direction:column;gap:16px;max-width:62ch}
+
+.conv-t .eyebrow{margin-bottom:2px}
+
+.conv-t p{font-size:16px;line-height:1.72;color:var(--ink-2)}
+
+.conv-t .conv-lead{font-family:var(--disp);font-size:clamp(22px,2.6vw,30px);line-height:1.3;font-weight:600;color:var(--ink);letter-spacing:-.012em;text-wrap:balance}
+
+.conv-t .conv-b{font-weight:600;color:var(--ink)}
+
+.conv-t .conv-end{font-family:var(--disp);font-style:italic;font-size:19px;color:var(--ink);padding-left:16px;border-left:2px solid var(--vis-500)}
+
+.conv-w{
+  position:sticky;top:104px;min-height:320px;border-radius:var(--r-2xl);border:1px solid var(--line);
+  background:radial-gradient(120% 90% at 0% 0%,var(--vis-50),transparent 60%),radial-gradient(120% 90% at 100% 100%,var(--tal-50),transparent 60%),var(--surface);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:32px;overflow:hidden;
+}
+
+@media (max-width:900px){.conv-w{position:relative;top:0;min-height:300px}}
+
+.wr{display:grid;place-items:center;text-align:center;width:100%}
+
+.wi{
+  grid-area:1/1;display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;transform:translateY(34%);filter:blur(10px);
+  transition:opacity .5s var(--ease),transform .5s var(--ease),filter .5s var(--ease);
+}
+
+.wi.on{opacity:1;transform:none;filter:none}
+
+.wi.out{opacity:0;transform:translateY(-34%);filter:blur(10px)}
+
+.wi .we{font-size:clamp(26px,2.6vw,34px);line-height:1;letter-spacing:.08em}
+
+.wi .ww{
+  font-family:var(--disp);font-weight:600;letter-spacing:-.025em;line-height:1.1;
+  font-size:clamp(40px,5.4vw,70px);padding:0 .06em .08em;
+  background:linear-gradient(96deg,var(--tal-600) 5%,var(--vis-700) 95%);
+  background:linear-gradient(96deg in oklab,var(--tal-600) 5%,var(--vis-700) 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+
+.wi .wt{font-family:var(--disp);font-style:italic;font-size:clamp(15px,1.4vw,18px);line-height:1.45;color:var(--ink-2);max-width:34ch;text-wrap:balance}
+
+.wr-bars{display:flex;gap:6px}
+
+.wr-bars i{width:28px;height:4px;border-radius:2px;background:var(--line-strong);transition:background .4s var(--ease),width .4s var(--ease)}
+
+.wr-bars i.on{width:44px;background:linear-gradient(90deg,var(--tal-600),var(--vis-600))}
+
+@media (prefers-reduced-motion:reduce){
+  .wr{display:flex;flex-direction:column;gap:22px}
+  .wi{opacity:1;transform:none;filter:none}
+  .wi .ww{font-size:clamp(32px,4vw,48px)}
+  .wr-bars{display:none}
+}
+
+/* ---------- Pied de page blanc (thème clair uniquement) ---------- */
+.site-ft{background:#FFFFFF;margin-top:0}
+
+:root[data-theme="dark"] .site-ft{background:var(--ground)}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .site-ft{background:var(--ground)}}
+
+/* ---------- v7 : menu burger + fenêtres pop-up ---------- */
+/* Burger : deux traits inégaux qui s'accordent au survol et se
+   croisent en ✕ à l'ouverture, en prenant le dégradé de marque. */
+.burger{display:none;position:relative;width:42px;height:42px;border-radius:var(--r-pill);flex:0 0 auto;
+  background:var(--surface);border:1px solid var(--line);transition:background var(--t-fast),border-color var(--t-fast)}
+
+.burger:hover{background:var(--surface-3)}
+
+.burger span{position:absolute;right:11px;height:2px;border-radius:2px;background:var(--ink);
+  transition:transform .45s cubic-bezier(.34,1.56,.64,1),width .35s var(--ease),top .35s var(--ease),background .3s}
+
+.burger span:nth-child(1){top:16px;width:20px}
+
+.burger span:nth-child(2){top:24px;width:12px}
+
+.burger:hover span:nth-child(2){width:20px}
+
+.burger.x{border-color:var(--line-strong)}
+
+.burger.x span{top:20px;width:20px;background:linear-gradient(90deg,var(--vis-600),var(--tal-600))}
+
+.burger.x span:nth-child(1){transform:rotate(45deg)}
+
+.burger.x span:nth-child(2){transform:rotate(-45deg)}
+
+@media (max-width:1060px){
+  .burger{display:block}
+  .site-hd .hd-cta{display:none}
+  .site-hd .end{gap:6px}
+}
+
+@media (max-width:374px){.brand-wm{font-size:16px}.burger{width:38px;height:38px}.burger span{right:9px}.burger span:nth-child(1){top:14px}.burger span:nth-child(2){top:22px}.burger.x span{top:18px}}
+
+/* Menu ouvert : la capsule passe au-dessus du voile, son burger devient la croix. */
+body.menu-open .site-hd{z-index:130}
+
+.ov{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:16px}
+
+.ov[hidden]{display:none!important}
+
+.ov-bg{position:absolute;inset:0;
+  background:color-mix(in srgb,var(--ground) 42%,transparent);
+  -webkit-backdrop-filter:blur(0) saturate(100%);backdrop-filter:blur(0) saturate(100%);opacity:0;
+  transition:opacity .3s var(--ease),backdrop-filter .4s var(--ease),-webkit-backdrop-filter .4s var(--ease)}
+
+.ov.on .ov-bg{opacity:1;-webkit-backdrop-filter:blur(12px) saturate(120%);backdrop-filter:blur(12px) saturate(120%)}
+
+.ov-win{position:relative;width:min(460px,100%);max-height:calc(100dvh - 32px);overflow:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2xl);box-shadow:var(--shadow-3);
+  padding:28px;opacity:0;transform:translateY(14px) scale(.96);
+  transition:opacity .32s var(--ease),transform .42s cubic-bezier(.2,.9,.25,1.05)}
+
+.ov.on .ov-win{opacity:1;transform:none}
+
+/* Le menu se pose sous la capsule. */
+.ov-win.ov-menu{align-self:start;margin-top:calc(84px + env(safe-area-inset-top,0px));width:min(520px,100%);padding:14px 14px 18px}
+
+.mm{display:flex;flex-direction:column}
+
+.mm a{display:flex;align-items:center;gap:14px;padding:15px 14px;border-radius:var(--r-lg);text-decoration:none;color:var(--ink);
+  opacity:0;transform:translateY(10px);transition:background var(--t-fast),opacity .4s var(--ease),transform .45s var(--ease);
+  transition-delay:0s,calc(.06s + var(--i)*.055s),calc(.06s + var(--i)*.055s)}
+
+.ov.on .mm a{opacity:1;transform:none}
+
+.mm a + a{border-top:1px solid var(--line)}
+
+.mm a:hover{background:var(--surface-2);text-decoration:none}
+
+.mm .k{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink-4);width:22px}
+
+.mm .l{font-family:var(--disp);font-size:clamp(22px,5.4vw,28px);font-weight:600;letter-spacing:-.015em;line-height:1.2;flex:1}
+
+.mm svg.ic{width:18px;height:18px;color:var(--ink-3);transition:transform var(--t) var(--ease),color var(--t)}
+
+.mm a:hover svg.ic{transform:translateX(4px);color:var(--ink)}
+
+.mm-cta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding:14px 4px 0;border-top:1px solid var(--line);
+  opacity:0;transform:translateY(10px);transition:opacity .4s var(--ease) .3s,transform .45s var(--ease) .3s}
+
+.ov.on .mm-cta{opacity:1;transform:none}
+
+.mm-cta .btn{border-radius:var(--r-pill)}
+
+@media (max-width:380px){.mm-cta{grid-template-columns:1fr}}
+
+/* Fenêtre d'inscription */
+.ov-x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%}
+
+.ov-t{font-size:clamp(24px,4vw,28px);line-height:1.2;margin:4px 40px 8px 0}
+
+.ov-s{font-size:14.5px;line-height:1.6;color:var(--ink-2);margin-bottom:20px}
+
+.rpk{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+
+.rp{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:var(--r-lg);text-align:left;
+  border:1px solid var(--line);background:var(--surface);transition:border-color var(--t-fast),background var(--t-fast),transform var(--t) var(--ease)}
+
+.rp:hover{background:var(--surface-2)}
+
+.rp .emo{font-size:20px;margin-bottom:6px}
+
+.rp b{font-size:15px;font-weight:600}
+
+.rp span:last-child{font-size:12.5px;color:var(--ink-3)}
+
+.rp-vis[aria-pressed="true"]{border-color:#FFD741;background:#FFF6D1;box-shadow:inset 0 0 0 1px #FFD741}
+
+.rp-tal[aria-pressed="true"]{border-color:#007CD8;background:#E4F1FB;box-shadow:inset 0 0 0 1px #007CD8}
+
+.rp[aria-pressed="true"] b,.rp[aria-pressed="true"] span:last-child{color:#1F1E1B}
+
+.ov-f{display:flex;flex-direction:column;gap:14px}
+
+.ov-n{font-size:12.5px;color:var(--ink-3);text-align:center;margin-top:14px}
+
+.ov-sw{font-size:13.5px;color:var(--ink-2);text-align:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+
+.ov-ok{display:flex;flex-direction:column;align-items:center;text-align:center;padding:10px 0 4px}
+
+.ov-ok .ov-t{margin:14px 0 8px}
+
+.okc{width:52px;height:52px;border-radius:50%;background:var(--ok-bg);color:var(--ok-ink);display:grid;place-items:center;animation:pop .4s var(--ease) both}
+
+.okc svg{width:24px;height:24px}

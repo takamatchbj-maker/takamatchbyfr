@@ -1,0 +1,72 @@
+<!doctype html><html lang="fr" data-page="app"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+<title>TakaMatch</title>
+<meta name="description" content="TakaMatch, l'outil : accueil, explorer, connexions, Atelier, messages, fiche, paramètres et support.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<!-- ============================================================
+     TMGuard — filet de sécurité commun à toutes les pages TakaMatch
+     · écran de chargement tant que la page n'est pas prête
+     · message clair si la page plante (au lieu d'un écran blanc)
+     · bandeau hors connexion
+     · TMGuard.fetch : délai maximum, nouvelles tentatives, messages lisibles
+     Pour brancher un outil de suivi d'erreurs plus tard (Sentry…) :
+     TMGuard.onError = err => { ... }
+     ============================================================ -->
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages/app.css">
+<script src="js/main.js"></script>
+</head><body>
+<div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="tmRgTal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--gt2)"/><stop offset="1" style="stop-color:var(--gt1)"/></linearGradient>
+    <linearGradient id="tmRgVis" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--gv2)"/><stop offset="1" style="stop-color:var(--gv1)"/></linearGradient>
+  </defs>
+</svg>
+
+<div class="app on" id="app">
+  <header class="topbar" id="topbar">
+    <button class="iconbtn iconbtn-lg hide-d" data-act="side-toggle" aria-label="Ouvrir le menu" aria-controls="side">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h16"/></svg>
+    </button>
+    <a class="brand" href="#" data-act="go" data-v="accueil" aria-label="TakaMatch, accueil"><img class="brand-logo" src="assets/images/logo-principal.svg" alt="TakaMatch"></a>
+    <button class="btn btn-ghost btn-sm top-search" data-act="cmdk">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      Rechercher ou aller à…<kbd>⌘K</kbd>
+    </button>
+    <div style="flex:1"></div>
+    <button id="projBtn" class="proj-btn" data-act="projmenu" aria-haspopup="menu" hidden></button>
+    <button class="iconbtn iconbtn-lg" data-act="notifs" id="bellBtn" aria-label="Notifications" style="position:relative"></button>
+    <button class="iconbtn iconbtn-lg" data-act="theme" id="themeBtn" aria-label="Changer de thème"></button>
+    <button id="meBtn" data-act="memenu" class="row" aria-haspopup="menu">
+      <span class="av av-28" id="meAv"></span>
+      <span class="hide-m" style="text-align:left;line-height:1.2">
+        <span style="display:block;font-weight:600;font-size:13px" id="meName">—</span>
+        <span style="display:block;font-size:11.5px;color:var(--ink-3)" id="meRole">—</span>
+      </span>
+      <svg class="ic hide-m" style="width:15px;height:15px;color:var(--ink-3)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+  </header>
+  <div class="offline" id="offline" hidden>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 22 20H2z"/><path d="M12 9.5v4.5M12 17.3h.01"/></svg>
+    Tu es hors ligne. Tes messages et invitations partiront dès le retour du réseau.
+  </div>
+
+  <div class="shell">
+    <nav class="side scroll" id="side" aria-label="Navigation de l'application"></nav>
+    <main class="main scroll" id="main" tabindex="-1"></main>
+  </div>
+
+  <nav class="tabbar" id="tabbar" aria-label="Navigation principale"></nav>
+</div>
+
+<div id="layer"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="js/pages/app.js"></script>
+</body></html>

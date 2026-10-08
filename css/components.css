@@ -1,0 +1,178 @@
+/* ============================================================
+   TakaMatch — composants
+   Boutons, champs, cartes, pastilles, modales, toasts… partagés par les 3 pages.
+   ============================================================ */
+
+/* Thème sombre : le pendant nocturne du papier, pas un inverse mécanique. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#1A1815; --surface:#22201C; --surface-2:#282521; --surface-3:#302C27;
+    --line:#37332D; --line-strong:#4A453D;
+    --ink:#F2EFE8; --ink-2:#BDB7AC; --ink-3:#A49E92; --ink-4:#8B857A;
+    --shadow-2:0 1px 2px rgba(0,0,0,.4),0 8px 20px -10px rgba(0,0,0,.6);
+    --shadow-3:0 4px 10px -4px rgba(0,0,0,.45),0 22px 48px -16px rgba(0,0,0,.7);
+    --shadow-pop:0 10px 30px -10px rgba(0,0,0,.65);
+    --tal-50:#14252F; --tal-100:#1A3244; --tal-200:#25475F; --tal-300:#3A6E92;
+    --tal-500:#3FA3EE; --tal-600:#5CB4F5; --tal-700:#9CD1FA;
+    --vis-50:#2A2308; --vis-100:#3B300C; --vis-200:#514111; --vis-300:#735C17;
+    --vis-500:#FFD741; --vis-600:#FFD741; --vis-700:#F0CE6F;
+    --ok:#7FA886; --ok-bg:#1C2A1E; --ok-ink:#9DC2A3;
+    --warn:#D2A44E; --warn-bg:#2C2312; --warn-ink:#E0BC77;
+    --bad:#D4796D; --bad-bg:#2E1B18; --bad-ink:#E5A196; --on-bad:#2E1512;
+    --a-on:#08283F;
+    --a-edge:var(--tal-600);
+  }
+  :root:not([data-theme="light"])[data-role="vis"]{ --a-on:#2A2308; --a-edge:var(--vis-300); }
+}
+
+.tnum{font-variant-numeric:tabular-nums}
+
+.mono{font-family:var(--mono)}
+
+/* Taille d'icône par défaut : sans elle, un SVG sans width remplit son conteneur. */
+svg.ic{width:16px;height:16px;flex:0 0 auto;display:inline-block;vertical-align:-3px}
+
+.chip svg.ic, .hint svg.ic, .stat .d svg.ic, .momo svg.ic{width:13px;height:13px;vertical-align:-2px}
+
+.lbl svg.ic{width:14px;height:14px}
+
+h1 svg.ic, h2 svg.ic, h3 svg.ic{width:18px;height:18px}
+
+/* ---------- Scrollbars ---------- */
+.scroll{scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
+
+.scroll::-webkit-scrollbar{width:10px;height:10px}
+
+.btn:disabled{opacity:.42;cursor:not-allowed}
+
+.btn-a:hover:not(:disabled){filter:brightness(.94)}
+
+.btn-danger:hover:not(:disabled){filter:brightness(.96)}
+
+.btn-block{width:100%}
+
+.btn .ic{width:16px;height:16px;flex:0 0 auto}
+
+.btn-sm .ic{width:14px;height:14px}
+
+.field{display:flex;flex-direction:column;gap:6px}
+
+.opt .box svg{width:11px;height:11px;stroke:var(--a-on);opacity:0;transition:opacity var(--t-fast)}
+
+.opt[aria-pressed="true"] .box svg{opacity:1}
+
+.opt-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:2px 10px}
+
+.opt-line3{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:2px 10px}
+
+.opt-row{display:flex;flex-wrap:wrap;gap:8px}
+
+.opt-row .opt{flex:0 1 auto}
+
+/* Toutes les cellules prennent la hauteur de la plus haute : une
+   grille de choix se lit comme une grille, pas comme un escalier. */
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;grid-auto-rows:1fr}
+
+.toggle[aria-pressed="true"]::after{transform:translateX(18px)}
+
+/* ============================================================
+   Mouvement — DESIGN.md §6 : un moment orchestré, pas des effets
+   dispersés. Pas d'entrée en fondu-glissé sur chaque section.
+   ============================================================ */
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@keyframes pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+
+@keyframes slideL{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+@keyframes unblur{from{filter:blur(16px);transform:scale(1.05)}to{filter:blur(0);transform:none}}
+
+.rise{animation:rise var(--t-slow) var(--ease) both}
+
+.pop-in{animation:pop var(--t) var(--ease) both}
+
+/* ============================================================
+   Composants métier
+   ============================================================ */
+.grid{display:grid;gap:14px}
+
+.g3{grid-template-columns:repeat(3,1fr)}
+
+.g2{grid-template-columns:repeat(2,1fr)}
+
+/* Gabarits à deux colonnes : contenu principal + rail. Ils retombent en
+   une colonne bien avant le seuil mobile, sinon le rail étrangle le texte. */
+.cols{display:grid;gap:16px;align-items:start}
+
+.cols-main{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+
+.cols-side{grid-template-columns:minmax(0,1fr) 300px}
+
+.cols-fiche{grid-template-columns:minmax(0,1fr) 290px}
+
+@media (max-width:1000px){
+  .cols-main,.cols-side,.cols-fiche{grid-template-columns:minmax(0,1fr)}
+}
+
+.row{display:flex;align-items:center;gap:10px}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .tint-tal{--t1:#0A65AE;--t2:#04405F}
+  :root:not([data-theme="light"]) .tint-tal.soft{--t1:#2C8FD3;--t2:#0A65AE}
+  :root:not([data-theme="light"]) .tint-tal.deep{--t1:#054C77;--t2:#032F4B}
+  :root:not([data-theme="light"]) .tint-vis{--t1:#EFC63C;--t2:#C9941A}
+  :root:not([data-theme="light"]) .tint-vis.soft{--t1:#FFDE6E;--t2:#EFC63C}
+  :root:not([data-theme="light"]) .tint-vis.deep{--t1:#C9941A;--t2:#A3760C}
+}
+
+/* Cartes annuaire */
+.deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+
+.pcard .cover .glyph{font-size:40px}
+
+.pcard .cover .fav{position:absolute;top:9px;right:9px}
+
+.pcard h3{font-size:15.5px;line-height:1.25}
+
+.pcard.person .who,.pcard.person .chips{justify-content:center}
+
+.pcard.person .sc-line,.pcard.person .foot{width:100%}
+
+.toast.ok .ic{stroke:#4ADE80}
+
+ .toast.bad .ic{stroke:#FCA5A5}
+
+.gauge{display:flex;gap:4px;margin:8px 0 4px}
+
+/* Barre d'onglets mobile */
+.tabbar{display:none}
+
+@media (min-width:861px){ .hide-d{display:none!important} }
+
+.btn-vis:hover:not(:disabled){filter:brightness(.97)}
+
+.btn-tal:hover:not(:disabled){filter:brightness(.97)}
+
+/* ---------- Écran de chargement et bandeau d'erreur (TMGuard) ---------- */
+.tmg-boot{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:24px;background:#F4F1EA;color:#1F1E1B;font:500 14px/1.5 Inter,-apple-system,"Segoe UI",Roboto,sans-serif;text-align:center;opacity:0;animation:tmgIn .25s .18s forwards}
+.tmg-boot.dark{background:#1A1815;color:#EDE9E0}
+.tmg-boot.err{opacity:1;animation:none}
+.tmg-boot[hidden],.tmg-bar[hidden]{display:none}
+.tmg-in{max-width:380px;display:grid;justify-items:center;gap:12px;text-align:center}
+.tmg-spin{width:34px;height:34px;border-radius:50%;border:3px solid rgba(0,124,216,.18);border-top-color:#007CD8;border-right-color:#FFD741;animation:tmgSpin .8s linear infinite}
+.tmg-in h2{margin:0;font:600 20px/1.3 "Source Serif 4",Georgia,serif}
+.tmg-in p{margin:0;opacity:.78}
+.tmg-btn{appearance:none;border:0;border-radius:8px;padding:10px 16px;font:600 14px/1 Inter,-apple-system,"Segoe UI",sans-serif;background:#007CD8;color:#fff;cursor:pointer}
+.tmg-btn.ghost{background:transparent;color:inherit;box-shadow:inset 0 0 0 1px rgba(127,120,105,.45)}
+.tmg-btn:focus-visible{outline:3px solid #FFD741;outline-offset:2px}
+.tmg-in details{font-size:12px;opacity:.7;max-width:100%}
+.tmg-in pre{white-space:pre-wrap;word-break:break-word;text-align:left;margin:6px 0 0;font:12px/1.4 ui-monospace,Menlo,monospace}
+.tmg-bar{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:2147483001;width:min(560px,calc(100vw - 24px));display:flex;align-items:center;gap:10px;padding:10px 12px 10px 14px;border-radius:10px;background:#F4E5E1;color:#93372E;font:500 13.5px/1.4 Inter,-apple-system,"Segoe UI",sans-serif;box-shadow:0 10px 30px -10px rgba(31,30,27,.35)}
+.tmg-bar.off{background:#F5EDDC;color:#7D5715}
+.tmg-bar span{flex:1}
+.tmg-bar .tmg-btn{padding:7px 11px;font-size:13px;background:#93372E}
+.tmg-bar.off .tmg-btn{display:none}
+.tmg-bar .x{appearance:none;border:0;background:transparent;color:inherit;font-size:18px;line-height:1;cursor:pointer;padding:4px 6px}
+@keyframes tmgIn{to{opacity:1}}
+@keyframes tmgSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.tmg-boot{animation:none;opacity:1}.tmg-spin{animation-duration:2.4s}}

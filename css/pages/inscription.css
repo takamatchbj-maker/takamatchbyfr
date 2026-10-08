@@ -1,0 +1,1282 @@
+/* ============================================================
+   TakaMatch — page inscription
+   Styles propres à inscription.html.
+   ============================================================ */
+
+button{background:none;border:0;cursor:pointer;padding:0}
+
+ul{margin:0;padding:0;list-style:none}
+
+:focus-visible{outline:2px solid var(--a-600);outline-offset:2px;border-radius:var(--r-xs)}
+
+::selection{background:var(--a-200);color:var(--ink)}
+
+.scroll::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+
+.scroll::-webkit-scrollbar-track{background:transparent}
+
+/* ============================================================
+   Primitives — DESIGN.md §6
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:40px;padding:0 18px;border-radius:var(--r-md);
+  font-weight:600;font-size:14px;white-space:nowrap;letter-spacing:-.005em;
+  transition:background var(--t-fast),border-color var(--t-fast),color var(--t-fast),opacity var(--t-fast);
+  border:1px solid transparent;
+}
+
+/* Une seule action pleine par vue ; pas d'ombre portée sur les boutons. */
+.btn-a{background:var(--a-600);color:var(--a-on);border-color:var(--a-edge)}
+
+/* L'invitation est l'action qui coûte : le bouton la propose sans
+   l'imposer, et ne prend la couleur de marque pleine qu'au survol. */
+.btn-soft{background:var(--a-50);color:var(--a-700);border-color:var(--a-200)}
+
+.btn-soft:hover:not(:disabled){background:var(--a-600);color:var(--a-on);border-color:var(--a-edge)}
+
+.btn-soft:disabled{background:var(--surface-2);color:var(--ink-3);border-color:var(--line)}
+
+.btn-ghost{background:var(--surface);border-color:var(--line-strong);color:var(--ink)}
+
+.btn-ghost:hover:not(:disabled){background:var(--surface-2)}
+
+.btn-quiet{color:var(--ink-2)}
+
+.btn-quiet:hover:not(:disabled){background:var(--surface-3);color:var(--ink)}
+
+.btn-danger{background:var(--bad-bg);color:var(--bad-ink)}
+
+.btn-sm{height:32px;padding:0 13px;font-size:13.5px;gap:6px}
+
+.btn-lg{height:48px;padding:0 24px;font-size:15px}
+
+/* Les cartes se distinguent par leur contenu, pas par un habillage commun. */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg)}
+
+.card-pad{padding:var(--s3)}
+
+.chip{
+  display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;
+  border-radius:var(--r-sm);background:var(--surface-3);color:var(--ink-2);
+  font-size:12.5px;font-weight:500;white-space:nowrap;
+}
+
+.chip-a{background:var(--a-50);color:var(--a-700);box-shadow:inset 0 0 0 1px var(--a-200)}
+
+.chip-ok{background:var(--ok-bg);color:var(--ok-ink)}
+
+.chip-warn{background:var(--warn-bg);color:var(--warn-ink)}
+
+.chip-bad{background:var(--bad-bg);color:var(--bad-ink)}
+
+/* Le pseudo public : c'est une donnée, donc du monospace. */
+.handle{
+  font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--ink-2);
+  letter-spacing:-.02em;
+}
+
+/* Ces deux pastilles vivent sur une couverture en dégradé : leur fond est
+   clair dans les deux thèmes, leur encre reste donc sombre. Liée au token
+   --ink, elle devenait blanche sur blanc en mode sombre. */
+.chip-handle{
+  background:rgba(250,249,245,.94);color:#1F1E1B;font-family:var(--mono);
+  font-size:12px;font-weight:500;height:24px;box-shadow:inset 0 0 0 1px rgba(31,30,27,.14);
+}
+
+.chip-onart{
+  background:rgba(250,249,245,.95);color:#1F1E1B;
+  box-shadow:inset 0 0 0 1px rgba(31,30,27,.12);
+}
+
+/* Libellé de section : bas de casse, pas de capitales traquées (DESIGN.md §2). */
+.lbl{font-size:13px;font-weight:600;color:var(--ink-3);letter-spacing:0}
+
+.dim{color:var(--ink-3)}
+
+.hr{height:1px;background:var(--line);border:0;margin:0}
+
+.field > label{font-size:14px;font-weight:500;color:var(--ink-2)}
+
+.field .req{color:var(--bad);margin-left:2px}
+
+.inp{
+  width:100%;height:44px;padding:0 14px;border-radius:var(--r-md);
+  background:var(--surface-3);border:1px solid var(--line);color:var(--ink);
+  font-size:15px;
+  transition:border-color var(--t-fast),box-shadow var(--t-fast),background var(--t-fast);
+}
+
+textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line-height:1.6}
+
+.inp::placeholder{color:var(--ink-4)}
+
+.inp:hover{border-color:var(--line-strong)}
+
+.inp:focus{outline:none;border-color:var(--a-600);background:var(--surface);box-shadow:0 0 0 2px var(--a-glow)}
+
+.hint{font-size:13px;color:var(--ink-3);line-height:1.5}
+
+.opt{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);
+  cursor:pointer;transition:border-color var(--t-fast),background var(--t-fast),color var(--t-fast);
+  font-size:14px;font-weight:450;text-align:left;
+}
+
+.opt:hover{border-color:var(--line-strong);background:var(--surface-2)}
+
+.opt[aria-pressed="true"]{border-color:var(--a-600);background:var(--a-50);color:var(--a-700);font-weight:600}
+
+.opt .box{
+  width:17px;height:17px;flex:0 0 auto;margin-top:2px;border-radius:var(--r-xs);
+  border:1.5px solid var(--line-strong);display:grid;place-items:center;
+  transition:background var(--t-fast),border-color var(--t-fast);
+}
+
+.opt[aria-pressed="true"] .box{background:var(--a-600);border-color:var(--a-edge)}
+
+.opt.radio .box{border-radius:50%}
+
+/* Dans le formulaire de fiche, l'option se réduit à son contrôle et à
+   son libellé : une grille de douze cases encadrées se lisait mal, et
+   la bordure n'apportait rien qu'un cadre de plus. */
+.opt-plain{
+  border-color:transparent;background:transparent;
+  padding:9px 8px;align-items:center;min-height:40px;
+}
+
+.opt-plain:hover{background:var(--surface-2);border-color:transparent}
+
+.opt-plain[aria-pressed="true"]{background:transparent;border-color:transparent;color:var(--a-700);font-weight:600}
+
+.opt-plain .box{margin-top:0}
+
+.opt-grid .opt{align-items:center;min-height:44px}
+
+.opt-grid .opt .box{margin-top:0}
+
+.toggle{
+  width:42px;height:24px;border-radius:99px;background:var(--line-strong);position:relative;
+  transition:background var(--t) var(--ease);flex:0 0 auto;
+}
+
+.toggle::after{
+  content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;
+  background:var(--surface);transition:transform var(--t) var(--ease);
+}
+
+.toggle[aria-pressed="true"]{background:var(--a-600)}
+
+.toggle.ok[aria-pressed="true"]{background:var(--ok)}
+
+@keyframes shimmer{to{background-position:200% 0}}
+
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.25}}
+
+.skel{
+  background:linear-gradient(90deg,var(--surface-3) 25%,var(--surface-2) 50%,var(--surface-3) 75%);
+  background-size:200% 100%;animation:shimmer 1.3s linear infinite;border-radius:var(--r-sm);
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+.col{display:flex;flex-direction:column;gap:10px}
+
+/* Teinte de sujet — elle ne dit plus le thème du projet, elle dit le
+   rôle de celui qu'on regarde : bleu pour un talent, or pour un
+   visionnaire. Les valeurs viennent des deux rampes de marque. La
+   variation d'un sujet à l'autre se joue à l'intérieur de la famille,
+   par l'angle et la profondeur — jamais en changeant de teinte. */
+.tint{
+  background:linear-gradient(var(--ta,138deg), var(--t1), var(--t2));
+  color:var(--t-on,#fff);
+}
+
+.pcard{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;
+  display:flex;flex-direction:column;transition:transform var(--t) var(--ease),box-shadow var(--t) var(--ease),border-color var(--t-fast);
+}
+
+.pcard:hover{border-color:var(--line-strong);background:var(--surface-2)}
+
+.pcard .cover{height:118px;position:relative;display:grid;place-items:center;overflow:hidden}
+
+.pcard .cover .tags{position:absolute;top:9px;left:9px;display:flex;gap:5px;flex-wrap:wrap}
+
+.pcard .body{padding:13px 15px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
+
+.pcard .who{
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+  font-size:13px;color:var(--ink-3);line-height:1.3;
+}
+
+.pcard .who .sep{color:var(--ink-3)}
+
+.pcard .ex{font-size:13px;color:var(--ink-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.pcard .chips{display:flex;gap:5px;flex-wrap:wrap}
+
+/* ---- Variante Talent : une personne se présente par son portrait ----
+   Le bandeau ne sert plus qu'à porter la teinte ; le portrait rond le
+   chevauche, et tout ce qui identifie la personne se range dessous,
+   centré sur l'axe du portrait. Le cerne fait un pixel : il détache le
+   portrait du bandeau sans l'encadrer. */
+.pcard.person .cover{height:78px;overflow:visible;display:block}
+
+.pcard.person .portrait{
+  position:absolute;left:50%;bottom:-37px;transform:translateX(-50%);
+  width:74px;height:74px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface);
+}
+
+.pcard.person .portrait .av{width:72px;height:72px;font-size:21px}
+
+.pcard.person .body{padding-top:50px;align-items:center;text-align:center;gap:8px}
+
+/* En mode Focus, même geste sur la bannière haute. */
+.detail .hero.portrait-hero{height:132px;overflow:visible}
+
+/* Ici le portrait s'aligne à gauche, sur l'axe du nom qui le suit. */
+.detail .hero .portrait{
+  position:absolute;left:22px;bottom:-40px;
+  width:82px;height:82px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface);
+}
+
+.detail .hero.portrait-hero + .meta{padding-top:50px}
+
+/* Le score et les boutons sont ancrés en bas : d'une carte à l'autre
+   ils tombent sur la même ligne, quel que soit le nombre de jetons. */
+.pcard .sc-line{margin-top:auto;padding-top:2px}
+
+.pcard .foot{padding-top:4px;display:flex;gap:8px;align-items:center}
+
+.iconbtn{
+  width:30px;height:30px;border-radius:var(--r-md);display:grid;place-items:center;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-3);
+  transition:all var(--t-fast) var(--ease);
+}
+
+.iconbtn:hover{color:var(--ink);border-color:var(--line-strong);background:var(--surface-2)}
+
+.iconbtn.on{background:var(--bad-bg);border-color:transparent;color:var(--bad)}
+
+.iconbtn .ic{width:15px;height:15px}
+
+.iconbtn-lg{width:38px;height:38px}
+
+.iconbtn-lg .ic{width:18px;height:18px}
+
+/* Le bouton de profil fait exactement la hauteur des boutons d'icône
+   voisins, sinon la barre du haut a deux lignes de base. */
+#meBtn{height:38px;box-sizing:border-box}
+
+/* Toasts */
+.toasts{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));
+  z-index:120;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:calc(100% - 32px);
+}
+
+.toast{
+  display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--r-md);
+  background:var(--ink);color:var(--ground);font-size:14px;font-weight:500;
+  box-shadow:var(--shadow-pop);animation:pop .3s var(--ease) both;pointer-events:auto;max-width:100%;
+}
+
+.toast .ic{width:17px;height:17px;flex:0 0 auto}
+
+.toast.out{animation:fadeout .3s var(--ease-in) forwards}
+
+@keyframes fadeout{to{opacity:0;transform:translateY(8px) scale(.96)}}
+
+/* Crédits d'invitation — la rareté, rendue tangible */
+.credits{background:linear-gradient(160deg,var(--a-50),var(--surface) 65%);border-color:var(--a-200)}
+
+.gauge i{flex:1;height:6px;border-radius:var(--r-xs);background:var(--surface-3);transition:background .5s var(--ease)}
+
+.gauge i.on{background:var(--a-600)}
+
+.momo{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--ink-3)}
+
+.momo b{padding:2px 6px;border-radius:var(--r-xs);font-size:11px}
+
+.momo .mtn{background:#FFCC00;color:#1A1A1A}
+
+.momo .moov{background:#0077A8;color:#fff}
+
+.momo .celtiis{background:#E4002B;color:#fff}
+
+@media (max-width:860px){
+  .toolbar > *{flex:1 1 auto}
+  .toolbar .seg{flex:0 0 auto}
+  .shell{padding:0;gap:0}
+  .side{
+    position:fixed;top:10px;bottom:10px;left:10px;z-index:92;width:250px;flex:0 0 250px;
+    transform:translateX(-100%);transition:transform var(--t) var(--ease),visibility var(--t);
+    padding-top:calc(14px + env(safe-area-inset-top,0px));
+    box-shadow:var(--shadow-3);
+    visibility:hidden; /* hors écran : ni cliquable, ni atteignable au clavier */
+  }
+  .side.open{transform:none;visibility:visible;box-shadow:var(--shadow-3)}
+  .wrap{padding:18px 16px 100px}
+  .page-h h1{font-size:22px}
+  .focus{grid-template-columns:1fr}
+  .msg-l{grid-template-columns:1fr;height:auto}
+  .msg-l .thread-list{max-height:210px}
+  .msg-l .chat{height:min(66vh,540px)}
+  .msg-l.viewing .thread-list{display:none}
+  .tabbar{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
+    border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));
+  }
+  .tabbar button{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:var(--r-sm);
+    font-size:10.5px;font-weight:600;color:var(--ink-3);position:relative;transition:color var(--t-fast);
+  }
+  .tabbar button.on{color:var(--a-700)}
+  .tabbar .ic{width:21px;height:21px}
+  .tabbar .cnt{position:absolute;top:3px;right:calc(50% - 20px);min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--bad);color:var(--on-bad);font-size:9.5px;font-weight:800;display:grid;place-items:center}
+  .toasts{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .g3,.g2{grid-template-columns:1fr}
+  .hide-m{display:none!important}
+}
+
+@media (max-width:560px){
+  .deck{grid-template-columns:1fr}
+  .opt-grid{grid-template-columns:1fr}
+  .modal .mf{flex-direction:column-reverse}
+  .modal .mf .btn{width:100%}
+}
+
+/* ---------- Logo courant (DESIGN.md §5.12) ---------- */
+/* Logo officiel (logo-principal.svg), intégré en data URI : jamais recoloré,
+   hauteur 28 px, proportions conservées. */
+.brand{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink);justify-self:start;line-height:0}
+
+.brand:hover{text-decoration:none}
+
+.brand-logo{display:block;height:28px;width:auto;max-width:none;flex:0 0 auto}
+
+}
+
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--ink-3)}
+
+/* Encre sur les boutons de rôle. En sombre, le bleu s'éclaircit :
+   le blanc ne tient plus dessus, l'encre devient nuit. */
+:root{--tal-on:#fff}
+
+:root[data-theme="dark"]{--tal-on:#08283F}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tal-on:#08283F}}
+
+/* Boutons de rôle : or pour le visionnaire, bleu pour le talent. */
+/* Couleurs fixées par la marque, identiques dans les deux thèmes.
+   Fonds clairs : l'encre est sombre, jamais blanche. */
+.btn-vis{background:#FFE890;color:#3D2B00;border-color:#FFD741;--fx:rgba(255,215,65,.85)}
+
+.btn-tal{background:#95C8EF;color:#08283F;border-color:#007CD8;--fx:rgba(0,124,216,.6)}
+
+.btn .arr{transition:transform var(--t) var(--ease)}
+
+.btn:hover .arr{transform:translateX(4px)}
+
+.btn .emo{font-size:16px;line-height:1}
+
+/* Dégradé de titre bleu → or. La borne or est le palier 700 : sur le
+   papier, le 600 tombait sous 3:1. En sombre, les deux s'éclaircissent. */
+.gt{
+  background:linear-gradient(96deg,var(--tal-600) 8%,var(--vis-700) 92%);
+  background:linear-gradient(96deg in oklab,var(--tal-600) 8%,var(--vis-700) 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+
+.gold{color:var(--vis-700)}
+
+.chip-tal{background:var(--tal-50);color:var(--tal-700);box-shadow:inset 0 0 0 1px var(--tal-200)}
+
+/* ---------- v5 ---------- */
+/* Bouton « Commencer » : dégradé or → bleu, qui glisse au survol. */
+.btn-go{
+  background:linear-gradient(100deg,#FFD741 0%,#007CD8 50%,#FFD741 100%);
+  background-size:200% 100%;background-position:0 0;
+  color:#FFFFFF;border-color:transparent;
+  /* Ombre légère : détache le blanc de la partie or du dégradé. */
+  text-shadow:0 1px 2px rgba(20,24,31,.55),0 0 8px rgba(20,24,31,.28);
+  transition:background-position .6s var(--ease),filter var(--t-fast);
+}
+
+.btn-go:hover{background-position:100% 0}
+
+/* ---------- Choix de rôle .rp (DESIGN.md §5.3) ---------- */
+.rpk{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+
+.rp{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:var(--r-lg);text-align:left;
+  border:1px solid var(--line);background:var(--surface);transition:border-color var(--t-fast),background var(--t-fast),transform var(--t) var(--ease)}
+
+.rp:hover{background:var(--surface-2)}
+
+.rp .emo{font-size:20px;margin-bottom:6px}
+
+.rp b{font-size:15px;font-weight:600}
+
+.rp span:last-child{font-size:12.5px;color:var(--ink-3)}
+
+.rp-vis[aria-pressed="true"]{border-color:#FFD741;background:#FFF6D1;box-shadow:inset 0 0 0 1px #FFD741}
+
+.rp-tal[aria-pressed="true"]{border-color:#007CD8;background:#E4F1FB;box-shadow:inset 0 0 0 1px #007CD8}
+
+.rp[aria-pressed="true"] b,.rp[aria-pressed="true"] span:last-child{color:#1F1E1B}
+
+/* ---------- Fenêtres pop-up .ov (DESIGN.md §5.9) ---------- */
+.ov{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:16px}
+
+.ov[hidden]{display:none!important}
+
+.ov-bg{position:absolute;inset:0;
+  background:color-mix(in srgb,var(--ground) 42%,transparent);
+  -webkit-backdrop-filter:blur(0) saturate(100%);backdrop-filter:blur(0) saturate(100%);opacity:0;
+  transition:opacity .3s var(--ease),backdrop-filter .4s var(--ease),-webkit-backdrop-filter .4s var(--ease)}
+
+.ov.on .ov-bg{opacity:1;-webkit-backdrop-filter:blur(12px) saturate(120%);backdrop-filter:blur(12px) saturate(120%)}
+
+.ov-win{position:relative;width:min(460px,100%);max-height:calc(100dvh - 32px);overflow:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2xl);box-shadow:var(--shadow-3);
+  padding:28px;opacity:0;transform:translateY(14px) scale(.96);
+  transition:opacity .32s var(--ease),transform .42s cubic-bezier(.2,.9,.25,1.05)}
+
+.ov.on .ov-win{opacity:1;transform:none}
+
+.ov-x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%}
+
+.ov-t{font-size:clamp(24px,4vw,28px);line-height:1.2;margin:4px 40px 8px 0}
+
+.ov-s{font-size:14.5px;line-height:1.6;color:var(--ink-2);margin-bottom:20px}
+
+/* ============================================================
+   Compléments repris du prototype H (absents de la référence)
+   ============================================================ */
+.av{
+  border-radius:50%;flex:0 0 auto;background:var(--surface-3);
+  display:grid;place-items:center;font-family:var(--disp);font-weight:600;color:var(--ink-3);overflow:hidden;
+  font-size:13px;letter-spacing:-.02em;line-height:1;
+}
+
+.av.tint{background:linear-gradient(var(--ta,138deg), var(--t1), var(--t2));color:var(--t-on,#fff)}
+
+.av-72{width:72px;height:72px;font-size:21px}
+
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+/* Masqué à l'écran, lu par les lecteurs d'écran et atteignable au clavier. */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;opacity:0}
+
+/* Correctif : choisir une photo donnait le focus à un champ caché, et le navigateur faisait
+   défiler la carte (overflow:hidden) pour le montrer. La carte ne défile plus jamais. */
+.onb-card{overflow:clip}
+
+.sr{top:0;left:0}
+
+/* Le champ fichier caché est fixé à l'écran : lui donner le focus ne fait défiler aucun conteneur. */
+input[type=file].sr{position:fixed;top:0;left:0}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ============================================================
+   Scène de travail
+   L'onboarding s'ouvre par-dessus la vitrine (DESIGN.md §8). Isolé,
+   il garde ce décor : le papier et les deux halos du hero (§2.6).
+   ============================================================ */
+body{overflow:hidden}
+
+.scene{position:fixed;inset:0;background:var(--ground);overflow:hidden;z-index:0}
+
+.scene i{position:absolute;border-radius:50%;filter:blur(92px);display:block}
+
+.scene .b1{width:580px;height:580px;background:var(--vis-500);left:-180px;top:-70px;opacity:.55}
+
+.scene .b2{width:640px;height:640px;background:var(--tal-500);right:-200px;top:-130px;opacity:.38}
+
+.scene .b3{width:560px;height:520px;left:50%;top:120px;margin-left:-280px;background:var(--ground);opacity:.55;filter:blur(70px)}
+
+:root[data-theme="dark"] .scene .b1{opacity:.22}
+
+:root[data-theme="dark"] .scene .b2{opacity:.20}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .scene .b1{opacity:.22}
+  :root:not([data-theme="light"]) .scene .b2{opacity:.20}
+}
+
+/* Écran affiché quand la fenêtre est fermée : les deux portes d'entrée
+   de la vitrine, « Commencer » et « Se connecter ». */
+.closed{position:fixed;inset:0;z-index:1;display:grid;place-items:center;padding:16px;text-align:center}
+
+.closed .in{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:420px;animation:rise var(--t-slow) var(--ease) both}
+
+.closed h1{font-size:clamp(26px,4vw,34px);line-height:1.2}
+
+.closed p{color:var(--ink-2)}
+
+.closed .row{flex-wrap:wrap;justify-content:center;margin-top:6px}
+
+.closed .btn{border-radius:var(--r-pill);min-width:150px}
+
+/* ============================================================
+   Onboarding — une fenêtre unique, de taille fixe
+   DESIGN.md §5.9 et §8 : voile de la couleur du fond, flou 12 px,
+   fenêtre 1000 × 648 px, --r-2xl, --shadow-3, entrée en 420 ms.
+   ============================================================ */
+.onb{
+  position:fixed;inset:0;z-index:80;display:grid;place-items:center;overflow-y:auto;
+  padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));
+}
+
+.onb-veil{
+  position:fixed;inset:0;
+  background:color-mix(in srgb,var(--ground) 42%,transparent);
+  -webkit-backdrop-filter:blur(12px) saturate(120%);backdrop-filter:blur(12px) saturate(120%);
+  animation:fadein .3s var(--ease) both;
+}
+
+.onb-wrap{position:relative;width:min(1000px,100%);padding-top:48px;margin:auto}
+
+/* La croix vit sur le voile : on quitte le parcours, on n'y recule pas. */
+.onb-x{
+  position:absolute;top:0;right:0;width:36px;height:36px;border-radius:50%;
+  display:grid;place-items:center;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-2);
+  transition:background var(--t-fast),color var(--t-fast),transform var(--t-fast) var(--ease);
+}
+
+.onb-x:hover{background:var(--surface-2);color:var(--ink)}
+
+.onb-x:active{transform:scale(.94)}
+
+.onb-x .ic{width:17px;height:17px}
+
+.onb-card{
+  position:relative;z-index:1;width:100%;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-2xl);box-shadow:var(--shadow-3);
+  display:grid;grid-template-columns:minmax(0,1fr) 44%;
+  /* Taille arrêtée une fois pour toutes : aucune étape ne la fait bouger. */
+  height:min(648px,calc(100dvh - 104px));overflow:hidden;
+  animation:ovIn .42s cubic-bezier(.2,.9,.25,1.05) both;
+}
+
+@keyframes ovIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+
+.onb-left{display:flex;flex-direction:column;min-height:0;min-width:0}
+
+.onb-head{padding:14px 32px 0;flex:0 0 auto}
+
+.onb-body{flex:1;overflow-y:auto;padding:6px 32px 12px;min-height:0;display:flex;flex-direction:column}
+
+/* Le bloc se centre quand il y a de la place, et redevient un flux
+   normal — sans rognage — dès qu'il déborde. */
+.onb-inner{margin:auto 0;width:100%}
+
+.onb-tail{flex:0 0 auto}
+
+.onb-foot{
+  display:flex;align-items:center;gap:12px;padding:16px 32px 12px;
+  border-top:1px solid var(--line);background:var(--surface);
+}
+
+.onb-foot .grow{flex:1;min-width:0}
+
+.onb-foot .btn-lg{min-width:200px}
+
+.onb-foot .note{font-size:12.5px;color:var(--ink-2)}
+
+.onb-legal{padding:0 32px calc(16px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;line-height:1.55;color:var(--ink-2)}
+
+.onb-legal a{color:var(--ink-2)}
+
+.onb-legal a:hover{color:var(--ink)}
+
+/* ---------- Barre du haut : retour · étape et jauge · suivant ---------- */
+.onb-nav{display:grid;grid-template-columns:38px minmax(0,1fr) 38px;align-items:center;gap:12px;margin-bottom:8px}
+
+.onb-nav .iconbtn{width:38px;height:38px}
+
+.onb-nav .iconbtn .ic{width:17px;height:17px}
+
+.onb-nav .iconbtn:disabled{opacity:.42;cursor:not-allowed;background:var(--surface);border-color:var(--line);color:var(--ink-3)}
+
+.onb-nav .ghost{visibility:hidden}
+
+.ob-steps{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0;font-size:12.5px;color:var(--ink-2)}
+
+.ob-steps .mono{font-size:12px;font-weight:600}
+
+.ob-g{display:flex;gap:4px;width:min(260px,100%)}
+
+.ob-g i{flex:1;height:4px;border-radius:2px;background:var(--surface-3);transition:background var(--t-slow) var(--ease)}
+
+.ob-g i.done{background:var(--a-600)}
+
+.ob-g i.cur{
+  background:linear-gradient(90deg,var(--vis-600),var(--tal-600));
+  background:linear-gradient(90deg in oklab,var(--vis-600),var(--tal-600));
+}
+
+/* Avant le choix du rôle, l'accent reste neutre (§8.3) : la jauge est
+   en dégradé, l'action principale en « Commencer ». */
+.onb-card.pre .ob-g i.done{
+  background:linear-gradient(90deg,var(--vis-600),var(--tal-600));
+  background:linear-gradient(90deg in oklab,var(--vis-600),var(--tal-600));opacity:.5;
+}
+
+.onb-nav .brand{justify-self:center}
+
+/* Jauges et anneau de complétion : la couleur du rôle, du foncé au
+   clair. Jamais de mélange bleu → or une fois le rôle choisi. */
+:root{--g-tal1:#0A5C99;--g-tal2:#8DC4EE;--g-vis1:#A6750E;--g-vis2:#F2D36B;--g1:var(--g-tal1);--g2:var(--g-tal2)}
+
+:root[data-theme="dark"]{--g-tal1:#2C8FD3;--g-tal2:#9CD1FA;--g-vis1:#C9941A;--g-vis2:#FFE890}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--g-tal1:#2C8FD3;--g-tal2:#9CD1FA;--g-vis1:#C9941A;--g-vis2:#FFE890}}
+
+:root[data-role="vis"]{--g1:var(--g-vis1);--g2:var(--g-vis2)}
+
+.onb-card:not(.pre) .ob-g i.cur{background:linear-gradient(90deg,var(--g1),var(--g2))}
+
+/* La couleur du rôle s'installe sous les yeux, en 380 ms. */
+.onb .btn-a,.onb .opt,.onb .opt .box,.onb .inp,.onb .chip-a,.onb .ring .fg{
+  transition:background var(--t-slow) var(--ease),border-color var(--t-slow) var(--ease),color var(--t-slow) var(--ease),box-shadow var(--t-fast),filter var(--t-fast);
+}
+
+/* ---------- Hiérarchie du contenu ---------- */
+.onb-h{display:flex;flex-direction:column;gap:6px;margin:4px 0 20px}
+
+.onb-h h2{font-size:26px;line-height:1.18}
+
+.onb-h p{color:var(--ink-2);font-size:14.5px;line-height:1.55}
+
+.onb-h .who{font-family:var(--mono);font-size:13.5px;color:var(--ink-2);letter-spacing:-.02em;word-break:break-all}
+
+/* Champ plus haut ici : c'est le seul geste de l'écran (§5.2). */
+.onb .inp{height:48px}
+
+.onb textarea.inp{height:auto}
+
+.onb .hint{color:var(--ink-2)}
+
+.onb .hint svg.ic{vertical-align:-2px}
+
+.inp.err{border-color:var(--bad)}
+
+.inp.err:focus{box-shadow:0 0 0 2px color-mix(in srgb,var(--bad) 22%,transparent)}
+
+.ferr{font-size:13px;color:var(--bad-ink);display:none}
+
+.ferr.on{display:block}
+
+/* Le séparateur « ou » — bas de casse (§3.2). */
+.orline{display:flex;align-items:center;gap:12px;margin:16px 0}
+
+.orline::before,.orline::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.orline span{font-size:12.5px;font-weight:500;color:var(--ink-3)}
+
+/* Mot de passe : l'œil vit dans le champ. */
+.inp-x{position:relative;display:block}
+
+.inp-x .inp{padding-right:52px}
+
+.inp-x .peek{
+  position:absolute;right:5px;top:50%;transform:translateY(-50%);
+  width:38px;height:38px;border-radius:var(--r-sm);display:grid;place-items:center;
+  color:var(--ink-2);transition:color var(--t-fast),background var(--t-fast);
+}
+
+.inp-x .peek:hover{color:var(--ink);background:var(--surface-2)}
+
+.inp-x .peek .ic{width:18px;height:18px}
+
+/* Critères : ○ au départ, ✓ une fois rempli — jamais l'inverse. */
+.pwreq{display:flex;flex-direction:column;gap:8px}
+
+.pwreq li{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-2);transition:color var(--t) var(--ease)}
+
+.pwreq .mk{
+  width:17px;height:17px;flex:0 0 auto;border-radius:50%;border:1.5px solid var(--line-strong);
+  display:grid;place-items:center;transition:background var(--t) var(--ease),border-color var(--t) var(--ease);
+}
+
+.pwreq .mk svg{width:10px;height:10px;stroke:#fff;stroke-width:3.6;opacity:0;transition:opacity var(--t) var(--ease)}
+
+.pwreq li.ok{color:var(--ok-ink)}
+
+.pwreq li.ok .mk{background:var(--ok);border-color:var(--ok)}
+
+.pwreq li.ok .mk svg{opacity:1}
+
+/* Code à usage unique : six cases, en mono — c'est une donnée. */
+.otp{display:grid;grid-template-columns:repeat(6,minmax(0,52px));gap:8px}
+
+.otp .inp{height:56px;padding:0;text-align:center;font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:0}
+
+.otp-act{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:4px}
+
+.linkbtn{font-size:13px;font-weight:600;color:var(--a-700);text-decoration:underline;text-underline-offset:2px;min-height:32px}
+
+.linkbtn:hover{text-decoration-thickness:2px}
+
+/* Case pleine largeur : toute la ligne est cliquable (46 px). */
+.opt-line{width:100%;align-items:center;min-height:46px;padding:10px 14px;font-size:13.5px}
+
+.opt-line .box{margin-top:0}
+
+/* Cases d'engagement (pacte, nouveautés) : noir et gris, sans la couleur
+   du rôle — c'est un accord, pas un choix de marque. */
+.opt-line[aria-pressed="true"]{background:var(--surface-2);border-color:var(--line-strong);color:var(--ink)}
+
+.opt-line[aria-pressed="true"] .box{background:var(--ink);border-color:var(--ink)}
+
+.opt-line .box svg{stroke:var(--ground)}
+
+/* États du bouton principal (§5.1) : le spinner prend la place de
+   l'icône, le libellé reste ; le succès passe au vert 600 ms. */
+.btn.loading{pointer-events:none}
+
+.btn .spin{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite;flex:0 0 auto}
+
+.btn.done{background:var(--ok-bg)!important;border-color:var(--ok)!important;color:var(--ok-ink)!important;filter:none!important}
+
+/* ---------- Le pacte ---------- */
+.pact{display:flex;flex-direction:column}
+
+.pact-i{display:flex;gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+
+.pact-i:first-child{border-top:0;padding-top:0}
+
+.tile{
+  width:36px;height:36px;flex:0 0 auto;border-radius:var(--r-md);display:grid;place-items:center;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);
+}
+
+.tile .ic{width:17px;height:17px}
+
+.pact-i .t{font-weight:600;font-size:14px;margin-bottom:2px}
+
+.pact-i .d{font-size:13px;color:var(--ink-2);line-height:1.55}
+
+/* ---------- Le choix du rôle : .rp (§5.3), en grand ---------- */
+.onb .rpk{grid-auto-rows:1fr;gap:12px;margin:0}
+
+.onb .rp{position:relative;padding:18px;gap:3px;min-height:100%}
+
+.onb .rp .emo{font-size:26px;margin-bottom:8px;line-height:1}
+
+.onb .rp b{font-size:15.5px}
+
+.onb .rp .sub{font-size:12.5px;font-weight:600;color:var(--ink-3)}
+
+.onb .rp .d{font-size:13px;line-height:1.5;color:var(--ink-2);margin-top:6px}
+
+.onb .rp[aria-pressed="true"] .sub,.onb .rp[aria-pressed="true"] .d{color:#4A473F}
+
+.rp-vis:hover{border-color:#FFD741}
+
+.rp-tal:hover{border-color:#007CD8}
+
+.rp .tick{
+  position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;
+  background:var(--ok);display:grid;place-items:center;opacity:0;transform:scale(.8);
+  transition:opacity var(--t) var(--ease),transform var(--t) var(--ease);
+}
+
+.rp .tick svg{width:12px;height:12px;stroke:#fff;stroke-width:3.6}
+
+.rp[aria-pressed="true"] .tick{opacity:1;transform:none}
+
+@media (max-width:460px){.onb .rpk{grid-template-columns:1fr}}
+
+/* ---------- Le pseudo ---------- */
+.at{display:flex;align-items:stretch}
+
+.at > span{
+  display:grid;place-items:center;padding:0 14px;border:1px solid var(--line);border-right:0;
+  border-radius:var(--r-md) 0 0 var(--r-md);background:var(--surface-3);font-family:var(--mono);color:var(--ink-2);
+}
+
+.at .inp{border-radius:0 var(--r-md) var(--r-md) 0;font-family:var(--mono)}
+
+.sugg{
+  height:38px;padding:0 12px;border-radius:var(--r-md);background:var(--surface-3);border:1px solid var(--line);
+  font-family:var(--mono);font-size:13px;color:var(--ink-2);transition:border-color var(--t-fast),color var(--t-fast);
+}
+
+.sugg:hover{border-color:var(--line-strong);color:var(--ink)}
+
+.note-card{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:var(--r-lg);background:var(--surface-2);border:1px solid var(--line)}
+
+.note-card b{display:block;font-size:14px;margin-bottom:2px}
+
+/* ---------- La fiche express ---------- */
+.fsec{display:flex;flex-direction:column;gap:9px}
+
+/* Libellé en bas de casse, pas en capitales espacées (§3.2). */
+.fsec-l{display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--ink)}
+
+.fsec-l .req{color:var(--bad)}
+
+.fsec-b{display:flex;gap:14px;align-items:flex-start}
+
+.fsec-c{flex:1;min-width:0;padding-left:14px;border-left:1px solid var(--line)}
+
+.fsec-c > .hint{margin-bottom:6px}
+
+.fiche-note{font-size:13px;color:var(--ink-2)}
+
+.opt:disabled{opacity:.42;cursor:not-allowed}
+
+.opt:disabled:hover{background:transparent}
+
+/* Couverture du projet : une photo à gauche, ou une icône à droite. */
+.cov2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+
+.cov2 .lbl{margin-bottom:8px}
+
+.cov-zone{
+  display:grid;place-items:center;width:100%;aspect-ratio:16/9;border-radius:var(--r-lg);cursor:pointer;
+  border:1.5px dashed var(--line-strong);background:var(--surface-2) center/cover no-repeat;color:var(--ink-3);
+  transition:border-color var(--t-fast),color var(--t-fast);
+}
+
+.cov-zone:hover{border-color:var(--a-600);color:var(--ink)}
+
+.cov-zone.has{border:1px solid var(--line)}
+
+.cov-ph:focus-within .cov-zone{outline:2px solid var(--a-600);outline-offset:2px}
+
+.cov-ph .row{margin-top:10px;flex-wrap:wrap;gap:8px}
+
+.cov-ph label.btn{cursor:pointer}
+
+.cov-ic{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+
+.cov-ic button{
+  aspect-ratio:1;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);
+  font-size:22px;line-height:1;display:grid;place-items:center;transition:border-color var(--t-fast),background var(--t-fast);
+}
+
+.cov-ic button:hover:not(:disabled){border-color:var(--line-strong);background:var(--surface-2)}
+
+.cov-ic button[aria-pressed="true"]{border-color:var(--a-600);background:var(--a-50);box-shadow:inset 0 0 0 1px var(--a-600)}
+
+.cov-ic button:disabled{opacity:.3;filter:grayscale(1);cursor:not-allowed}
+
+.cov2 .hint{margin-top:8px}
+
+@media (max-width:560px){.cov2{grid-template-columns:minmax(0,1fr)}.cov-ic{grid-template-columns:repeat(6,minmax(0,1fr))}.cov-ic button{font-size:19px}}
+
+.pcard .cover .likes{position:absolute;top:9px;right:9px;height:22px;font-size:11px}
+
+.pcard .offer{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+
+.pcard .offer .ic{width:13px;height:13px;flex:0 0 auto}
+
+.ready .note-card{text-align:left;width:100%;max-width:420px;margin-top:14px}
+
+.ready .note-card ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+
+.ready .note-card li{font-size:13px;color:var(--ink-2);line-height:1.5}
+
+.onb-cap .sc{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+
+.onb-cap .sc li{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);border-bottom:1px dashed var(--line);padding-bottom:3px}
+
+.onb-cap .sc b{font-family:var(--mono);font-weight:600;color:var(--ink)}
+
+.fiche-note b{color:var(--bad)}
+
+b.req{color:var(--bad);font-weight:700}
+
+.cnt-c.bad{color:var(--bad)}
+
+/* Section obligatoire manquante : un éclair rouge doux, 2 s. */
+.fsec.flash{animation:fsecFlash 2s var(--ease) both;border-radius:var(--r-md)}
+
+@keyframes fsecFlash{0%,55%{background:var(--bad-bg);box-shadow:0 0 0 8px var(--bad-bg)}100%{background:transparent;box-shadow:0 0 0 8px transparent}}
+
+@media (prefers-reduced-motion:reduce){.fsec.flash{animation-duration:.01s}}
+
+.cnt-c{font-family:var(--mono);font-size:12px;color:var(--ink-3);text-align:right;margin-top:5px}
+
+@media (max-width:560px){
+  .fsec-b{gap:10px}
+  .fsec-b .tile{width:32px;height:32px}
+  .fsec-c{padding-left:10px}
+}
+
+/* ---------- Anneau de complétion (§5.6) ---------- */
+.ring{position:relative;flex:0 0 auto}
+
+.ring svg{transform:rotate(-90deg);width:100%;height:100%;display:block}
+
+.ring circle{fill:none;stroke-linecap:round}
+
+.ring .bg{stroke:var(--surface-3)}
+
+.ring .fg{transition:stroke-dashoffset 1.8s var(--ease)}
+
+.ring .num{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:1px;
+  font-family:var(--mono);font-weight:600;letter-spacing:-.03em;white-space:nowrap;line-height:1;
+}
+
+.ring .num small{font-weight:600;color:var(--ink-3)}
+
+/* ---------- Écran « Prêt » ---------- */
+.ready{display:flex;flex-direction:column;align-items:center;text-align:center}
+
+.okc{width:52px;height:52px;border-radius:50%;background:var(--ok-bg);color:var(--ok-ink);display:grid;place-items:center;animation:pop .4s var(--ease) both}
+
+.okc svg{width:24px;height:24px}
+
+.ready h2{font-size:26px;line-height:1.2;margin:16px 0 8px}
+
+.ready > p{color:var(--ink-2);font-size:14.5px;line-height:1.6;max-width:42ch;margin:0 auto 22px}
+
+.ready .card{display:flex;align-items:center;gap:18px;padding:18px 20px;text-align:left;width:100%;max-width:420px}
+
+.ready .card .v{font-family:var(--disp);font-size:22px;font-weight:600;margin-top:2px}
+
+/* ---------- Panneau de droite : une image fixe par étape ---------- */
+.onb-side{
+  position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;
+  background:var(--surface-2);border-left:1px solid var(--line);
+}
+
+.onb-art{flex:0 1 auto;min-height:0;display:grid;place-items:center;padding:0 28px;animation:rise var(--t-slow) var(--ease) both}
+
+.onb-art svg{width:100%;height:auto;max-height:300px;display:block}
+
+.onb-cap{flex:0 0 auto;padding:24px 28px 0}
+
+.onb-cap .lbl{color:var(--ink-2);margin-bottom:8px}
+
+.onb-cap .figs{display:flex;gap:26px;margin:0 0 10px;justify-content:flex-start}
+
+.onb-cap .fig{padding:0;text-align:left}
+
+.onb-cap .fig b{display:block;font-family:var(--disp);font-size:24px;font-weight:600;line-height:1.1;color:var(--ink);letter-spacing:-.015em}
+
+.onb-cap .fig span{display:block;font-size:12.5px;font-weight:500;color:var(--ink-2);margin-top:2px}
+
+.onb-cap p{font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+
+/* À l'étape « fiche », le panneau accueille l'aperçu vivant. */
+.onb-side.preview{align-items:center;padding:24px;gap:12px}
+
+.prev-wrap{width:min(268px,100%);display:flex;flex-direction:column;gap:10px}
+
+.prev-l{display:flex;align-items:center;justify-content:center;gap:7px}
+
+.prev-l i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+
+.prev-wrap .pcard:hover{background:var(--surface);border-color:var(--line)}
+
+/* Accroche limitée à deux lignes, coupée par « … » ; un mot sans espace
+   se casse au lieu de déborder de la carte. */
+.pcard .ex{-webkit-line-clamp:2;line-clamp:2;overflow-wrap:anywhere;word-break:break-word}
+
+.pcard h3,.pcard .handle{overflow-wrap:anywhere}
+
+/* Le pseudo sur une fiche : petite pastille noire en mono. Elle ne se
+   confond plus avec les pastilles blanches des secteurs posées sur la
+   couverture. Réservé aux fiches ; dans le texte courant, .handle reste. */
+.handle-chip{
+  display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:var(--r-xs);
+  background:#15130F;color:#fff;border:1px solid transparent;
+  font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:-.02em;line-height:1;
+  white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+}
+
+:root[data-theme="dark"] .handle-chip{border-color:rgba(255,255,255,.18)}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .handle-chip{border-color:rgba(255,255,255,.18)}}
+
+/* Libellé posé devant les compétences d'une fiche : « Recherche : »
+   sur un projet, « Compétences : » sur une personne. */
+.pcard .chips{align-items:center}
+
+.chips-k{font-size:12px;font-weight:600;color:var(--ink-3);margin-right:1px;white-space:nowrap}
+
+.pcard .plink{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:6px;font-family:var(--mono);overflow-wrap:anywhere}
+
+.pcard .plink .ic{width:13px;height:13px;flex:0 0 auto}
+
+/* Fiche perso : étape facultative du visionnaire. */
+.opt-tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;margin-left:8px;vertical-align:4px;border-radius:var(--r-sm);background:var(--surface-3);color:var(--ink-2);font:600 12px var(--sans);letter-spacing:0}
+
+.ready-lines{width:100%;max-width:420px;margin-top:12px;display:flex;flex-direction:column;gap:6px;text-align:left}
+
+.ready-lines p{font-size:13.5px;line-height:1.5;color:var(--ink-2);display:flex;gap:8px;align-items:flex-start}
+
+.ready-lines p .ic{margin-top:3px;color:var(--ink-3)}
+
+.ready-lines b{color:var(--ink);font-weight:600}
+
+.mask{font-family:var(--mono);letter-spacing:.14em}
+
+.prev-pct{display:flex;align-items:center;gap:12px;padding:14px 16px}
+
+.prev-pct .grow{flex:1}
+
+/* ---------- Mobile : la fenêtre devient une page (§8.5) ---------- */
+@media (max-width:900px){
+  .onb{padding:0;place-items:stretch}
+  .onb-wrap{padding-top:0;width:100%;height:100dvh}
+  .onb-x{top:max(14px,calc(env(safe-area-inset-top,0px) + 4px));right:16px;z-index:3;box-shadow:none;background:var(--surface-2)}
+  .onb-card{grid-template-columns:minmax(0,1fr);border-radius:0;border:0;height:100dvh;box-shadow:none;animation:none}
+  .onb-side{display:none}
+  .onb-head{padding:max(12px,env(safe-area-inset-top,0px)) 20px 0}
+  .onb-nav{padding-right:48px;gap:8px}
+  .onb-body{padding:6px 20px 12px}
+  .onb-foot{padding:14px 20px 10px}
+  .onb-foot .btn-lg{flex:1;min-width:0}
+  .onb-foot .grow{display:none}
+  .onb-foot{flex-wrap:wrap;row-gap:8px}
+  .onb-foot .note{flex:1 0 100%;text-align:center}
+  .onb-legal{padding:0 20px calc(14px + env(safe-area-inset-bottom,0px))}
+  .onb-h h2,.ready h2{font-size:23px}
+}
+
+@media (max-width:420px){
+  .onb-h h2,.ready h2{font-size:21px}
+  .onb-head,.onb-body,.onb-foot,.onb-legal{padding-left:16px;padding-right:16px}
+  .otp{gap:6px}
+  .otp .inp{height:52px;font-size:20px}
+}
+
+/* ============================================================
+   Téléphone — sélecteur de pays à drapeau
+   ============================================================ */
+.tel{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px}
+
+.cc{position:relative}
+
+.phone-cnt{font-size:12px;text-align:right;color:var(--ink-3)}
+
+.phone-cnt.ok{color:var(--ok-ink)}
+
+.cc-btn{
+  height:48px;display:flex;align-items:center;gap:8px;padding:0 10px 0 12px;border-radius:var(--r-md);
+  background:var(--surface-3);border:1px solid var(--line);color:var(--ink);font-size:14px;
+  transition:border-color var(--t-fast),background var(--t-fast);
+}
+
+.cc-btn:hover{border-color:var(--line-strong)}
+
+.cc-btn[aria-expanded="true"]{border-color:var(--a-600);background:var(--surface)}
+
+.cc-btn .ic{width:15px;height:15px;color:var(--ink-3)}
+
+.flag{width:22px;height:15px;flex:0 0 auto;border-radius:2px;box-shadow:0 0 0 1px rgba(31,30,27,.12);display:block}
+
+.cc-list{
+  position:absolute;top:calc(100% + 6px);left:0;z-index:5;width:260px;max-height:236px;overflow-y:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-pop);padding:6px;
+  animation:pop var(--t) var(--ease) both;
+}
+
+.cc-list li{display:flex;align-items:center;gap:10px;height:38px;padding:0 10px;border-radius:var(--r-md);font-size:14px;cursor:pointer;outline:none}
+
+.cc-list li:hover,.cc-list li:focus{background:var(--surface-2)}
+
+.cc-list li:focus-visible{box-shadow:inset 0 0 0 2px var(--a-600)}
+
+.cc-list li[aria-selected="true"]{color:var(--a-700);font-weight:600}
+
+.cc-list .n{flex:1;min-width:0}
+
+.cc-list .mono{font-size:12.5px;color:var(--ink-3)}
+
+/* ============================================================
+   Photos — profil et couverture
+   ============================================================ */
+.up{display:flex;gap:18px;align-items:center}
+
+.up-zone{
+  width:112px;height:112px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  border:1.5px dashed var(--line-strong);background:var(--surface-2) center/cover no-repeat;color:var(--ink-3);
+  transition:border-color var(--t-fast),background-color var(--t-fast),color var(--t-fast);
+}
+
+.up-zone:hover{border-color:var(--a-600);color:var(--ink)}
+
+.up.has .up-zone{border:1px solid var(--line)}
+
+.up.drag .up-zone{border-color:var(--a-600);background-color:var(--a-50)}
+
+.up:focus-within .up-zone{outline:2px solid var(--a-600);outline-offset:2px}
+
+.up-in{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:600;text-align:center;padding:0 8px}
+
+.up-in .ic{width:22px;height:22px}
+
+.up-meta{min-width:0}
+
+.up-meta b{display:block;font-size:14px;font-weight:600;margin-bottom:2px}
+
+.up-meta .req{color:var(--bad)}
+
+.up-meta .row{margin-top:10px;flex-wrap:wrap;gap:8px}
+
+.up-meta label.btn{cursor:pointer}
+
+.up-cover{flex-direction:column;align-items:stretch;gap:12px}
+
+.up-cover .up-zone{width:100%;height:auto;aspect-ratio:16/7;border-radius:var(--r-lg)}
+
+.av-24{width:24px;height:24px}
+
+.pcard .cover.has-img{background-size:cover;background-position:center}
+
+@media (max-width:420px){.up:not(.up-cover){flex-direction:column;align-items:flex-start}}
+
+/* ============================================================
+   « Publier ma fiche » grisé mais cliquable, et sa note
+   ============================================================ */
+.btn.is-off{opacity:.42}
+
+.btn.is-off:hover{filter:none}
+
+.why{
+  position:relative;display:flex;gap:10px;align-items:flex-start;margin:0 32px 10px;padding:11px 40px 11px 13px;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);
+  font-size:13px;line-height:1.5;color:var(--ink-2);
+}
+
+.why.in{animation:rise var(--t) var(--ease) both}
+
+.why > .ic{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:var(--ink-3)}
+
+.why b{display:block;font-weight:600;color:var(--ink)}
+
+.why-x{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:var(--r-sm);display:grid;place-items:center;color:var(--ink-3)}
+
+.why-x:hover{background:var(--surface-3);color:var(--ink)}
+
+.why-x .ic{width:14px;height:14px}
+
+@media (max-width:900px){.why{margin:0 20px 10px}}
+
+@media (max-width:420px){.why{margin:0 16px 10px}}
+
+/* ============================================================
+   Tableau de bord — aperçu simplifié + rappel des photos
+   ============================================================ */
+.dash{position:fixed;inset:0;z-index:60;background:var(--ground);overflow-y:auto}
+
+.dash-top{position:sticky;top:0;z-index:2;height:60px;display:flex;align-items:center;gap:12px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+
+.dash-top .grow{flex:1}
+
+.dash-av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;background:var(--a-100) center/cover no-repeat;color:var(--a-700);font:600 14px var(--disp)}
+
+.dash-in{max-width:1000px;margin:0 auto;padding:32px 24px 96px;display:flex;flex-direction:column;gap:16px}
+
+.dash-h h1{font-size:30px;line-height:1.18}
+
+.dash-h p{color:var(--ink-2);margin-top:4px}
+
+.nudge{display:flex;align-items:center;gap:14px;padding:16px 18px;background:linear-gradient(160deg,var(--a-50),var(--surface) 65%);border-color:var(--a-200)}
+
+.nudge .grow{flex:1;min-width:0}
+
+.nudge b{display:block;font-size:14.5px;font-weight:600}
+
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+.stat .v{font-family:var(--disp);font-size:32px;font-weight:600;letter-spacing:-.015em;margin:6px 0 2px}
+
+.fiche-c{display:flex;align-items:center;gap:16px}
+
+@media (max-width:760px){
+  .stats{grid-template-columns:1fr}
+  .nudge{flex-wrap:wrap}
+  .nudge .btn{width:100%}
+  .dash-in{padding:20px 16px 96px}
+  .dash-h h1{font-size:22px}
+}
+
+#remind .ov-win{width:min(500px,100%)}
+
+#remind .up-zone{width:96px;height:96px}
+
+#remind .up-cover .up-zone{width:100%;height:auto}
+
+.rem-f{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+
+.ov-ok{display:flex;flex-direction:column;align-items:center;text-align:center;padding:10px 0 4px}
+
+.ov-ok .ov-t{margin:14px 0 8px}
+
+/* ============================================================
+   Atelier de travail — hors produit
+   Un panneau discret pour sauter d'une étape à l'autre, changer de
+   rôle ou de thème, et remplir un exemple. Il ne fait pas partie de
+   l'onboarding : supprimez-le (#wb) avant intégration.
+   ============================================================ */
+.wb{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:200;display:flex;flex-direction:column-reverse;align-items:flex-start;gap:10px}
+
+.wb-t{
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  background:var(--ink);color:var(--ground);box-shadow:var(--shadow-pop);
+  transition:transform var(--t) var(--ease);
+}
+
+.wb-t:hover{transform:translateY(-1px)}
+
+.wb-t .ic{width:19px;height:19px}
+
+.wb-p{
+  width:272px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+  box-shadow:var(--shadow-3);padding:14px;display:flex;flex-direction:column;gap:12px;
+  animation:pop var(--t) var(--ease) both;
+}
+
+.wb-p[hidden]{display:none!important}
+
+.wb-p .hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+
+.wb-p .hd b{font-family:var(--disp);font-size:16px;font-weight:600}
+
+.wb-p .field > label{font-size:12.5px;font-weight:600;color:var(--ink-3)}
+
+.wb-p select.inp{height:38px;font-size:14px;padding:0 10px}
+
+.wb-seg{display:grid;grid-template-columns:1fr 1fr;padding:3px;gap:2px;background:var(--surface-3);border-radius:var(--r-md)}
+
+.wb-seg button{height:32px;border-radius:var(--r-sm);font-size:13px;font-weight:600;color:var(--ink-2)}
+
+.wb-seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+
+.wb-p .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.wb-p .acts .btn{padding:0 10px}
+
+/* Sur mobile, la fenêtre occupe tout l'écran : l'atelier se range au
+   bord gauche, à mi-hauteur, loin des commandes du parcours. */
+@media (max-width:900px){
+  .wb{left:6px;bottom:auto;top:46%;flex-direction:column;align-items:flex-start}
+  .wb-t{width:34px;height:34px;opacity:.8}
+  .wb-t .ic{width:16px;height:16px}
+  .wb-p{width:min(272px,calc(100vw - 24px))}
+}
+
+.tm-shell .scene,.tm-shell #closed,.tm-shell #wb,.tm-shell #dash{display:none!important}
+
+.tm-shell,.tm-shell body{background:transparent!important}
+
+
+/* Page autonome : fond papier au lieu de la vitrine floutée. */
+.tm-shell,.tm-shell body{background:var(--ground)!important}

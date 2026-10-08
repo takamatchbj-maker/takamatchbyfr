@@ -1,0 +1,122 @@
+/* ============================================================
+   TakaMatch — variables
+   Couleurs, polices, rayons, espacements et ombres (clair + sombre).
+   Issus du design system (Figma → DESIGN.md). Toute la charte se règle ici.
+   ============================================================ */
+
+/* ============================================================
+   TakaMatch — tokens
+   Base : DESIGN.md (Warm Editorial System) — neutres papier,
+   sérif humaniste en titrage, rayons courts, ombres rares.
+   Écart assumé : l'accent terracotta est remplacé par les deux
+   couleurs de marque, or et bleu, pilotées par le rôle actif.
+   La discipline reste celle de DESIGN.md — l'accent n'apparaît
+   qu'à un ou deux endroits par écran, jamais en aplat de fond.
+   ============================================================ */
+:root{
+  /* Neutres chauds — DESIGN.md §3 */
+  --ground:#F4F1EA; --surface:#FAF9F5; --surface-2:#F2EFE7; --surface-3:#EDE9E0;
+  --line:#E4E0D6; --line-strong:#D2CCBC;
+  /* Les deux encres secondaires ont été assombries : à #8A8579 le texte
+     tertiaire ne donnait que 3,4:1 sur le papier — sous le seuil AA. */
+  --ink:#1F1E1B; --ink-2:#5D5A52; --ink-3:#706C5E; --ink-4:#8C8779;
+
+  /* Ombres : réservées aux calques flottants. Les cartes se posent
+     sur un filet, pas sur une ombre (DESIGN.md §6). */
+  --shadow-1:none;
+  --shadow-2:0 1px 2px rgba(31,30,27,.05),0 8px 20px -10px rgba(31,30,27,.14);
+  --shadow-3:0 4px 10px -4px rgba(31,30,27,.10),0 22px 48px -16px rgba(31,30,27,.26);
+  --shadow-pop:0 10px 30px -10px rgba(31,30,27,.30);
+
+  /* Marque — les deux 500 sont vos hex d'origine, intacts.
+     Les paliers voisins sont retendus pour tenir sur le papier. */
+  --tal-50:#EAF0F6; --tal-100:#DAE6F1; --tal-200:#BCD3E8; --tal-300:#8DB7DC;
+  --tal-500:#007CD8; --tal-600:#0A65AE; --tal-700:#0A5C99; --tal-800:#083F69;
+  --vis-50:#F7F1DD; --vis-100:#F2E6BE; --vis-200:#EBD694; --vis-300:#E3C258;
+  --vis-500:#FFD741; --vis-600:#C9941A; --vis-700:#8A6008; --vis-800:#5E4106;
+
+  /* Sémantique — DESIGN.md §3, jamais confondue avec l'accent */
+  --ok:#4B7F52; --ok-bg:#E8EFE5; --ok-ink:#3A6640;
+  /* Encre posée sur un aplat sémantique plein (pastille de compteur). */
+  --on-bad:#fff;
+  --warn:#B07D2E; --warn-bg:#F5EDDC; --warn-ink:#7D5715;
+  --bad:#B54A3F; --bad-bg:#F4E5E1; --bad-ink:#93372E;
+
+  /* Rayons — DESIGN.md §5 : courts et constants, 6 à 10 px.
+     Au-delà de 12 px seulement pour les grands calques. */
+  --r-xs:4px; --r-sm:6px; --r-md:8px; --r-lg:10px; --r-xl:12px; --r-2xl:16px; --r-pill:999px;
+
+  /* Espacement — base 8 (DESIGN.md §5) */
+  --s1:8px; --s2:16px; --s3:24px; --s4:32px; --s5:48px; --s6:64px; --s7:96px;
+
+  --ease:cubic-bezier(.22,1,.36,1); --ease-in:cubic-bezier(.4,0,1,1);
+  --t-fast:.13s; --t:.22s; --t-slow:.38s;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --disp:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  /* Accent par défaut = Talent */
+  --a-50:var(--tal-50); --a-100:var(--tal-100); --a-200:var(--tal-200); --a-300:var(--tal-300);
+  --a-500:var(--tal-500); --a-600:var(--tal-600); --a-700:var(--tal-700);
+  --a-on:#fff;
+  --a-edge:var(--tal-600);
+  --a-glow:rgba(0,124,216,.18);
+  /* Couleur « de l'autre » : un Talent voit ses interlocuteurs en or,
+     un Visionnaire les voit en bleu. La conversation garde deux voix. */
+  --o-50:var(--vis-50); --o-100:var(--vis-100); --o-700:var(--vis-700);
+}
+
+:root[data-role="vis"]{
+  --a-50:var(--vis-50); --a-100:var(--vis-100); --a-200:var(--vis-200); --a-300:var(--vis-300);
+  --a-500:var(--vis-500); --a-600:var(--vis-500); --a-700:var(--vis-700);
+  --a-on:#4A3500;              /* encre sombre sur l'or : 11:1 au lieu de 1,6:1 */
+  --a-edge:var(--vis-600);     /* l'or sur papier crème a besoin d'un filet */
+  --a-glow:rgba(201,148,26,.22);
+  --o-50:var(--tal-50); --o-100:var(--tal-100); --o-700:var(--tal-700);
+}
+
+:root[data-theme="dark"]{
+  --ground:#1A1815; --surface:#22201C; --surface-2:#282521; --surface-3:#302C27;
+  --line:#37332D; --line-strong:#4A453D;
+  --ink:#F2EFE8; --ink-2:#BDB7AC; --ink-3:#A49E92; --ink-4:#8B857A;
+  --shadow-2:0 1px 2px rgba(0,0,0,.4),0 8px 20px -10px rgba(0,0,0,.6);
+  --shadow-3:0 4px 10px -4px rgba(0,0,0,.45),0 22px 48px -16px rgba(0,0,0,.7);
+  --shadow-pop:0 10px 30px -10px rgba(0,0,0,.65);
+  --tal-50:#14252F; --tal-100:#1A3244; --tal-200:#25475F; --tal-300:#3A6E92;
+  --tal-500:#3FA3EE; --tal-600:#5CB4F5; --tal-700:#9CD1FA;
+  --vis-50:#2A2308; --vis-100:#3B300C; --vis-200:#514111; --vis-300:#735C17;
+  --vis-500:#FFD741; --vis-600:#FFD741; --vis-700:#F0CE6F;
+  --ok:#7FA886; --ok-bg:#1C2A1E; --ok-ink:#9DC2A3;
+  --warn:#D2A44E; --warn-bg:#2C2312; --warn-ink:#E0BC77;
+  --bad:#D4796D; --bad-bg:#2E1B18; --bad-ink:#E5A196; --on-bad:#2E1512;
+  --a-on:#08283F;
+  --a-edge:var(--tal-600);
+}
+
+:root[data-theme="dark"][data-role="vis"]{ --a-on:#2A2308; --a-edge:var(--vis-300); }
+
+.tint-tal{--t1:#007CD8;--t2:#035587;--t-on:#fff}
+
+.tint-tal.soft{--t1:#3D9FE4;--t2:#007CD8}
+
+.tint-tal.deep{--t1:#035587;--t2:#054C77}
+
+.tint-vis{--t1:#FFD741;--t2:#DD9F21;--t-on:#3D2B00}
+
+.tint-vis.soft{--t1:#FFE890;--t2:#FFD741}
+
+.tint-vis.deep{--t1:#DD9F21;--t2:#CC9305}
+
+/* En sombre, on descend d'un cran dans la rampe : les mêmes couleurs,
+   posées sur du noir, éblouissaient. */
+:root[data-theme="dark"] .tint-tal{--t1:#0A65AE;--t2:#04405F}
+
+:root[data-theme="dark"] .tint-tal.soft{--t1:#2C8FD3;--t2:#0A65AE}
+
+:root[data-theme="dark"] .tint-tal.deep{--t1:#054C77;--t2:#032F4B}
+
+:root[data-theme="dark"] .tint-vis{--t1:#EFC63C;--t2:#C9941A}
+
+:root[data-theme="dark"] .tint-vis.soft{--t1:#FFDE6E;--t2:#EFC63C}
+
+:root[data-theme="dark"] .tint-vis.deep{--t1:#C9941A;--t2:#A3760C}

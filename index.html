@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr" data-page="site">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TakaMatch — la plateforme de cofondation pour l'Afrique de l'Ouest</title>
+<meta name="description" content="TakaMatch réunit ceux qui portent un projet et ceux qui ont les compétences pour le bâtir — comme cofondateurs, pas comme client et prestataire.">
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1815" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="TakaMatch — Connecter, co-créer, impacter">
+<meta property="og:description" content="La plateforme de cofondation pour l'Afrique de l'Ouest. Une idée seule ne suffit pas ; une compétence seule non plus.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<!-- ============================================================
+     TMGuard — filet de sécurité commun à toutes les pages TakaMatch
+     · écran de chargement tant que la page n'est pas prête
+     · message clair si la page plante (au lieu d'un écran blanc)
+     · bandeau hors connexion
+     · TMGuard.fetch : délai maximum, nouvelles tentatives, messages lisibles
+     Pour brancher un outil de suivi d'erreurs plus tard (Sentry…) :
+     TMGuard.onError = err => { ... }
+     ============================================================ -->
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages/vitrine.css">
+<script src="js/main.js"></script>
+</head>
+<body>
+<div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
+
+<div id="site" class="site scroll"></div>
+<div class="ov" id="ov" hidden><div class="ov-bg" data-act="ov-close"></div><div class="ov-win" role="dialog" aria-modal="true" aria-label="Fenêtre"></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="js/pages/vitrine.js"></script>
+</body>
+</html>

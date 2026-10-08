@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr" data-page="onb" class="tm-shell">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TakaMatch — Rejoindre</title>
+<meta name="description" content="Les interfaces d'onboarding de TakaMatch, isolées du prototype H et mises au design system v1.1.">
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1815" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<!-- ============================================================
+     TMGuard — filet de sécurité commun à toutes les pages TakaMatch
+     · écran de chargement tant que la page n'est pas prête
+     · message clair si la page plante (au lieu d'un écran blanc)
+     · bandeau hors connexion
+     · TMGuard.fetch : délai maximum, nouvelles tentatives, messages lisibles
+     Pour brancher un outil de suivi d'erreurs plus tard (Sentry…) :
+     TMGuard.onError = err => { ... }
+     ============================================================ -->
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages/inscription.css">
+<script src="js/main.js"></script>
+</head>
+<body>
+<div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
+<!-- Le décor : la vitrine derrière la fenêtre (papier et halos du hero). -->
+<div class="scene" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+
+<!-- Fenêtre fermée : les deux portes d'entrée de la vitrine. -->
+<main class="closed" id="closed" hidden>
+  <div class="in">
+    <span class="brand"><img class="brand-logo" src="assets/images/logo-principal.svg" alt="TakaMatch"></span>
+    <h1>Rejoindre <span class="gt">TakaMatch</span></h1>
+    <p>La fenêtre d'onboarding est fermée. Rouvre-la par l'une des deux portes de la vitrine.</p>
+    <div class="row">
+      <button class="btn btn-go btn-lg" data-act="open-onb">Commencer</button>
+      <button class="btn btn-ghost btn-lg" data-act="open-onb" data-mode="login">Se connecter</button>
+    </div>
+  </div>
+</main>
+
+<!-- L'onboarding. -->
+<div id="onb" hidden></div>
+
+<!-- Atelier de travail : hors produit, à retirer avant intégration. -->
+<div class="wb" id="wb"></div>
+
+<!-- Tableau de bord simplifié (arrivée après l'onboarding). -->
+<div class="dash" id="dash" hidden></div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="js/pages/inscription.js"></script>
+</body>
+</html>
