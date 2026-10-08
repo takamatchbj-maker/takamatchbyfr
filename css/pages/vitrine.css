@@ -1381,6 +1381,7 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 
 @media (max-width:520px){.hero-ey{max-width:30ch}}
 
+.hero-ey svg.hero-rk{width:18px;height:18px;vertical-align:-3px;margin-right:7px;display:inline-block}
 .hero-ey svg.ic{width:17px;height:17px;color:var(--vis-700);transform:rotate(-15deg);vertical-align:-3px;margin-right:6px;display:inline-block}
 
 /* Illustrations des fiches projet + voile or du rôle visionnaire. */
