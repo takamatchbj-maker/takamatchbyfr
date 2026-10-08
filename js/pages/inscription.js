@@ -724,7 +724,7 @@ function renderOnb(){
         + '<div class="col" style="gap:12px">'
         +   '<div class="field"><label for="otp0">Code reçu<span class="req" aria-hidden="true">*</span></label>'
         +   '<div class="otp" role="group" aria-label="Code à 6 chiffres">'
-        +     [0,1,2,3,4,5].map(k => '<input class="inp" id="otp'+k+'" inputmode="numeric" autocomplete="'+(k?'off':'one-time-code')+'" maxlength="1" aria-label="Chiffre '+(k+1)+'" value="'+esc(O.code[k]||'')+'">').join('')
+        +     [0,1,2,3,4,5].map(k => '<input class="inp" id="otp'+k+'" inputmode="numeric" autocomplete="'+(k?'off':'one-time-code')+'" maxlength="6" aria-label="Chiffre '+(k+1)+'" value="'+esc(O.code[k]||'')+'">').join('')
         +   '</div></div>'
         +   '<p class="hint">Il expire dans <span class="mono">10 min</span>. Pense à regarder dans les indésirables.</p>'
         +   '<div class="otp-act"><button class="linkbtn" data-act="onb-resend">Renvoyer le code</button>'
@@ -1644,12 +1644,31 @@ document.addEventListener('input', e => {
     if(digits.length > 1){
       digits.slice(0, 6 - i).split('').forEach((d,k) => { boxes[i+k].value = d; });
       boxes[Math.min(5, i + digits.length)].focus();
+      syncCode(); otpAutoSubmit(); return;
     } else {
       el.value = digits;
       if(digits && i < 5) boxes[i+1].focus();
     }
     syncCode();
   }
+});
+/* Code collé (Ctrl+V, clic droit, presse-papiers du téléphone) : les 6 chiffres
+   se répartissent dans les cases, quelle que soit la case choisie, puis le code part tout seul. */
+function otpAutoSubmit(){
+  if(O.code.length !== 6 || O.sending) return;
+  const b = $('#onbMain'); if(b && !b.disabled) setTimeout(() => { if(O.code.length === 6 && !O.sending) b.click(); }, 150);
+}
+document.addEventListener('paste', e => {
+  const el = e.target; if(!(el && el.closest && el.closest('.otp'))) return;
+  const txt = ((e.clipboardData || window.clipboardData) && (e.clipboardData || window.clipboardData).getData('text')) || '';
+  const digits = txt.replace(/\D/g,'');
+  if(!digits) { e.preventDefault(); return; }
+  e.preventDefault();
+  const boxes = $$('.otp .inp');
+  const start = digits.length >= 6 ? 0 : boxes.indexOf(el);
+  digits.slice(0, 6 - start).split('').forEach((d,k) => { boxes[start+k].value = d; });
+  boxes[Math.min(5, start + digits.length - 1)].focus();
+  syncCode(); otpAutoSubmit();
 });
 /* On ne corrige pas quelqu'un qui est encore en train d'écrire. */
 document.addEventListener('focusout', e => {
