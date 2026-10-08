@@ -535,9 +535,9 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 </script>
 <!-- Espace équipe en ligne : comptes, rôles, prix et journal dans Supabase. -->
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
-<script src="js/supabase.js?v=20261008f"></script>
-<script src="js/geo.js?v=20261008f"></script>
-<script src="js/prix.js?v=20261008f"></script>
+<script src="js/supabase.js?v=20261008g"></script>
+<script src="js/geo.js?v=20261008g"></script>
+<script src="js/prix.js?v=20261008g"></script>
 </head>
 <body>
 <div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
@@ -605,7 +605,7 @@ const P = {
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8h.01"/>',
   refresh:'<path d="M20.5 11A8.5 8.5 0 0 0 6 6.5L3.5 9"/><path d="M3.5 4v5h5"/><path d="M3.5 13a8.5 8.5 0 0 0 14.5 4.5L20.5 15"/><path d="M20.5 20v-5h-5"/>',
 };
-const ic = (n, cls) => '<svg class="ic '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||'')+'</svg>';
+const ic = (n, cls) => n === 'verif' ? '<svg class="ic '+(cls||'')+'" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="'+VB_PATH+'"/></svg>' : '<svg class="ic '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||'')+'</svg>';
 
 /* ---------- Utilitaires ---------- */
 const $ = (s, r) => (r||document).querySelector(s);
@@ -643,7 +643,7 @@ const csv = rows => rows.map(r => r.map(c => '"'+String(c==null?'':c).replace(/"
    ============================================================ */
 const MODULES = [
   {id:'overview', l:'Vue d\'ensemble', i:'home', grp:'Pilotage'},
-  {id:'verifs', l:'Vérifications', i:'shield', grp:'Pilotage'},
+  {id:'verifs', l:'Vérifications', i:'verif', grp:'Pilotage'},
   {id:'reports', l:'Signalements', i:'flag', grp:'Pilotage'},
   {id:'support', l:'Support', i:'help', grp:'Pilotage'},
   {id:'users', l:'Utilisateurs', i:'users', grp:'Plateforme'},
@@ -979,7 +979,7 @@ VIEWS.overview = () => {
   const paid = D.payments.filter(p => p.status === 'ok');
   const mrev = paid.filter(p => now - p.at < 30*DAY).reduce((a, p) => a + p.amount, 0), prev = paid.filter(p => now - p.at >= 30*DAY && now - p.at < 60*DAY).reduce((a, p) => a + p.amount, 0);
   const todo = [
-    ['verifs', D.verifs.filter(v => v.status === 'pending').length, 'dossiers de vérification à traiter', 'shield'],
+    ['verifs', D.verifs.filter(v => v.status === 'pending').length, 'dossiers de vérification à traiter', 'verif'],
     ['reports', D.reports.filter(r => r.status === 'new').length, 'nouveaux signalements', 'flag'],
     ['support', D.tickets.filter(t => t.status === 'open').length, 'messages au support sans réponse', 'help'],
     ['teams', D.teams.filter(t => t.state === 'dispute').length, 'litige d\'équipe ouvert', 'tools'],
@@ -1002,7 +1002,7 @@ VIEWS.overview = () => {
     + '<div class="grid g4" style="margin-bottom:14px">'
     +   kpi('users', 'Inscrits', nf(u.length), '+'+new7+' cette semaine', true)
     +   kpi('users', 'Talents · Visionnaires', tal+' · '+vis, both+(both > 1 ? ' comptes' : ' compte')+' avec les deux profils')
-    +   kpi('shield', 'Profils vérifiés', Math.round(ver/u.length*100)+' %', ver+' comptes sur '+u.length)
+    +   kpi('verif', 'Profils vérifiés', Math.round(ver/u.length*100)+' %', ver+' comptes sur '+u.length)
     +   (canSee('payments') || A.me.role === 'super' ? kpi('coins', 'Encaissé (30 jours)', fcfa(mrev), (prev ? (mrev >= prev ? '+' : '')+Math.round((mrev - prev)/prev*100)+' % vs les 30 jours précédents' : ''), mrev >= prev)
                                                      : kpi('tools', 'Ateliers actifs', D.teams.length, D.teams.filter(t => t.pacte).length+' pactes commandés'))
     + '</div>'

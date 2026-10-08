@@ -64,6 +64,8 @@ const P = {
   book:'<path d="M4 4.5A2 2 0 0 1 6 2.5h13v15H6a2 2 0 0 0-2 2z"/><path d="M4 19.5a2 2 0 0 0 2 2h13v-4"/>',
 };
 function ic(n, cls){
+  /* Badge de vérification : l'icône officielle (pleine), partout où il est question de vérifier un profil. */
+  if(n === 'verif') return '<svg class="ic ic-verif '+(cls||'')+'" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="'+VB_PATH+'"/></svg>';
   return '<svg class="ic '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||'')+'</svg>';
 }
 
@@ -1167,7 +1169,7 @@ document.addEventListener('click', e => {
           + '<div style="font-size:13px;font-weight:600;color:var(--ink-2)">'+l[0]+'</div><div class="hint" id="'+l[1]+'N">Choisir une photo</div>'
           + '<input type="file" accept="image/*" id="'+l[1]+'" class="sr"></label>').join('')+'</div>',
         '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-a" data-act="verify-id-go">Envoyer</button>'); break;
-    case 'verify-id-go': S.me.verifiedId = true; closeLayer(); confetti(); render(); toast('Identité vérifiée. Badge obtenu.', 'ok'); pushNotif('shield','Profil vérifié','Le badge de confiance est actif.'); break;
+    case 'verify-id-go': S.me.verifiedId = true; closeLayer(); confetti(); render(); toast('Identité vérifiée. Badge obtenu.', 'ok'); pushNotif('verif','Profil vérifié','Le badge de confiance est actif.'); break;
     case 'ask-ref': modal('Demander une référence',
         '<p>Une personne avec qui tu as réellement travaillé confirme en trois clics ce que vous avez fait ensemble. C\'est le signal le plus difficile à falsifier.</p>'
         + field('refMail','Son adresse email','<input class="inp" id="refMail" type="email" placeholder="collegue@exemple.com">')
@@ -2292,7 +2294,7 @@ function vFiche(){
     +       '<div class="fiche-kv"><b>Sexe</b> · '+SEX_L[m.sex||'n']+' <span class="dim" style="font-size:12.5px">(visible après un match)</span> · <a href="#" data-act="edit-account">Modifier</a></div>'
     +       '<div class="fiche-kv"><b>'+(tal?'Compétences clés':'Compétences recherchées')+'</b> · <span class="dim">'+esc(sk.slice(0,3).map(skillL).join(', ') || 'à renseigner')+'</span></div></div>'
     +     '<div class="fiche-id-a"><span id="ficheRing">'+ringHTML(c.pct, 72, kind)+'</span>'
-    +       (m.verifiedId ? '' : m.verifyPending ? '<span class="vpend">'+ic('clock')+'Vérification en cours</span>' : '<button class="btn btn-ghost btn-sm" data-act="verify-id">'+ic('shield')+'Faire vérifier mon profil</button>')+'</div></div>'
+    +       (m.verifiedId ? '' : m.verifyPending ? '<span class="vpend">'+ic('clock')+'Vérification en cours</span>' : '<button class="btn btn-ghost btn-sm" data-act="verify-id">'+ic('verif', isTalMode() ? 'tal' : 'vis')+'Faire vérifier mon profil</button>')+'</div></div>'
     +   '<div class="fiche-id-f"><div class="fiche-tools">'
     +     '<button class="btn btn-ghost btn-sm" data-act="stats">'+ic('chart')+'Statistiques de '+(tal?'ta fiche':'cette fiche')+'</button>'
     +     '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="'+esc(myHandle())+'" data-l="Pseudo">'+ic('copy')+'<span class="mono">'+esc(myHandle())+'</span></button>'
@@ -3416,7 +3418,7 @@ function vFiche(){
     +       '<div class="fiche-kv"><b>Sexe</b> · '+SEX_L[m.sex||'n']+' <span class="dim" style="font-size:12.5px">(visible après un match)</span> · <a href="#" data-act="edit-account">Modifier</a></div>'
     +       '<div class="fiche-kv"><b>'+(kind === 'vis' ? 'Compétences recherchées' : 'Compétences clés')+'</b> · <span class="dim">'+esc(sk.slice(0,3).map(skillL).join(', ') || 'à renseigner')+'</span></div></div>'
     +     '<div class="fiche-id-a"><span id="ficheRing">'+ringHTML(c.pct, 72, kind)+'</span>'
-    +       (m.verifiedId ? '' : m.verifyPending ? '<span class="vpend">'+ic('clock')+'Vérification en cours</span>' : '<button class="btn btn-ghost btn-sm" data-act="verify-id">'+ic('shield')+'Faire vérifier mon profil</button>')+'</div></div>'
+    +       (m.verifiedId ? '' : m.verifyPending ? '<span class="vpend">'+ic('clock')+'Vérification en cours</span>' : '<button class="btn btn-ghost btn-sm" data-act="verify-id">'+ic('verif', isTalMode() ? 'tal' : 'vis')+'Faire vérifier mon profil</button>')+'</div></div>'
     +   (perso ? '' : '<div class="fiche-id-f"><div class="fiche-tools">'
     +     '<button class="btn btn-ghost btn-sm" data-act="stats">'+ic('chart')+'Statistiques de '+(tal?'ta fiche':'cette fiche')+'</button>'
     +     '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="'+esc(myHandle())+'" data-l="Pseudo">'+ic('copy')+'<span class="mono">'+esc(myHandle())+'</span></button>'
@@ -3915,6 +3917,8 @@ function vBadge(role, ok){
   const css = `
 .vbadge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;white-space:nowrap;line-height:1;vertical-align:middle}
 .vbadge svg{width:15px;height:15px;flex:0 0 auto}
+.ic-verif.tal{color:#007CD8}.ic-verif.vis{color:#E2A70F}
+:root[data-theme="dark"] .ic-verif.tal{color:#3FA3EE}:root[data-theme="dark"] .ic-verif.vis{color:#FFD741}
 .vb-tal svg{fill:#007CD8}.vb-tal span{color:var(--tal-700)}
 .vb-vis svg{fill:#E2A70F}.vb-vis span{color:var(--vis-700)}
 .vb-off svg{fill:#D3CEC3}.vb-off span{color:var(--ink-3);font-weight:500}
@@ -4224,7 +4228,7 @@ document.addEventListener('click', async e => {
   tmBus('verify-request', {user:tmUserCard(), doc, selfie});
   closeLayer(); render();
   success('Dossier envoyé', 'L\'équipe TakaMatch vérifie que ta pièce d\'identité et ton selfie correspondent à ton nom légal. Réponse sous <b>48 h</b> ; le badge '+vBadge(isTalMode() ? 'tal' : 'vis', true)+' s\'affiche dès la validation.');
-  pushNotif('shield', 'Vérification en cours', 'Ton dossier est entre les mains de l\'équipe TakaMatch.');
+  pushNotif('verif', 'Vérification en cours', 'Ton dossier est entre les mains de l\'équipe TakaMatch.');
 }, true);
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act="report-go"]'); if(!t) return;
@@ -4247,11 +4251,11 @@ function tmHandleStaff(m){
   if(m.type === 'verify-decision'){
     me.verifyPending = false;
     if(d.ok){ me.verifiedId = true; confetti(); toast('Ton profil est vérifié. Badge obtenu.', 'ok');
-      pushNotif('shield', 'Profil vérifié', 'L\'équipe TakaMatch a validé ton identité. Le badge est actif.'); }
+      pushNotif('verif', 'Profil vérifié', 'L\'équipe TakaMatch a validé ton identité. Le badge est actif.'); }
     else if(d.more){ toast('L\'équipe TakaMatch a besoin d\'un complément pour ta vérification.', 'bad');
-      pushNotif('shield', 'Complément demandé', d.motif || 'Renvoie une photo plus nette de ta pièce d\'identité.'); }
+      pushNotif('verif', 'Complément demandé', d.motif || 'Renvoie une photo plus nette de ta pièce d\'identité.'); }
     else { toast('Ta vérification n\'a pas abouti. Motif : '+(d.motif || 'non précisé')+'.', 'bad');
-      pushNotif('shield', 'Vérification refusée', d.motif || 'Tu peux renvoyer un dossier.'); }
+      pushNotif('verif', 'Vérification refusée', d.motif || 'Tu peux renvoyer un dossier.'); }
     render();
   }
   if(m.type === 'support-reply'){ toast('Nouvelle réponse de l\'équipe TakaMatch.', 'ok'); pushNotif('help', 'Réponse du support', d.text || ''); }
