@@ -388,8 +388,14 @@ const FICHE_KEYS = ['skills','sectors','level','diploma','status','avail','pace'
 
 
 
-function getPath(k){ return k.startsWith('p.') ? S.me.project[k.slice(2)] : S.me[k]; }
-function setPath(k, v){ if(k.startsWith('p.')) S.me.project[k.slice(2)] = v; else S.me[k] = v; }
+/* « p. » : la fiche projet active · « x. » : la fiche perso (distincte de la fiche Talent). */
+function persoOf(m){ m = m || S.me; if(!m.perso) m.perso = {skills:[], level:'', bio:'', portfolio:'', portfolioTitle:'', noPortfolio:false}; return m.perso; }
+function getPath(k){ return k.startsWith('p.') ? S.me.project[k.slice(2)] : k.startsWith('x.') ? persoOf()[k.slice(2)] : S.me[k]; }
+function setPath(k, v){ if(k.startsWith('p.')) S.me.project[k.slice(2)] = v; else if(k.startsWith('x.')) persoOf()[k.slice(2)] = v; else S.me[k] = v; }
+/* Deux fiches, deux contenus : on copie l'une dans l'autre au moment où la seconde naît, puis elles vivent séparément. */
+const PERSO_KEYS = ['skills','level','bio','portfolio','portfolioTitle','noPortfolio'];
+function copyPersoToTalent(m){ const x = persoOf(m); PERSO_KEYS.forEach(k => { m[k] = structuredClone(x[k]); }); }
+function copyTalentToPerso(m){ const x = persoOf(m); PERSO_KEYS.forEach(k => { x[k] = structuredClone(m[k] == null ? (Array.isArray(x[k]) ? [] : '') : m[k]); }); }
 
 function optBtn(act, key, val, label, pressed, radio, plain){
   return '<button type="button" class="opt'+(radio?' radio':'')+(plain?' opt-plain':'')+'" data-act="'+act+'" data-k="'+key+'" data-v="'+esc(val)+'" aria-pressed="'+(pressed?'true':'false')+'">'
@@ -2011,7 +2017,7 @@ function scoreTalent(t, me){
    rows : [libellé, rempli, poids, ligne complète] */
 function rulesData(kind){
   const m = S.me, p = m.project || {};
-  if(kind === 'perso') return {skills:m.skills, level:m.level, bio:m.bio, portfolio:m.portfolio, noPortfolio:m.noPortfolio};
+  if(kind === 'perso'){ const x = persoOf(m); return {skills:x.skills, level:x.level, bio:x.bio, portfolio:x.portfolio, noPortfolio:x.noPortfolio}; }
   return {first:m.first, last:m.last, handle:m.handle, city:m.city, skills:m.skills, level:m.level, diploma:m.diploma, status:m.status,
     sectors:m.sectors, pace:m.pace, bio:m.bio, portfolio:m.portfolio, noPortfolio:m.noPortfolio,
     project:{title:p.title, sectors:p.sectors, seeking:p.seeking, pace:p.pace, offer:p.pay, hook:p.hook, vision:p.vision,
@@ -2660,6 +2666,7 @@ function doUnlock(btn){
   payThen({kind:'second', key:'second', label:'Second profil · Visionnaire', amount:priceOf('second').charged}, btn, () => {
     const m = S.me;
     m.visUnlocked = true; m.visSince = new Date(); if(!m.fresh) m.slots = Math.max(m.slots, 2);
+    if(!(persoOf(m).skills || []).length && !persoOf(m).bio) copyTalentToPerso(m);
     S.payments.unshift(...(m.fresh ? [] : [{d:today(), l:'Emplacement projet n° 2 · démo', a:priceOf('slot').charged, op:S.pay.op, ref:S.pay.ref, cc:S.pay.cc}]), {d:today(), l:'Second profil · Visionnaire', a:priceOf('second').charged, op:S.pay.op, ref:S.pay.ref, cc:S.pay.cc});
     closeLayer(); confetti();
     if(S.view === 'fiche' && isDirty()) commitFiche();
@@ -3346,17 +3353,31 @@ function navIcon(n){ return n.id === 'fiche' ? (isTalMode() ? 'idcard' : 'cards'
 /* ---------- Mes fiches : fiche projet active ou fiche perso ---------- */
 function ficheKind(){ return isTalMode() ? 'tal' : (S.ficheTab === 'perso' ? 'perso' : 'vis'); }
 const personal = () => ficheKind() !== 'vis';
-function ficheSnap(){ return JSON.stringify(personal() ? TAL_KEYS.map(k => S.me[k]) : S.me.project); }
-function saveBaseline(){ S.saved = {snap:ficheSnap(), kind:ficheKind(), idx:S.me.projIdx,
-  data:structuredClone(personal() ? TAL_KEYS.map(k => S.me[k]) : S.me.project)}; }
+function ficheData(){ const k = ficheKind(); return k === 'perso' ? persoOf() : k === 'tal' ? TAL_KEYS.map(x => S.me[x]) : S.me.project; }
+function ficheSnap(){ return JSON.stringify(ficheData()); }
+function saveBaseline(){ S.saved = {snap:ficheSnap(), kind:ficheKind(), idx:S.me.projIdx, data:structuredClone(ficheData())}; }
 function isDirty(){ return !!S.saved && S.saved.kind === ficheKind() && S.saved.idx === S.me.projIdx && S.saved.snap !== ficheSnap(); }
 function restoreBaseline(){
   if(!S.saved) return;
-  if(S.saved.kind !== 'vis') TAL_KEYS.forEach((k, i) => S.me[k] = structuredClone(S.saved.data[i]));
+  if(S.saved.kind === 'perso') S.me.perso = structuredClone(S.saved.data);
+  else if(S.saved.kind !== 'vis') TAL_KEYS.forEach((k, i) => S.me[k] = structuredClone(S.saved.data[i]));
   else S.me.projects[S.saved.idx] = structuredClone(S.saved.data);
 }
-function ficheFields(){ return ficheKind() === 'vis' ? projectFields() : talentFields(); }
-function meAsPerso(){ return Object.assign(meAsTalent(), {role:'vis'}); }
+function persoFields(){
+  const x = persoOf();
+  return '<p class="fiche-note">Ta fiche perso est facultative et <b>distincte de ta fiche Talent</b> : elle présente la personne qui porte tes projets.</p>'
+  + fsec('tools', 'Tes compétences clés', false, optList(SKILLS, 'f-multi', 'x.skills', x.skills), 'Choisis-en 2 à 4 : ce que toi, tu apportes à ton projet.')
+  + fsec('trend', "Ton niveau d'expérience", false, optList(LEVEL, 'f-one', 'x.level', x.level, 'opt-row', true))
+  + fsec('quote', 'Ta signature', false, area('xbio', 'x.bio', 420, "Ton parcours, pourquoi ce problème te tient à cœur, ce que tu as déjà fait.", x.bio),
+      "Un talent rejoint une personne autant qu'une idée. "+TMRules.MIN.persoBio+" caractères au moins pour compter.")
+  + fsec('link', 'Ton lien portfolio', false,
+      '<div class="grid g2" style="gap:10px">'
+      + '<input class="inp" id="xportfolioTitle" data-k="x.portfolioTitle" placeholder="LinkedIn, site, article…" value="'+esc(x.portfolioTitle || '')+'" aria-label="Titre du lien"'+(x.noPortfolio ? ' disabled' : '')+'>'
+      + '<input class="inp" id="xportfolio" data-k="x.portfolio" placeholder="linkedin.com/in/tonnom" value="'+esc(x.portfolio || '')+'" aria-label="Adresse du lien"'+(x.noPortfolio ? ' disabled' : '')+'></div>'
+      + noneBox('x.noPortfolio', x.noPortfolio, 'Je n\'ai pas de lien à montrer'), 'Visible seulement après un match.');
+}
+function ficheFields(){ const k = ficheKind(); return k === 'vis' ? projectFields() : k === 'perso' ? persoFields() : talentFields(); }
+function meAsPerso(){ const x = persoOf(); return Object.assign(meAsTalent(), {skills:x.skills, level:x.level, bio:x.bio, portfolio:x.noPortfolio ? '' : x.portfolio, role:'vis'}); }
 function ownerOf(p){
   const o = OWNERS[p.id]; if(!o) return null;
   return Object.assign({id:p.id, name:p.owner, handle:p.ownerHandle, city:p.ownerCity, verified:p.ownerVerified, pace:p.pace, hue:p.hue + 1, role:'vis'}, o);
@@ -3365,14 +3386,14 @@ function ownerOf(p){
 function previewCard(){
   const m = S.me, kind = ficheKind();
   if(kind !== 'vis'){
-    const sk = m.skills.slice(0,3), role = kind === 'perso' ? 'vis' : 'tal';
+    const src = kind === 'perso' ? persoOf() : m, sk = (src.skills || []).slice(0,3), role = kind === 'perso' ? 'vis' : 'tal';
     return '<article class="pcard person" aria-label="Aperçu de ta fiche '+(kind === 'perso' ? 'perso' : 'Talent')+'">'
       + '<div class="cover '+tintCls(role, m.avatarHue)+'" style="'+tintAng(m.avatarHue)+'">'
       +   '<span class="portrait">'+avatarOf({id:'me', name:myName(), hue:m.avatarHue}, 72, false, role)+'</span></div>'
       + '<div class="body">'
       +   '<h3 class="masked-name">'+esc(maskName(myName()))+'</h3>'
       +   '<div class="who"><span class="handle">'+esc(myHandle())+'</span><span class="sep">·</span>'+esc(cityOf(m.city)[0]||'—')+'</div>'
-      +   (m.bio ? '<p class="ex">'+esc(m.bio)+'</p>' : '<div class="col" style="gap:5px;width:100%"><div class="skel" style="height:9px"></div><div class="skel" style="height:9px;width:70%"></div></div>')
+      +   (src.bio ? '<p class="ex">'+esc(src.bio)+'</p>' : '<div class="col" style="gap:5px;width:100%"><div class="skel" style="height:9px"></div><div class="skel" style="height:9px;width:70%"></div></div>')
       +   (sk.length ? '<div class="chips"><span class="chips-l">Compétences :</span>'+sk.map(s => '<span class="chip '+(role === 'vis' ? 'chip-vis' : 'chip-tal')+'">'+esc(skillL(s))+'</span>').join('')+'</div>' : '<div class="skel" style="height:22px;width:74%"></div>')
       + '</div></article>';
   }
@@ -3395,7 +3416,7 @@ function persoCard(){
 function vFiche(){
   const m = S.me, tal = isTalMode(), kind = ficheKind(), c = completion(kind), p = m.project, perso = kind === 'perso';
   if(!S.saved || S.saved.kind !== kind) saveBaseline();
-  const sk = kind === 'vis' ? p.seeking : m.skills;
+  const sk = kind === 'vis' ? p.seeking : kind === 'perso' ? persoOf().skills : m.skills;
   const link = 'takamatch.bj/'+myHandle();
   const title = tal ? 'Ta fiche <span class="acc">Talent</span>'
     : 'Tes fiches · <span class="acc">'+(perso ? 'Ta fiche perso' : esc(projName(p)))+'</span>';
@@ -3802,6 +3823,7 @@ function tmSecondTalHTML(){
     payThen({kind:'second', key:'second', label:'Second profil · Talent', amount:priceOf('second').charged}, btn, () => {
       const m = S.me;
       m.visUnlocked = true; m.visSince = new Date();
+      copyPersoToTalent(m);   /* la fiche Talent part de la fiche perso, puis vit sa vie */
       S.payments.unshift({d:today(), l:'Second profil · Talent', a:priceOf('second').charged, op:S.pay.op, ref:S.pay.ref, cc:S.pay.cc});
       closeLayer(); confetti();
       if(S.view === 'fiche' && isDirty()) commitFiche();
@@ -3850,6 +3872,7 @@ function tmSecondTalHTML(){
     } else {
       const x = o.perso || {}, p = o.project || {};
       Object.assign(m, {skills:x.skills || [], level:x.level || '', bio:x.bio || '', portfolio:x.portfolio || '', noPortfolio:!!x.noPortfolio, pace:o.pace || 'serieux'});
+      m.perso = {skills:(x.skills || []).slice(), level:x.level || '', bio:x.bio || '', portfolio:x.portfolio || '', portfolioTitle:x.portfolioTitle || '', noPortfolio:!!x.noPortfolio};
       m.projects = [Object.assign(blankProject(), {
         title:p.title || '', sectors:p.sectors || [], seeking:p.seeking || [], hook:p.hook || '', vision:p.vision || '',
         traction:p.traction || '', challenges:p.challenges || '', link:p.link || '', noLink:!!p.noLink, pace:o.pace || 'serieux',

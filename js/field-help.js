@@ -42,6 +42,11 @@
     assets:{t:'Ce que tu as déjà sécurisé : financement, agrément, matériel, local, partenaires. Ça rassure le talent sur ce qu\'il n\'aura pas à construire.', ex:['« 6 M FCFA de subvention, un local prêté par la mairie d\'Abomey. »']},
     challenges:{t:'Ce qui te bloque aujourd\'hui, et pourquoi tu cherches un cofondateur. Le talent y voit où il peut t\'aider.', ex:['« Je suis médecin, pas développeur : le prototype atteint ses limites. »']},
     link:{t:'Une page où l\'on peut voir ton projet : site, page Facebook, vidéo de démonstration… Pas encore de page ? Coche la case.', ex:['tchekopay.com', 'facebook.com/kanvo.abomey']},
+    /* Fiche perso du porteur : elle présente la personne derrière le projet, pas un candidat. */
+    perso_skills:{t:'Ce que toi, porteur, apportes à ton projet. Les talents y voient ce que tu fais déjà, et donc ce qu\'ils viendraient compléter. 2 à 4 au maximum.', ex:['Un porteur commercial : « Vente & Partenariats » + « Finance & Levée »', 'Une porteuse agronome : « Opérations terrain »']},
+    perso_level:{t:'Ton niveau dans les compétences que tu apportes au projet. Débutant : moins de 2 ans. Intermédiaire : 2 à 5 ans. Expert : plus de 5 ans.', ex:['10 ans de vente en entreprise → Expert']},
+    perso_bio:{t:'Qui tu es derrière le projet : ton parcours, pourquoi ce problème te tient à cœur, ce que tu as déjà fait. Un talent rejoint une personne autant qu\'une idée.', ex:['« Infirmière pendant 10 ans à Parakou, j\'ai vu des dossiers de patients se perdre chaque semaine. J\'ai lancé Kèkè Santé pour que ça n\'arrive plus. »']},
+    perso_portfolio:{t:'Un lien qui montre ton parcours : LinkedIn, article de presse, site de ton activité… Visible seulement après un match. Pas de lien ? Coche la case.', ex:['Titre « LinkedIn », adresse « linkedin.com/in/tonnom »']},
     invite:{t:'Dis en deux phrases pourquoi cette personne, et ce que tu apportes. Un message précis obtient trois fois plus de réponses qu\'un message type.', ex:['« Ta section Défis me parle : j\'ai déjà monté une API de paiement pour 200 marchands. »']},
     support:{t:'Décris ce qui se passe, ce que tu as essayé, et sur quel appareil. Pour un paiement, ajoute la référence.', ex:['« Mes crédits n\'apparaissent pas. Paiement Moov, référence MP26107788. »']}
   };
@@ -68,7 +73,12 @@
     if(f && BY_FOR[f]) return BY_FOR[f];
     var txt = norm(el.childNodes.length ? Array.prototype.map.call(el.childNodes, function(n){ return n.nodeType === 3 ? n.textContent : ''; }).join(' ') : el.textContent);
     if(!txt) txt = norm(el.textContent);
-    for(var i = 0; i < RULES.length; i++) if(RULES[i][0].test(txt)) return RULES[i][1];
+    for(var i = 0; i < RULES.length; i++) if(RULES[i][0].test(txt)){
+      var k = RULES[i][1];
+      /* Dans la fiche perso, l'aide parle du porteur, pas d'un candidat. */
+      if(el.closest && el.closest('.perso-form, [data-help-ctx="perso"]') && HELP['perso_' + k]) return 'perso_' + k;
+      return k;
+    }
     return null;
   }
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }

@@ -29,7 +29,7 @@
     lastProf:'', lastIdent:'', lastPriv:'', lastProj:{}, lastAt:{}, busy:false};
 
   /* ---------- Lecture ---------- */
-  const PROF_COLS = 'id,handle,city,country,photo_url,avatar_hue,primary_role,skills,sectors,level,diploma,status,pace,bio,portfolio_url,portfolio_title,no_portfolio,talent_online,verified_id,is_demo,account_status,updated_at';
+  const PROF_COLS = 'id,handle,city,country,photo_url,avatar_hue,primary_role,skills,sectors,level,diploma,status,pace,bio,portfolio_url,portfolio_title,no_portfolio,talent_online,verified_id,is_demo,account_status,updated_at,perso';
   async function loadAll(){
     const sel = (t, q) => DB.select(t, q).catch(e => { console.warn('[TakaMatch]', t, e.message); return []; });
     const r = await Promise.all([
@@ -107,8 +107,10 @@
     Object.keys(TALENT_PROJECTS).forEach(k => delete TALENT_PROJECTS[k]);
     PROJECTS.forEach(x => {
       const o = D.prof.get(x.ownerId);
-      if(o && (o.skills || []).length && o.bio) OWNERS[x.id] = {skills:o.skills, level:o.level, sectors:o.sectors || [], bio:o.bio,
-        portfolio:o.portfolio_url || '', rate:'', avail:'dispo', sex:sexOf(o.id)};
+      const ps = o && o.perso && Object.keys(o.perso).length ? o.perso : null;
+      const src = ps ? {skills:ps.skills || [], level:ps.level || '', bio:ps.bio || '', portfolio:ps.noPortfolio ? '' : (ps.portfolio || '')}
+                     : o ? {skills:o.skills || [], level:o.level, bio:o.bio, portfolio:o.portfolio_url || ''} : null;
+      if(src && (src.skills || []).length && src.bio) OWNERS[x.id] = Object.assign(src, {sectors:(o && o.sectors) || [], rate:'', avail:'dispo', sex:sexOf(o.id)});
       if(!x.hidden && !TALENT_PROJECTS[x.ownerId]) TALENT_PROJECTS[x.ownerId] = {title:x.title, sectors:x.sectors, seeking:x.seeking,
         pace:x.pace, pay:x.pay, hue:x.hue, hook:x.hook, vision:x.vision, traction:x.traction, assets:x.assets, challenges:x.challenges, link:x.link};
     });
@@ -134,6 +136,10 @@
       portfolio:p.portfolio_url || '', portfolioTitle:p.portfolio_title || '', noPortfolio:!!p.no_portfolio,
       first:id.first_name || m.first || '', last:id.last_name || m.last || '', phone:pv.phone || m.phone || '',
       country:p.country || m.country || '', avatarHue:p.avatar_hue || m.avatarHue});
+    /* Fiche perso : sa propre colonne ; à défaut (anciens comptes), les champs du profil. */
+    const ps = p.perso && Object.keys(p.perso).length ? p.perso : null;
+    m.perso = ps ? {skills:ps.skills || [], level:ps.level || '', bio:ps.bio || '', portfolio:ps.portfolio || '', portfolioTitle:ps.portfolioTitle || '', noPortfolio:!!ps.noPortfolio}
+                 : {skills:(p.skills || []).slice(), level:p.level || '', bio:p.bio || '', portfolio:p.portfolio_url || '', portfolioTitle:p.portfolio_title || '', noPortfolio:!!p.no_portfolio};
     m.credits = a.credits != null ? a.credits : m.credits;
     m.creditsMax = Math.max(3, m.credits);
     m.slots = a.project_slots || 1;
@@ -560,7 +566,8 @@
   function profSnap(){
     const m = S.me, row = {city:m.city || '', pace:m.pace || 'serieux', skills:m.skills || [], sectors:m.sectors || [], level:m.level || '',
       diploma:m.diploma || '', status:m.status || '', bio:m.bio || '', portfolio_url:m.noPortfolio ? '' : (m.portfolio || ''),
-      portfolio_title:m.noPortfolio ? '' : (m.portfolioTitle || ''), no_portfolio:!!m.noPortfolio, handle:m.handle || null};
+      portfolio_title:m.noPortfolio ? '' : (m.portfolioTitle || ''), no_portfolio:!!m.noPortfolio, handle:m.handle || null,
+      perso:m.perso || {}};
     if(D.acc && D.acc.has_talent) row.talent_online = !!m.online;
     if(m.photo && !/^data:/.test(m.photo)) row.photo_url = m.photo;
     return JSON.stringify(row);

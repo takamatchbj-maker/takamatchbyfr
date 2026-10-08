@@ -155,7 +155,8 @@
       skills:ME.skills || [], sectors:ME.sectors || [], level:ME.level || '', diploma:ME.diploma || '', status:ME.status || '',
       bio:ME.bio || '', portfolio_url:ME.noPortfolio ? '' : (ME.portfolio || ''), portfolio_title:ME.noPortfolio ? '' : (ME.portfolioTitle || ''), no_portfolio:!!ME.noPortfolio, talent_online:true
     } : {
-      skills:x.skills || [], level:x.level || '', bio:x.bio || '', portfolio_url:x.noPortfolio ? '' : (x.portfolio || ''), no_portfolio:!!x.noPortfolio
+      skills:x.skills || [], level:x.level || '', bio:x.bio || '', portfolio_url:x.noPortfolio ? '' : (x.portfolio || ''), no_portfolio:!!x.noPortfolio,
+      perso:{skills:x.skills || [], level:x.level || '', bio:x.bio || '', portfolio:x.noPortfolio ? '' : (x.portfolio || ''), portfolioTitle:x.portfolioTitle || '', noPortfolio:!!x.noPortfolio}
     }));
     await DB.update('profile_identity', 'id=eq.' + id, {first_name:ME.first, last_name:ME.last, sex:{m:'m', f:'f'}[ME.sex] || 'n'});
     if(ME.phone) await DB.update('profile_private', 'id=eq.' + id, {phone:fullPhone()});

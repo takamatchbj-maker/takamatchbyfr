@@ -818,7 +818,7 @@ function renderOnb(){
   else if(O.step === PERSO){
     body = '<div class="onb-h"><h2>Ta fiche perso<span class="opt-tag">Facultatif</span></h2>'
       + "<p>L'humain derrière le projet : les talents peuvent l'ouvrir depuis ta fiche projet. Pas de statistiques ici, et elle ne bloque pas la publication.</p></div>"
-      + '<div class="col" style="gap:24px" id="persoForm">' + persoFields() + '</div>';
+      + '<div class="col" style="gap:24px" id="persoForm" data-help-ctx="perso">' + persoFields() + '</div>';
     foot = onbFoot(a, '<button class="btn btn-ghost btn-lg" data-act="perso-skip">Passer cette étape</button>');
   }
 
