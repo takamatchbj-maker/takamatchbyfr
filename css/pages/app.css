@@ -2169,3 +2169,10 @@ button.likebtn:hover{background:var(--surface-3);color:var(--ink)}
 @keyframes fsecBad{0%,55%{background:var(--bad-bg);box-shadow:0 0 0 8px var(--bad-bg);border-radius:var(--r-md)}100%{background:transparent;box-shadow:0 0 0 8px transparent}}
 
 @media (prefers-reduced-motion:reduce){.fsec-hl-bad{animation-duration:.8s}}
+
+/* Sections incomplètes : petit texte rouge et case « Pas encore de lien » (règles : js/fiche-rules.js). */
+.fsec-err{margin:8px 0 0;font-size:13px;line-height:1.4;color:var(--bad-ink)}
+.none-chk{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+.none-chk input{width:16px;height:16px;margin:0;accent-color:var(--a-600);cursor:pointer}
+.inp:disabled{opacity:.55;cursor:not-allowed}
+.fsec-miss .fsec-c:not(:has(textarea, input.inp)){outline:1.5px solid var(--bad);outline-offset:6px;border-radius:var(--r-md)}

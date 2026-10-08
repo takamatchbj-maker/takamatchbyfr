@@ -141,20 +141,21 @@
     if(!dataUrl) return '';
     if(!/^data:/.test(dataUrl)) return /^https?:/.test(dataUrl) ? dataUrl : '';
     const blob = DB.dataUrlToBlob(dataUrl); if(!blob) return '';
-    return DB.upload(bucket, DB.uid() + '/' + name + '-' + Date.now() + '.jpg', blob);
+    try{ return await DB.upload(bucket, DB.uid() + '/' + name + '-' + Date.now() + '.jpg', blob); }
+    catch(e){ e.message = (bucket === 'covers' ? 'Image de couverture : ' : 'Photo de profil : ') + e.message; throw e; }
   }
   async function saveAll(){
     const id = DB.uid(); if(!id) throw new Error('Ta session a expiré. Reconnecte-toi.');
     const tal = ME.role === 'tal', x = ME.perso || {}, p = ME.project || {};
     const photo = await uploadImage('avatars', ME.photo, 'photo');
     await DB.update('profiles', 'id=eq.' + id, Object.assign({
-      handle:ME.handle, city:ME.city, country:ME.cc || null, primary_role:ME.role, pace:ME.pace || 'serieux',
+      handle:ME.handle, city:ME.city, country:ME.cityCc || ME.cc || null, primary_role:ME.role, pace:ME.pace || 'serieux',
       photo_url:photo, onboarded_at:new Date().toISOString()
     }, tal ? {
       skills:ME.skills || [], sectors:ME.sectors || [], level:ME.level || '', diploma:ME.diploma || '', status:ME.status || '',
-      bio:ME.bio || '', portfolio_url:ME.portfolio || '', portfolio_title:ME.portfolioTitle || '', talent_online:true
+      bio:ME.bio || '', portfolio_url:ME.noPortfolio ? '' : (ME.portfolio || ''), portfolio_title:ME.noPortfolio ? '' : (ME.portfolioTitle || ''), no_portfolio:!!ME.noPortfolio, talent_online:true
     } : {
-      skills:x.skills || [], level:x.level || '', bio:x.bio || '', portfolio_url:x.portfolio || ''
+      skills:x.skills || [], level:x.level || '', bio:x.bio || '', portfolio_url:x.noPortfolio ? '' : (x.portfolio || ''), no_portfolio:!!x.noPortfolio
     }));
     await DB.update('profile_identity', 'id=eq.' + id, {first_name:ME.first, last_name:ME.last, sex:{m:'m', f:'f'}[ME.sex] || 'n'});
     if(ME.phone) await DB.update('profile_private', 'id=eq.' + id, {phone:fullPhone()});
@@ -162,7 +163,7 @@
       const cover = await uploadImage('covers', p.cover, 'couverture');
       const row = {title:p.title || '', glyph:(typeof projIcon === 'function' && projIcon()) || '💡', cover_url:cover,
         sectors:p.sectors || [], seeking:p.seeking || [], hook:p.hook || '', vision:p.vision || '', traction:p.traction || '',
-        challenges:p.challenges || '', link:p.link || '', pace:ME.pace || 'serieux', offer:p.offer || 'equity', online:true};
+        challenges:p.challenges || '', link:p.noLink ? '' : (p.link || ''), no_link:!!p.noLink, pace:ME.pace || 'serieux', offer:p.offer || 'equity', online:true};
       const mine = await DB.select('projects', 'owner_id=eq.' + id + '&select=id&order=created_at.asc&limit=1');
       if(mine && mine[0]) await DB.update('projects', 'id=eq.' + mine[0].id, row);
       else await DB.insert('projects', Object.assign({owner_id:id}, row));

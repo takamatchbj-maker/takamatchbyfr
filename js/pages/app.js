@@ -505,6 +505,14 @@ function fsec(icon, label, req, body, help){
     + '<div class="fsec-b"><span class="fsec-i" aria-hidden="true">'+ic(icon)+'</span>'
     + '<div class="fsec-c">'+(help?'<p class="hint">'+esc(help)+'</p>':'')+body+'</div></div></section>';
 }
+/* Villes proposées : toutes celles du pays de la personne, au format « Ville, Pays » (js/geo.js). */
+function cityDatalist(cur){
+  const cc = TMGeo.split(cur).cc || S.me.country || 'BJ', c = TMGeo.country(cc);
+  return '<datalist id="e3List">'+c.v.map(v => '<option value="'+esc(v+', '+c.n)+'">').join('')+'</datalist>';
+}
+function noneBox(key, on, label){
+  return '<label class="none-chk"><input type="checkbox" data-k="'+key+'"'+(on ? ' checked' : '')+'><span>'+esc(label)+'</span></label>';
+}
 function area(id, k, max, ph, val){
   return '<textarea class="inp" id="'+id+'" data-k="'+k+'" maxlength="'+max+'" placeholder="'+esc(ph)+'">'+esc(val)+'</textarea>'
     + '<div class="cnt-r" data-cnt="'+id+'" data-max="'+max+'"></div>';
@@ -1256,7 +1264,7 @@ document.addEventListener('click', e => {
     case 'edit-account': modal('Modifier mon compte',
         '<div class="grid g2" style="gap:12px">'+field('e1','Prénom(s)','<input class="inp" id="e1" value="'+esc(S.me.first)+'">')
         + field('e2','Nom','<input class="inp" id="e2" value="'+esc(S.me.last)+'" disabled>')+'</div>'
-        + field('e3','Ville','<input class="inp" id="e3" value="'+esc(S.me.city)+'">')
+        + field('e3','Ville','<input class="inp" id="e3" list="e3List" autocomplete="off" value="'+esc(S.me.city)+'">'+cityDatalist(S.me.city))
         + '<div class="field"><label>Sexe</label><div class="opt-row" role="radiogroup" aria-label="Sexe">'+['m','f','n'].map(k =>
             '<button class="opt radio" data-act="sex-pick" data-v="'+k+'" aria-pressed="'+(S.me.sex===k)+'"><span class="box">'+tick()+'</span><span>'+SEX_L[k]+'</span></button>').join('')+'</div>'
         + '<p class="hint">Visible seulement après un match. Il ne compte ni dans le score ni dans les filtres.</p></div>'
@@ -1299,9 +1307,21 @@ document.addEventListener('submit', e => {
   }
 });
 
+/* Fiche : une case quittée avec du texte peut afficher son erreur en rouge. */
+document.addEventListener('focusout', e => {
+  const el = e.target;
+  if(el && el.closest && el.closest('#ficheForm') && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'checkbox')) && String(el.value || '').trim()){
+    el.dataset.touched = '1'; markRequired();
+  }
+}, true);
 /* Saisie */
 document.addEventListener('input', e => {
   const el = e.target;
+  if(el.dataset && el.dataset.k && el.closest('#ficheForm') && el.type === 'checkbox'){
+    setPath(el.dataset.k, el.checked); el.dataset.touched = '1';
+    const sec = el.closest('.fsec'); if(sec) $$('input.inp', sec).forEach(i => { i.disabled = el.checked; });
+    syncFiche(); markRequired(); return;
+  }
   if(el.dataset && el.dataset.k && el.closest('#ficheForm')){ setPath(el.dataset.k, el.value); syncFiche(); return; }
   if(el.id === 'q'){ S.q = el.value; S.focusIdx = 0; repaintExplorer(); return; }
   if(el.id === 'invMsg'){ syncCounters(); return; }
@@ -2030,9 +2050,9 @@ const DEMO_PROJECTS = [
 ];
 function blankProject(){
   return {id:'PRJ-'+uid().slice(1,7).toUpperCase(), title:'', glyph:'💡', photo:'', likes:0, sectors:[], seeking:[],
-    hook:'', vision:'', traction:'', assets:'', challenges:'', link:'', pace:'serieux', pay:'equity', online:false};
+    hook:'', vision:'', traction:'', assets:'', challenges:'', link:'', noLink:false, pace:'serieux', pay:'equity', online:false};
 }
-const MIN_TXT = 10;
+const MIN_TXT = TMRules.MIN.hook;   /* minimums réels : js/fiche-rules.js */
 const MAX_PROJ = 3, PRICE_VIS = 3000, PRICE_SLOT = 5000, REINVITE_DAYS = 30;
 function attachProjectGetter(me){
   Object.defineProperty(me, 'project', {configurable:true, enumerable:false,
@@ -2120,36 +2140,20 @@ function scoreTalent(t, me){
 }
 
 /* ---------- Complétion ---------- */
+/* Règles communes à l'inscription et à l'outil : js/fiche-rules.js.
+   rows : [libellé, rempli, poids, ligne complète] */
+function rulesData(kind){
+  const m = S.me, p = m.project || {};
+  if(kind === 'perso') return {skills:m.skills, level:m.level, bio:m.bio, portfolio:m.portfolio, noPortfolio:m.noPortfolio};
+  return {first:m.first, last:m.last, handle:m.handle, city:m.city, skills:m.skills, level:m.level, diploma:m.diploma, status:m.status,
+    sectors:m.sectors, pace:m.pace, bio:m.bio, portfolio:m.portfolio, noPortfolio:m.noPortfolio,
+    project:{title:p.title, sectors:p.sectors, seeking:p.seeking, pace:p.pace, offer:p.pay, hook:p.hook, vision:p.vision,
+      traction:p.traction, challenges:p.challenges, link:p.link, noLink:p.noLink}};
+}
 function completion(kind){
-  const m = S.me, r = [];
   kind = kind || ficheKind();
-  if(kind === 'tal' || kind === 'perso'){
-    r.push(['Nom et prénoms', !!(m.first && m.last), 6]);
-    r.push(['Pseudo public', !!m.handle, 5]);
-    r.push(['Ville', !!m.city, 5]);
-    r.push(['Compétences clés', m.skills.length >= 2, 18]);
-    r.push(["Niveau d'expérience", !!m.level, 6]);
-    r.push(['Diplôme le plus élevé', !!m.diploma, 6]);
-    r.push(['Statut professionnel', !!m.status, 6]);
-    r.push(["Secteurs qui t'attirent", m.sectors.length >= 1, 10]);
-    r.push(['Rythme', !!m.pace, 12]);
-    r.push(['Signature personnelle', (m.bio||'').trim().length >= MIN_TXT, 15]);
-    r.push(['Lien portfolio', !!m.portfolio, 5]);
-  } else {
-    const p = m.project;
-    r.push(['Nom et prénoms', !!(m.first && m.last), 5]);
-    r.push(['Pseudo public', !!m.handle, 5]);
-    r.push(['Titre du projet', !!p.title, 8]);
-    r.push(['Secteurs du projet', p.sectors.length >= 1, 10]);
-    r.push(['Compétences recherchées', p.seeking.length >= 1, 18]);
-    r.push(['Le Hook', (p.hook||'').trim().length >= MIN_TXT, 16]);
-    r.push(['La Vision', (p.vision||'').length >= 60, 12]);
-    r.push(['La Traction', (p.traction||'').length >= 40, 10]);
-    r.push(['Les Défis', (p.challenges||'').length >= 40, 10]);
-    r.push(['Lien externe', !!p.link, 6]);
-  }
-  const done = r.filter(x => x[1]).reduce((a,b) => a+b[2], 0), tot = r.reduce((a,b) => a+b[2], 0);
-  return {pct:Math.round(done/tot*100), rows:r};
+  const R = TMRules.rows(kind, rulesData(kind));
+  return {pct:TMRules.pct(R), rows:R.map(r => [r.label, r.ok, r.w, r])};
 }
 
 /* ---------- Avatars : photo floue avant le match, nette après ---------- */
@@ -2378,14 +2382,15 @@ function talentFields(){
   + fsec('briefcase', 'Ton statut professionnel', true, optList(STATUS, 'f-one', 'status', m.status, 'opt-wrap', true))
   + fsec('compass', "Les secteurs qui t'attirent", true, '<div class="opt-row">'+SECTORS.map(s => optBtn('f-multi','sectors',s.id,s.g+' '+esc(s.l),m.sectors.includes(s.id))).join('')+'</div>')
   + fsec('clock', 'Combien de temps peux-tu vraiment donner ?', true, paceOpts('pace'), isTalMode() ? "C'est la première cause d'échec d'une cofondation. Sois honnête, pas ambitieux. Ce que chaque projet propose (parts, rémunération) est indiqué sur sa fiche." : "Le temps que tu consacres toi-même à tes projets. Les talents le voient sur ta fiche perso.")
-  + fsec('link', 'Ton lien portfolio', false,
+  + fsec('link', 'Ton lien portfolio', true,
       '<div class="grid g2" style="gap:10px">'
-      + '<input class="inp" id="portfolioTitle" data-k="portfolioTitle" placeholder="GitHub, Behance, LinkedIn…" value="'+esc(m.portfolioTitle)+'" aria-label="Titre du lien">'
-      + '<input class="inp" id="portfolio" data-k="portfolio" placeholder="github.com/tonpseudo" value="'+esc(m.portfolio)+'" aria-label="Adresse du lien"></div>',
+      + '<input class="inp" id="portfolioTitle" data-k="portfolioTitle" placeholder="GitHub, Behance, LinkedIn…" value="'+esc(m.portfolioTitle)+'" aria-label="Titre du lien"'+(m.noPortfolio ? ' disabled' : '')+'>'
+      + '<input class="inp" id="portfolio" data-k="portfolio" placeholder="github.com/tonpseudo" value="'+esc(m.portfolio)+'" aria-label="Adresse du lien"'+(m.noPortfolio ? ' disabled' : '')+'></div>'
+      + noneBox('noPortfolio', m.noPortfolio, 'Je n\'ai pas encore de portfolio'),
       'Visible seulement après un match.')
   + fsec('quote', 'Ta signature personnelle', true,
       area('bio', 'bio', 420, "Ce que tu sais faire, ce que tu as déjà livré, et le type de projet que tu cherches.", m.bio),
-      "Deux ou trois phrases concrètes valent mieux qu'un paragraphe de généralités. 10 caractères au moins.");
+      "Deux ou trois phrases concrètes valent mieux qu'un paragraphe de généralités. "+TMRules.MIN.bio+" caractères au moins.");
 }
 function projectFields(){
   const p = S.me.project;
@@ -2398,12 +2403,13 @@ function projectFields(){
   + fsec('tools', 'Les compétences que tu recherches', true, optList(SKILLS, 'f-multi', 'p.seeking', p.seeking), 'Elles pèsent 54 points sur 100 dans le score : ce sont elles qui décident qui te voit en haut de liste.')
   + fsec('clock', 'Quel rythme attends-tu de ton cofondateur ?', true, paceOpts('p.pace'))
   + fsec('coins', 'Ce que tu proposes aux talents', true, payOpts('p.pay'), "C'est affiché sur ta fiche, et les talents peuvent filtrer les projets qui prévoient une rémunération.")
-  + fsec('zap', 'Le Hook', true, area('hook','p.hook',400,"Le problème que tu résous, en une ou deux phrases. Un chiffre vaut mieux qu'une intention.",p.hook), "Présente le problème que ton projet résout. Impact : capte l'attention en trois secondes. 10 caractères au moins.")
-  + fsec('rocket', 'La Vision', false, area('vision','p.vision',320,"Ce que le projet devient dans cinq ans si tout va bien.",p.vision), "Impact : permet au talent d'adhérer à ton ambition.")
-  + fsec('trend', 'La Traction actuelle', false, area('traction','p.traction',320,"Prototype, utilisateurs, premiers revenus, partenariats signés…",p.traction), "Impact : c'est la section qui fait la différence entre une idée et un projet.")
+  + fsec('zap', 'Le Hook', true, area('hook','p.hook',400,"Le problème que tu résous, en une ou deux phrases. Un chiffre vaut mieux qu'une intention.",p.hook), "Présente le problème que ton projet résout. Impact : capte l'attention en trois secondes. "+TMRules.MIN.hook+" caractères au moins.")
+  + fsec('rocket', 'La Vision', true, area('vision','p.vision',320,"Ce que le projet devient dans cinq ans si tout va bien.",p.vision), "Impact : permet au talent d'adhérer à ton ambition. "+TMRules.MIN.vision+" caractères au moins.")
+  + fsec('trend', 'La Traction actuelle', true, area('traction','p.traction',320,"Prototype, utilisateurs, premiers revenus, partenariats signés…",p.traction), "Impact : c'est la section qui fait la différence entre une idée et un projet. "+TMRules.MIN.traction+" caractères au moins.")
   + fsec('shield', 'Les Ressources sécurisées', false, area('assets','p.assets',320,"Financements, agréments, matériel, locaux, partenaires déjà acquis.",p.assets), "Impact : rassure sur ce que le talent n'aura pas à construire.")
-  + fsec('target', 'Les Défis', false, area('challenges','p.challenges',320,"Ce qui te bloque aujourd'hui et pour quoi tu cherches de l'aide.",p.challenges), "Impact : aide le talent à voir où il apporterait de la valeur.")
-  + fsec('link', 'Lien externe', false, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'">');
+  + fsec('target', 'Les Défis', true, area('challenges','p.challenges',320,"Ce qui te bloque aujourd'hui et pour quoi tu cherches de l'aide.",p.challenges), "Impact : aide le talent à voir où il apporterait de la valeur. "+TMRules.MIN.challenges+" caractères au moins.")
+  + fsec('link', 'Lien externe', true, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'"'+(p.noLink ? ' disabled' : '')+'>'
+      + noneBox('p.noLink', p.noLink, 'Mon projet n\'a pas encore de site ni de page'), 'Site, page Facebook, LinkedIn, vidéo de démonstration…');
 }
 function ficheFields(){ return isTalMode() ? talentFields() : projectFields(); }
 
@@ -3753,7 +3759,8 @@ const RMD_KEY = {
   'Nom et prénoms':'@acct', 'Pseudo public':'@acct', 'Ville':'@acct', 'Compétences clés':'compétences', "Niveau d'expérience":'niveau',
   'Diplôme le plus élevé':'diplôme', 'Statut professionnel':'statut', "Secteurs qui t'attirent":'secteurs', 'Rythme':'temps',
   'Signature personnelle':'signature', 'Lien portfolio':'portfolio', 'Titre du projet':'titre', 'Secteurs du projet':'secteurs',
-  'Compétences recherchées':'compétences', 'Le Hook':'hook', 'La Vision':'vision', 'La Traction':'traction', 'Les Défis':'défis', 'Lien externe':'lien externe'};
+  'Compétences recherchées':'compétences', 'Le Hook':'hook', 'La Vision':'vision', 'La Traction':'traction', 'Les Défis':'défis', 'Lien externe':'lien externe',
+  'Rythme attendu':'rythme', 'Ce que tu proposes':'proposes'};
 let rmdT = null;
 function scheduleReminder(delay){
   clearTimeout(rmdT);
@@ -3835,13 +3842,12 @@ S.me.phone = S.me.phone || '+229 01 97 45 25 63';
 function phoneLocal(){ return String(S.me.phone || '').replace(/^\+\d{1,3}\s*/, ''); }
 
 /* ---------- Sections obligatoires : une fiche incomplète ne peut pas être en ligne ---------- */
-const REQ_ROWS = {
-  tal:['Compétences clés', "Niveau d'expérience", 'Diplôme le plus élevé', 'Statut professionnel', "Secteurs qui t'attirent", 'Rythme', 'Signature personnelle'],
-  vis:['Titre du projet', 'Secteurs du projet', 'Compétences recherchées', 'Le Hook'],
-};
+/* Toutes les sections d'une fiche Talent ou projet sont obligatoires (fiche perso : facultative). */
 const REQ_LABEL = {'Compétences clés':'Compétences clés (2 au moins)', 'Compétences recherchées':'Compétences recherchées (1 au moins)',
-  'Signature personnelle':'Signature personnelle (10 caractères min.)', 'Le Hook':'Le Hook (10 caractères min.)'};
-function isReqRow(label, kind){ kind = kind || (isTalMode() ? 'tal' : 'vis'); return (REQ_ROWS[kind] || []).includes(label) ? 1 : 0; }
+  'Signature personnelle':'Signature personnelle ('+TMRules.MIN.bio+' caractères min.)', 'Le Hook':'Le Hook ('+TMRules.MIN.hook+' caractères min.)',
+  'La Vision':'La Vision ('+TMRules.MIN.vision+' caractères min.)', 'La Traction':'La Traction ('+TMRules.MIN.traction+' caractères min.)',
+  'Les Défis':'Les Défis ('+TMRules.MIN.challenges+' caractères min.)', 'Lien portfolio':'Lien portfolio (ou « pas encore »)', 'Lien externe':'Lien externe (ou « pas encore »)'};
+function isReqRow(label, kind){ kind = kind || (isTalMode() ? 'tal' : 'vis'); return kind === 'perso' ? 0 : 1; }
 /* Le rythme et la proposition d'un projet ont toujours une valeur : ils ne peuvent pas manquer. */
 function missingReq(kind){
   kind = kind || (isTalMode() ? 'tal' : 'vis');
@@ -3849,13 +3855,17 @@ function missingReq(kind){
   return completion(kind).rows.filter(r => !r[1] && isReqRow(r[0], kind)).map(r => r[0]);
 }
 /* Mène à la première section qui bloque, avec un message qui dit exactement pourquoi. */
+const TXT_FIELDS = {'Signature personnelle':['bio', TMRules.MIN.bio], 'Le Hook':['hook', TMRules.MIN.hook], 'La Vision':['vision', TMRules.MIN.vision],
+  'La Traction':['traction', TMRules.MIN.traction], 'Les Défis':['challenges', TMRules.MIN.challenges]};
 function explainMissing(miss){
-  const first = miss[0], txt = {'Signature personnelle':'bio', 'Le Hook':'hook'}[first];
+  const first = miss[0], tf = TXT_FIELDS[first];
   let msg;
-  if(txt){ const f = document.getElementById(txt), n = f ? f.value.trim().length : 0; if(f) f.dataset.tried = '1';
-    msg = txt === 'hook' ? 'Le Hook doit faire au moins '+MIN_TXT+' caractères : il en a '+n+'.' : 'Ta signature doit faire au moins '+MIN_TXT+' caractères : elle en a '+n+'.'; }
-  else msg = 'Pour être en ligne, remplis : '+miss.map(l => (REQ_LABEL[l] || l).toLowerCase()).join(', ')+'.';
-  if(txt && miss.length > 1) msg += ' Il te manque aussi : '+miss.slice(1).map(l => (REQ_LABEL[l] || l).toLowerCase()).join(', ')+'.';
+  if(tf){ const f = document.getElementById(tf[0]), n = f ? f.value.trim().length : 0; if(f) f.dataset.tried = '1';
+    msg = first+' doit faire au moins '+tf[1]+' caractères : '+n+' pour l\'instant.'; }
+  else msg = 'Pour être en ligne, complète : '+miss.map(l => (REQ_LABEL[l] || l).toLowerCase()).join(', ')+'.';
+  if(tf && miss.length > 1) msg += ' Il te manque aussi : '+miss.slice(1).map(l => (REQ_LABEL[l] || l).toLowerCase()).join(', ')+'.';
+  $$('#ficheForm textarea').forEach(t => { t.dataset.tried = '1'; });
+  S.ficheTried = true;
   markRequired();
   const secs = $$('#ficheForm .fsec'), k = RMD_KEY[first], sec = secs.find(s => ((s.querySelector('.fsec-l')||{}).textContent || '').toLowerCase().includes(k));
   if(sec){ sec.scrollIntoView({block:'center', behavior:'smooth'}); sec.classList.remove('fsec-hl-bad'); void sec.offsetWidth; sec.classList.add('fsec-hl-bad');
@@ -3882,20 +3892,28 @@ function commitFiche(){
 /* Signale en rouge discret les sections obligatoires vides. */
 function markRequired(){
   const form = $('#ficheForm'); if(!form || form.classList.contains('perso-form')) return;
-  ['bio','hook'].forEach(id => { const f = document.getElementById(id); if(!f) return;
-    const n = f.value.trim().length, short = n < MIN_TXT && (n > 0 || f.dataset.tried === '1');
+  Object.keys(TXT_FIELDS).forEach(label => { const id = TXT_FIELDS[label][0], min = TXT_FIELDS[label][1], f = document.getElementById(id); if(!f) return;
+    const n = f.value.trim().length, short = n < min && (f.dataset.touched === '1' || f.dataset.tried === '1');
     f.classList.toggle('inp-short', short);
     const cnt = form.querySelector('[data-cnt="'+id+'"]');
-    if(cnt && n < MIN_TXT){ cnt.textContent = 'encore '+(MIN_TXT - n)+' caractère'+(MIN_TXT - n > 1 ? 's' : '')+' (minimum '+MIN_TXT+')'; cnt.classList.toggle('short', short); }
+    if(cnt && n < min){ cnt.textContent = 'encore '+(min - n)+' caractère'+(min - n > 1 ? 's' : '')+' (minimum '+min+')'; cnt.classList.toggle('short', short); }
     else if(cnt) cnt.classList.remove('short'); });
-  const miss = missingReq().map(l => RMD_KEY[l]);
+  const rows = completion().rows;
   $$('#ficheForm .fsec').forEach(sec => {
     const lab = ((sec.querySelector('.fsec-l')||{}).textContent || '').toLowerCase();
-    const on = !!sec.querySelector('.fsec-l .req') && miss.some(k => k && lab.includes(k));
+    const row = rows.find(r => !r[1] && RMD_KEY[r[0]] && RMD_KEY[r[0]][0] !== '@' && lab.includes(RMD_KEY[r[0]]));
+    const touched = !!sec.querySelector('[data-touched="1"]');
+    const on = !!row && (S.ficheTried || touched);
     sec.classList.toggle('fsec-miss', on);
     let tag = sec.querySelector('.miss-tag');
-    if(on && !tag){ tag = document.createElement('span'); tag.className = 'miss-tag'; tag.textContent = 'À remplir pour être en ligne'; sec.querySelector('.fsec-l').appendChild(tag); }
+    if(on && !tag){ tag = document.createElement('span'); tag.className = 'miss-tag'; tag.textContent = 'À compléter'; sec.querySelector('.fsec-l').appendChild(tag); }
     if(!on && tag) tag.remove();
+    let er = sec.querySelector('.fsec-err');
+    const isText = !!sec.querySelector('textarea');
+    if(on && !isText){ if(!er){ er = document.createElement('p'); er.className = 'fsec-err'; er.setAttribute('role', 'alert'); sec.querySelector('.fsec-c').appendChild(er); } er.textContent = row[3].msg; }
+    else if(er) er.remove();
+    const inp = sec.querySelector('input.inp[data-k="portfolio"], input.inp[data-k="p.link"]');
+    if(inp) inp.classList.toggle('inp-short', on);
   });
 }
 function missingHTML(c){
@@ -3950,7 +3968,7 @@ document.addEventListener('click', e => {
     modal('Modifier mon compte',
       '<div class="grid g2" style="gap:12px">'+field('e1','Prénom(s)','<input class="inp" id="e1" value="'+esc(m.first)+'">')
       + field('e2','Nom','<input class="inp" id="e2" value="'+esc(m.last)+'" disabled>')+'</div>'
-      + field('e3','Ville','<input class="inp" id="e3" value="'+esc(m.city)+'">')
+      + field('e3','Ville','<input class="inp" id="e3" list="e3List" autocomplete="off" value="'+esc(m.city)+'">'+cityDatalist(m.city))
       + field('e4','Téléphone','<div class="row" style="gap:8px"><select class="inp" style="width:120px;flex:0 0 auto" id="e4c">'
           + ['BJ +229','TG +228','CI +225','SN +221'].map(o => '<option'+(String(m.phone).startsWith(o.slice(3)) ? ' selected' : '')+'>'+o+'</option>').join('')+'</select>'
           + '<input class="inp mono" id="e4" inputmode="tel" value="'+esc(phoneLocal())+'"></div>')
@@ -4099,7 +4117,7 @@ function tmSecondTalHTML(){
     const m = structuredClone(DEFAULT_ME);
     delete m.project; delete m.avail; delete m.pay;
     Object.assign(m, {
-      first:o.first || '', last:o.last || '', email:email || '', handle:o.handle || '', city:o.city || 'Cotonou, Bénin',
+      first:o.first || '', last:o.last || '', email:email || '', handle:o.handle || '', city:o.city || '',
       sex:o.sex === 'np' ? 'n' : (o.sex || 'n'), phone:o.phone ? (o.dial || payDial(o.cc))+' '+o.phone : '', country:PAY_COUNTRIES[o.cc] ? o.cc : '', photo:o.photo || '',
       role:o.role, primary:o.role, fresh:true, avatarHue:hue(o.handle),
       talentOn:true, talentPromptSeen:true,
@@ -4108,14 +4126,14 @@ function tmSecondTalHTML(){
     });
     if(o.role === 'tal'){
       Object.assign(m, {skills:o.skills || [], sectors:o.sectors || [], level:o.level || '', diploma:o.diploma || '', status:o.status || '',
-        pace:o.pace || 'serieux', bio:o.bio || '', portfolio:o.portfolio || '', portfolioTitle:o.portfolioTitle || ''});
+        pace:o.pace || 'serieux', bio:o.bio || '', portfolio:o.portfolio || '', portfolioTitle:o.portfolioTitle || '', noPortfolio:!!o.noPortfolio});
       m.projects = [blankProject()];
     } else {
       const x = o.perso || {}, p = o.project || {};
-      Object.assign(m, {skills:x.skills || [], level:x.level || '', bio:x.bio || '', portfolio:x.portfolio || '', pace:o.pace || 'serieux'});
+      Object.assign(m, {skills:x.skills || [], level:x.level || '', bio:x.bio || '', portfolio:x.portfolio || '', noPortfolio:!!x.noPortfolio, pace:o.pace || 'serieux'});
       m.projects = [Object.assign(blankProject(), {
         title:p.title || '', sectors:p.sectors || [], seeking:p.seeking || [], hook:p.hook || '', vision:p.vision || '',
-        traction:p.traction || '', challenges:p.challenges || '', link:p.link || '', pace:o.pace || 'serieux',
+        traction:p.traction || '', challenges:p.challenges || '', link:p.link || '', noLink:!!p.noLink, pace:o.pace || 'serieux',
         pay:p.offer || 'equity', photo:p.cover || '', glyph:o.projIconGlyph || '💡', online:true})];
     }
     m.projIdx = 0; m.visUnlocked = false; m.visSince = null; m.slots = 1;

@@ -1287,3 +1287,29 @@ b.req{color:var(--bad);font-weight:700}
 
 /* Connexion Apple pas encore proposée (compte Apple Developer requis). */
 [data-act="onb-social"][data-m="apple"]{display:none!important}
+
+/* ---------- Sections incomplètes : contour et petit texte rouges ---------- */
+.fsec-bad .fsec-l{color:var(--bad-ink)}
+.fsec-bad .tile{box-shadow:inset 0 0 0 1px var(--bad);color:var(--bad-ink)}
+.fsec-bad-opt .fsec-c{outline:1.5px solid var(--bad);outline-offset:6px;border-radius:var(--r-md)}
+.fsec-err{margin:8px 0 0;font-size:13px;line-height:1.4;color:var(--bad-ink)}
+.cnt-c.bad{color:var(--bad-ink)}
+
+/* « Pas encore de lien » */
+.none-chk{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+.none-chk input{width:16px;height:16px;margin:0;accent-color:var(--a-600);cursor:pointer}
+.inp:disabled{opacity:.55;cursor:not-allowed}
+
+/* ---------- Pays + ville (liste de villes du pays) ---------- */
+.city-grid{gap:12px;align-items:start}
+.city-f{position:relative}
+.city-list{
+  position:absolute;top:calc(100% - 2px);left:0;right:0;z-index:6;max-height:252px;overflow-y:auto;margin:6px 0 0;padding:6px;list-style:none;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-pop);
+}
+.city-list li{padding:9px 10px;border-radius:var(--r-md);font-size:14px;cursor:pointer;outline:none}
+.city-list li:hover,.city-list li:focus{background:var(--surface-2)}
+.city-list li:focus-visible{box-shadow:inset 0 0 0 2px var(--a-600)}
+.city-list li.other{font-size:13px;color:var(--ink-3);border-top:1px solid var(--line);border-radius:0 0 var(--r-md) var(--r-md);margin-top:4px}
+img.flag{object-fit:cover}
+@media (max-width:560px){ .city-grid{grid-template-columns:1fr} }

@@ -152,14 +152,14 @@ const refL = (list, id) => (list.find(x => x.id === id) || {l:'—'}).l;
 
 /* ---------- État ---------- */
 const DEFAULT_ME = {
-  first:'', last:'', sex:'', city:'Cotonou, Bénin', handle:'', role:'tal',
+  first:'', last:'', sex:'', city:'', cityCc:'', handle:'', role:'tal',
   skills:[], sectors:[], level:'', diploma:'', status:'',
-  pace:'', bio:'', portfolio:'', portfolioTitle:'',
+  pace:'', bio:'', portfolio:'', portfolioTitle:'', noPortfolio:false,
   photo:'', phone:'', cc:'BJ',
-  project:{title:'', sectors:[], seeking:[], hook:'', vision:'', traction:'', challenges:'', link:'', offer:'', icon:'', cover:''},
+  project:{title:'', sectors:[], seeking:[], hook:'', vision:'', traction:'', challenges:'', link:'', noLink:false, offer:'', icon:'', cover:''},
   /* Fiche perso du visionnaire : l'humain derrière le projet. Facultative,
      sans statistiques ; les talents l'ouvrent depuis la fiche projet. */
-  perso:{skills:[], level:'', bio:'', portfolio:''},
+  perso:{skills:[], level:'', bio:'', portfolio:'', noPortfolio:false},
 };
 let ME = structuredClone(DEFAULT_ME);
 const O = {
@@ -175,12 +175,12 @@ const isVisPath = () => (O.roleSel || ME.role) === 'vis';
 const onbSteps = () => isVisPath() ? ONB_STEPS_VIS : ONB_STEPS;
 /* Numéro affiché : le talent saute la fiche perso, sa photo reste l'étape 7. */
 const dispStep = s => (s > PERSO && !isVisPath()) ? s - 1 : s;
-const PERSO_MAX_SKILLS = 4, PERSO_BIO_MIN = 80;
+const PERSO_MAX_SKILLS = 4, PERSO_BIO_MIN = TMRules.MIN.persoBio;
 /* Publication : alignée sur l'outil. Une fiche n'est en ligne que si
    TOUTES ses sections obligatoires (*) sont remplies ; le facultatif
    (portfolio, Vision, Traction, Défis, lien, couverture, fiche perso)
    ne bloque jamais. La jauge de complétion reste indicative. */
-const TXT_REQ_MIN = 10;   /* signature (Talent) et Hook (projet) : 10 caractères au moins */
+const TXT_REQ_MIN = 10;   /* conservé pour compatibilité ; les vrais minimums sont dans js/fiche-rules.js */
 
 /* ---------- Identifiant, code, mot de passe ---------- */
 const isMail = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((v||'').trim());
@@ -188,27 +188,19 @@ const isPhone = v => /^\+?\d{8,14}$/.test((v||'').replace(/[\s.()-]/g,''));
 const identOk = v => isMail(v);
 /* Téléphone : demandé juste après la validation de l'e-mail. Pas de code
    SMS (payant) : on exige un vrai numéro, au bon format pour le pays. */
-const COUNTRIES = [
-  {id:'BJ', n:'Bénin',          c:'+229', len:[10], ph:'01 97 00 00 00'},
-  {id:'TG', n:'Togo',           c:'+228', len:[8],  ph:'90 00 00 00'},
-  {id:'CI', n:"Côte d'Ivoire",  c:'+225', len:[10], ph:'07 00 00 00 00'},
-  {id:'SN', n:'Sénégal',        c:'+221', len:[9],  ph:'77 000 00 00'},
-  {id:'BF', n:'Burkina Faso',   c:'+226', len:[8],  ph:'70 00 00 00'},
-  {id:'ML', n:'Mali',           c:'+223', len:[8],  ph:'76 00 00 00'},
-  {id:'NE', n:'Niger',          c:'+227', len:[8],  ph:'90 00 00 00'},
-  {id:'GH', n:'Ghana',          c:'+233', len:[9],  ph:'24 000 0000'},
-  {id:'NG', n:'Nigeria',        c:'+234', len:[10], ph:'803 000 0000'},
-  {id:'CM', n:'Cameroun',       c:'+237', len:[9],  ph:'6 70 00 00 00'},
-  {id:'FR', n:'France',         c:'+33',  len:[9],  ph:'6 12 34 56 78'},
-];
-const country = id => COUNTRIES.find(x => x.id === id) || COUNTRIES[0];
+/* Pays, indicatifs et villes : js/geo.js (partagé avec l'outil). */
+const COUNTRIES = TMGeo.sorted();
+const country = id => TMGeo.country(id);
 /* Le numéro doit avoir exactement le nombre de chiffres du pays : ni
    moins, ni plus. La saisie est bloquée au-delà et mise en forme par
    groupes, sur le modèle de l'exemple affiché. */
 const phoneDigits = v => (v||'').replace(/\D/g,'');
-function phoneOk(v, cc){ return phoneDigits(v).length === country(cc).len[0]; }
+/* Numéro national : on retire le 0 (ou le 1 au Canada) que les gens tapent souvent en tête. */
+const phoneNsn = (v, cc) => { const c = country(cc), d = phoneDigits(v); return c.trunk && d.charAt(0) === c.trunk ? d.slice(1) : d; };
+const phoneMax = cc => Math.max.apply(null, country(cc).len);
+function phoneOk(v, cc){ return country(cc).len.includes(phoneNsn(v, cc).length); }
 function phoneFormat(v, cc){
-  const c = country(cc), d = phoneDigits(v).slice(0, c.len[0]);
+  const c = country(cc), d = phoneNsn(v, cc).slice(0, phoneMax(cc));
   const groups = c.ph.split(' ').map(g => g.length);
   let out = [], i = 0;
   for(const g of groups){ if(i >= d.length) break; out.push(d.slice(i, i+g)); i += g; }
@@ -233,7 +225,8 @@ function flag(id){
     CM:V('#007A5E','#CE1126','#FCD116')+star(10,7,2.2,'#FCD116'),
     FR:V('#002395','#fff','#ED2939'),
   };
-  return '<svg class="flag" viewBox="0 0 20 14" aria-hidden="true">'+(F[id]||'')+'</svg>';
+  if(!F[id]) return TMGeo.flagImg(id);
+  return '<svg class="flag" viewBox="0 0 20 14" aria-hidden="true">'+F[id]+'</svg>';
 }
 const PW_RULES = [
   ['8 caractères minimum', v => v.length >= 8],
@@ -270,60 +263,31 @@ const myName = () => (ME.first+' '+ME.last).trim() || 'Ton nom';
 const myHandle = () => '@' + (ME.handle || 'ton_pseudo');
 const roleLabel = r => r === 'tal' ? 'Talent' : 'Visionnaire';
 
-/* ---------- Complétion de fiche ---------- */
-/* Un champ de texte compte comme rempli dès 5 caractères. */
+/* ---------- Complétion de fiche ----------
+   Règles communes à l'inscription et à l'outil : js/fiche-rules.js.
+   Toutes les sections sont obligatoires ; 100 % = tout est rempli. */
 const TXT_MIN = 5;
-function completionRows(){
+function rulesData(kind){
   const m = ME, p = m.project;
-  /* [rempli, poids, libellé de ce qui manque, obligatoire, data-k de la section] */
-  return m.role === 'tal' ? [
-    [!!(m.first && m.last), 6, 'ton nom', true], [!!m.handle, 5, 'ton pseudo', true], [!!m.city, 5, 'ta ville', true],
-    [m.skills.length >= 2, 18, 'au moins 2 compétences clés', true, 'skills'],
-    [!!m.level, 6, "ton niveau d'expérience", true, 'level'], [!!m.diploma, 6, 'ton diplôme', true, 'diploma'],
-    [!!m.status, 6, 'ton statut professionnel', true, 'status'],
-    [m.sectors.length >= 1, 10, 'au moins un secteur', true, 'sectors'], [!!m.pace, 12, 'ton rythme', true, 'pace'],
-    [(m.bio||'').trim().length >= TXT_REQ_MIN, 15, 'ta signature personnelle (10 caractères min.)', true, 'bio'],
-    [!!m.portfolio, 5, 'un lien portfolio', false],
-  ] : [
-    [!!(m.first && m.last), 5, 'ton nom', true], [!!m.handle, 5, 'ton pseudo', true],
-    [!!(p.title||'').trim(), 8, 'le titre du projet', true, 'p.title'], [p.sectors.length >= 1 && p.sectors.length <= MAX_SECTORS, 10, '1 à 3 secteurs', true, 'p.sectors'],
-    [p.seeking.length >= 1, 18, 'une compétence recherchée', true, 'p.seeking'], [!!m.pace, 8, 'le rythme attendu', true, 'pace'],
-    [!!p.offer, 8, 'ce que tu proposes aux talents', true, 'p.offer'],
-    [(p.hook||'').trim().length >= TXT_REQ_MIN, 16, 'le Hook (10 caractères min.)', true, 'p.hook'],
-    [(p.vision||'').trim().length >= TXT_MIN, 10, 'la Vision', false],
-    [(p.traction||'').trim().length >= TXT_MIN, 8, 'la Traction', false],
-    [(p.challenges||'').trim().length >= TXT_MIN, 8, 'les Défis', false],
-    [!!p.link, 4, 'un lien externe', false],
-  ];
+  if(kind === 'perso') return {skills:m.perso.skills, level:m.perso.level, bio:m.perso.bio, portfolio:m.perso.portfolio, noPortfolio:m.perso.noPortfolio};
+  return {first:m.first, last:m.last, handle:m.handle, city:m.city, skills:m.skills, level:m.level, diploma:m.diploma, status:m.status,
+    sectors:m.sectors, pace:m.pace, bio:m.bio, portfolio:m.portfolio, noPortfolio:m.noPortfolio,
+    project:{title:p.title, sectors:p.sectors, seeking:p.seeking, pace:m.pace, offer:p.offer, hook:p.hook, vision:p.vision,
+      traction:p.traction, challenges:p.challenges, link:p.link, noLink:p.noLink}};
 }
-function completion(){
-  const r = completionRows();
-  const done = r.filter(x=>x[0]).reduce((a,b)=>a+b[1],0), tot = r.reduce((a,b)=>a+b[1],0);
-  return Math.round(done/tot*100);
-}
-/* Fiche perso : sa propre jauge, qui ne compte pas dans la publication. */
-function persoRows(){
-  const x = ME.perso;
-  return [
-    [x.skills.length >= 2, 35, 'au moins 2 compétences clés'],
-    [!!x.level, 15, "ton niveau d'expérience"],
-    [(x.bio||'').trim().length >= PERSO_BIO_MIN, 35, 'ta signature (80 caractères)'],
-    [!!(x.portfolio||'').trim(), 15, 'un lien portfolio'],
-  ];
-}
-function persoPct(){
-  const r = persoRows();
-  return Math.round(r.filter(x=>x[0]).reduce((a,b)=>a+b[1],0) / r.reduce((a,b)=>a+b[1],0) * 100);
-}
-/* Sections obligatoires encore vides : tant qu'il en reste, pas de publication. */
-function requiredMissing(){ return completionRows().filter(x => x[3] && !x[0]).map(x => x[2]); }
+const ficheKind = () => ME.role === 'tal' ? 'tal' : 'vis';
+function ruleRows(kind){ kind = kind || ficheKind(); return TMRules.rows(kind, rulesData(kind)); }
+/* Format historique : [rempli, poids, ce qui manque, obligatoire, clé du champ] */
+function completionRows(){ return ruleRows().map(r => [r.ok, r.w, r.phrase, true, r.key, r]); }
+function completion(){ return TMRules.pct(ruleRows()); }
+function persoRows(){ return ruleRows('perso').map(r => [r.ok, r.w, r.phrase, true, r.key, r]); }
+function persoPct(){ return TMRules.pct(ruleRows('perso')); }
+/* Sections encore incomplètes : tant qu'il en reste, pas de publication. */
+function requiredMissing(){ return completionRows().filter(x => !x[0]).map(x => x[2]); }
 const ficheReady = () => requiredMissing().length === 0;
-/* La première section obligatoire encore vide (sa clé data-k), dans l'ordre du formulaire. */
-function firstMissingKey(){ const r = completionRows().find(x => x[3] && !x[0] && x[4]); return r ? r[4] : ''; }
-/* Ce qui manque encore, obligatoire d'abord, puis par poids. */
-function missing(){
-  return completionRows().filter(x => !x[0]).sort((a,b) => (b[3]-a[3]) || (b[1]-a[1])).map(x => x[2]);
-}
+/* La première section incomplète du formulaire (sa clé data-k). */
+function firstMissingKey(){ const r = completionRows().find(x => !x[0] && x[4]); return r ? r[4] : ''; }
+function missing(){ return completionRows().filter(x => !x[0]).sort((a,b) => b[1]-a[1]).map(x => x[2]); }
 /* La couverture se choisit sur la fiche (photo ou icône) : il ne reste
    ici que la photo de profil, pour les deux rôles. */
 const photosMissing = () => !ME.photo;
@@ -380,7 +344,6 @@ function onbGo(to){
   if(to === 5){
     ME.first = ($('#first').value || '').trim();
     ME.last  = ($('#last').value  || '').trim();
-    ME.city  = ($('#city').value  || '').trim();
     O.sugg = null;
   }
   if(to === 6){ ME.handle = slugify(($('#handle').value || '').trim()); }
@@ -643,6 +606,12 @@ function area(id, key, max, ph, val, min){
     + '<div class="cnt-c" data-for="'+id+'" aria-live="polite"></div>';
 }
 
+/* « Pas encore de lien » : une réponse valable à une section lien obligatoire. */
+function noneBox(key, on, label){
+  return '<label class="none-chk"><input type="checkbox" data-k="'+key+'"'+(on ? ' checked' : '')+'><span>'+esc(label)+'</span></label>';
+}
+const MINS = TMRules.MIN;
+
 /* ---------- Le mot de passe ---------- */
 function pwField(){
   return field('pwd', 'Mot de passe',
@@ -750,7 +719,7 @@ function renderOnb(){
         +     '<input class="inp" id="phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="'+c.ph.length+'" placeholder="'+esc(c.ph)+'" value="'+esc(phoneFormat(ME.phone, c.id))+'" aria-describedby="phoneCnt phoneErr phoneNote">'
         +   '</div>'
         +   '<span class="hint mono phone-cnt" id="phoneCnt" aria-live="polite"></span>'
-        +   '<span class="ferr" id="phoneErr" role="alert">Un numéro '+esc(c.id === 'FR' ? 'français' : 'de ce pays')+' compte exactement <span class="mono">'+c.len[0]+'</span> chiffres.</span></div>'
+        +   '<span class="ferr" id="phoneErr" role="alert">Un numéro '+esc(c.id === 'FR' ? 'français' : 'de ce pays')+' compte <span class="mono">'+c.len.join('</span> ou <span class="mono">')+'</span> chiffres (sans le '+(c.trunk||'0')+' de tête).</span></div>'
         +   '<div class="note-card" id="phoneNote">'+ic('lock')+'<div><b>Ton numéro reste privé</b>'
         +     '<p class="hint">Il n\'est jamais publié — ni sur ta fiche, ni dans les résultats, ni même après un match.</p></div></div>'
         + '</div>';
@@ -804,7 +773,7 @@ function renderOnb(){
 
   /* --- 4. Ton identité --- */
   else if(O.step === 4){
-    const cities = ['Cotonou, Bénin','Porto-Novo, Bénin','Parakou, Bénin','Abomey-Calavi, Bénin','Lomé, Togo','Abidjan, Côte d\'Ivoire','Dakar, Sénégal','Bamako, Mali','Niamey, Niger','Accra, Ghana','Lagos, Nigeria'];
+    if(!ME.cityCc) ME.cityCc = ME.cc || 'BJ';
     body = '<div class="onb-h"><h2>Ton nom légal</h2>'
       + '<p>Il sécurise les collaborations. Il reste privé et ne s\'affiche qu\'après un match accepté.</p></div>'
       + '<div class="col" style="gap:16px">'
@@ -814,8 +783,7 @@ function renderOnb(){
       +     '<div class="opt-row" role="group" aria-labelledby="sexL" aria-describedby="sexHint">'
       +     SEX.map(x => optBtn('f-sex', 'sex', x.id, esc(x.l), ME.sex === x.id, true)).join('')
       +     '</div><span class="hint" id="sexHint">Visible seulement après un match. Il ne compte ni dans le score ni dans les filtres.</span></div>'
-      +   field('city','Ville','<input class="inp" id="city" placeholder="Cotonou, Bénin" list="cities" value="'+esc(ME.city)+'">', true)
-      +   '<datalist id="cities">'+cities.map(c=>'<option value="'+esc(c)+'">').join('')+'</datalist>'
+      +   cityFields()
       +   '<p class="hint">'+ic('lock')+' Tu ne pourras pas le changer après — c\'est ce qui rend les documents de l\'Atelier valables.</p>'
       + '</div>';
     foot = onbFoot(a);
@@ -942,13 +910,13 @@ function talentFields(){
       + '<p class="hint" style="margin-top:6px">'+ic('info')+' Ce que chaque projet propose (parts, rémunération) est indiqué sur sa fiche.</p>',
       "C'est la première cause d'échec d'une cofondation. Sois honnête, pas ambitieux.")
   + fsec('quote', 'Ta signature personnelle', true,
-      area('bio', 'bio', 420, "Ce que tu sais faire, ce que tu as déjà livré, et le type de projet que tu cherches. Deux ou trois phrases concrètes valent mieux qu'un paragraphe de généralités.", m.bio, TXT_REQ_MIN),
-      'Impact : c\'est la première chose qu\'un visionnaire lit de toi. 10 caractères au moins.')
-  + fsec('link', 'Ton lien portfolio', false,
+      area('bio', 'bio', 420, "Ce que tu sais faire, ce que tu as déjà livré, et le type de projet que tu cherches. Deux ou trois phrases concrètes valent mieux qu'un paragraphe de généralités.", m.bio, MINS.bio),
+      'Impact : c\'est la première chose qu\'un visionnaire lit de toi. '+MINS.bio+' caractères au moins.')
+  + fsec('link', 'Ton lien portfolio', true,
       '<div class="grid g2" style="gap:10px">'
-      + '<input class="inp" id="portfolioTitle" data-k="portfolioTitle" placeholder="GitHub, Behance, LinkedIn…" value="'+esc(m.portfolioTitle)+'" aria-label="Titre du lien">'
-      + '<input class="inp" id="portfolio" data-k="portfolio" placeholder="github.com/tonpseudo" value="'+esc(m.portfolio)+'" aria-label="Adresse du lien">'
-      + '</div>');
+      + '<input class="inp" id="portfolioTitle" data-k="portfolioTitle" placeholder="GitHub, Behance, LinkedIn…" value="'+esc(m.portfolioTitle)+'" aria-label="Titre du lien"'+(m.noPortfolio ? ' disabled' : '')+'>'
+      + '<input class="inp" id="portfolio" data-k="portfolio" placeholder="github.com/tonpseudo" value="'+esc(m.portfolio)+'" aria-label="Adresse du lien"'+(m.noPortfolio ? ' disabled' : '')+'>'
+      + '</div>' + noneBox('noPortfolio', m.noPortfolio, 'Je n\'ai pas encore de portfolio'));
 }
 function projectFields(){
   const m = ME, p = m.project;
@@ -967,11 +935,12 @@ function projectFields(){
   + fsec('gift', 'Ce que tu proposes aux talents', true,
       '<div class="col" style="gap:2px">'+OFFER.map(x=>optBtn('f-one','p.offer',x.id,'<b>'+x.l+'</b> <span class="dim">— '+x.h+'</span>',p.offer===x.id,true)).join('')+'</div>',
       'Affiché sur ta fiche : le talent sait à quoi s\'attendre avant d\'accepter.')
-  + fsec('zap', 'Le Hook', true, area('hook','p.hook',400,"Le problème que tu résous, en une ou deux phrases. Un chiffre vaut mieux qu'une intention.",p.hook,TXT_REQ_MIN), "Impact : capte l'attention en trois secondes. 10 caractères au moins.")
-  + fsec('rocket', 'La Vision', false, area('vision','p.vision',320,'Ce que le projet devient dans cinq ans si tout va bien.',p.vision), "Impact : permet au talent d'adhérer à ton ambition.")
-  + fsec('trend', 'La Traction', false, area('traction','p.traction',320,'Prototype, utilisateurs, premiers revenus, partenariats signés… ce qui prouve que ça avance déjà.',p.traction), "Impact : c'est la section qui fait la différence entre une idée et un projet.")
-  + fsec('target', 'Les Défis', false, area('challenges','p.challenges',320,"Ce qui te bloque aujourd'hui et pour quoi tu cherches de l'aide.",p.challenges), "Impact : aide le talent à voir où il apporterait de la valeur.")
-  + fsec('link', 'Lien externe', false, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'">');
+  + fsec('zap', 'Le Hook', true, area('hook','p.hook',400,"Le problème que tu résous, en une ou deux phrases. Un chiffre vaut mieux qu'une intention.",p.hook,MINS.hook), "Impact : capte l'attention en trois secondes. "+MINS.hook+" caractères au moins.")
+  + fsec('rocket', 'La Vision', true, area('vision','p.vision',320,'Ce que le projet devient dans cinq ans si tout va bien.',p.vision,MINS.vision), "Impact : permet au talent d'adhérer à ton ambition. "+MINS.vision+" caractères au moins.")
+  + fsec('trend', 'La Traction', true, area('traction','p.traction',320,'Prototype, utilisateurs, premiers revenus, partenariats signés… ce qui prouve que ça avance déjà.',p.traction,MINS.traction), "Impact : c'est la section qui fait la différence entre une idée et un projet. "+MINS.traction+" caractères au moins.")
+  + fsec('target', 'Les Défis', true, area('challenges','p.challenges',320,"Ce qui te bloque aujourd'hui et pour quoi tu cherches de l'aide.",p.challenges,MINS.challenges), "Impact : aide le talent à voir où il apporterait de la valeur. "+MINS.challenges+" caractères au moins.")
+  + fsec('link', 'Lien externe', true, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'"'+(p.noLink ? ' disabled' : '')+'>'
+      + noneBox('p.noLink', p.noLink, 'Mon projet n\'a pas encore de site ni de page'), 'Site, page Facebook, LinkedIn, vidéo de démonstration…');
 }
 /* Fiche perso : mêmes briques que la fiche Talent (compétences, niveau,
    signature, portfolio), en plus court. Tout y est facultatif. */
@@ -982,9 +951,10 @@ function persoFields(){
   + fsec('trend', "Ton niveau d'expérience", false, optList(LEVEL, 'f-one', 'x.level', x.level, 'opt-row', true))
   + fsec('quote', 'Ta signature', false,
       area('pbio', 'x.bio', 420, "Qui tu es, ce que tu as déjà fait, et pourquoi c'est toi qui portes ce projet. Deux ou trois phrases concrètes.", x.bio),
-      PERSO_BIO_MIN + ' caractères au moins sont recommandés.')
+      PERSO_BIO_MIN + ' caractères au moins.')
   + fsec('link', 'Ton lien portfolio', false,
-      '<input class="inp" id="pport" data-k="x.portfolio" placeholder="linkedin.com/in/tonpseudo" value="'+esc(x.portfolio)+'" aria-label="Adresse du lien">');
+      '<input class="inp" id="pport" data-k="x.portfolio" placeholder="linkedin.com/in/tonpseudo" value="'+esc(x.portfolio)+'" aria-label="Adresse du lien"'+(x.noPortfolio ? ' disabled' : '')+'>'
+      + noneBox('x.noPortfolio', x.noPortfolio, 'Je n\'ai pas encore de portfolio'));
 }
 /* Couverture : à gauche une photo (lue sur l'appareil), à droite une
    icône. Seules les icônes des secteurs cochés sont proposées. */
@@ -1106,9 +1076,47 @@ function ringHTML(pct, size, rise){
 }
 function animateRings(){ $$('.ring .fg[data-to]').forEach(el => { el.setAttribute('stroke-dashoffset', el.dataset.to); el.removeAttribute('data-to'); }); }
 
+/* ---------- Pays et ville : la ville se choisit dans la liste du pays ---------- */
+function cityFields(){
+  const cc = ME.cityCc, cur = TMGeo.split(ME.city).city;
+  return '<div class="grid g2 city-grid">'
+    + field('cityCc', 'Pays', '<select class="inp" id="cityCc" autocomplete="country">'
+        + TMGeo.sorted().map(x => '<option value="'+x.id+'"'+(x.id === cc ? ' selected' : '')+'>'+esc(x.n)+'</option>').join('')+'</select>', true)
+    + '<div class="field city-f"><label for="city">Ville<span class="req" aria-hidden="true">*</span></label>'
+    +   '<input class="inp" id="city" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cityList" autocomplete="off" '
+    +     'placeholder="Commence à taper ta ville" value="'+esc(cur)+'">'
+    +   '<ul class="city-list" id="cityList" role="listbox" aria-label="Villes proposées" hidden></ul>'
+    +   '<span class="ferr" id="cityErr" role="alert">Choisis ta ville dans la liste proposée.</span></div>'
+    + '</div>';
+}
+let cityOther = '';
+function cityList(open){
+  const inp = $('#city'), ul = $('#cityList'); if(!inp || !ul) return;
+  const q = inp.value.trim(), hits = TMGeo.search(ME.cityCc, q, 8);
+  /* « Pas dans la liste » : proposé seulement quand aucune ville ne correspond. */
+  cityOther = q.length >= 2 && !hits.length ? q : '';
+  ul.innerHTML = hits.map((v, i) => '<li role="option" tabindex="-1" data-act="city-pick" data-v="'+esc(v)+'" id="cityOpt'+i+'">'+esc(v)+'</li>').join('')
+    + (cityOther ? '<li role="option" tabindex="-1" class="other" data-act="city-pick" data-v="'+esc(cityOther)+'" data-other="1">Ma ville n\'est pas dans la liste : utiliser « '+esc(cityOther)+' »</li>' : '');
+  const show = open !== false && !!ul.children.length;
+  ul.hidden = !show; inp.setAttribute('aria-expanded', show);
+  /* La liste peut tomber sous le bas de la fenêtre : on la ramène à l'écran. */
+  if(show) requestAnimationFrame(() => { try{ ul.scrollIntoView({block:'nearest', behavior:'smooth'}); }catch(e){} });
+}
+function cityPick(v){
+  const inp = $('#city'); if(!inp) return;
+  inp.value = v; ME.city = TMGeo.label(v, ME.cityCc);
+  cityList(false); O.cityTouched = true; checkIdentity();
+}
 function checkIdentity(){
   const f = $('#first'), l = $('#last'), c = $('#city'); if(!f) return;
-  ME.first = f.value.trim(); ME.last = l.value.trim(); ME.city = c.value.trim();
+  ME.first = f.value.trim(); ME.last = l.value.trim();
+  /* La ville n'est retenue que choisie dans la liste (ou confirmée « pas dans la liste »). */
+  const typed = c.value.trim(), known = TMGeo.match(ME.cityCc, typed), picked = TMGeo.split(ME.city).city;
+  if(known) ME.city = TMGeo.label(known, ME.cityCc);
+  else if(!typed || typed !== picked) ME.city = '';
+  const bad = !!O.cityTouched && !ME.city;
+  c.classList.toggle('err', bad); c.setAttribute('aria-invalid', bad);
+  const ce = $('#cityErr'); if(ce){ ce.textContent = typed ? 'Choisis ta ville dans la liste proposée.' : 'Indique ta ville.'; ce.classList.toggle('on', bad); }
   $$('[data-act="f-sex"]').forEach(b => { const on = b.dataset.v === ME.sex; b.setAttribute('aria-pressed', on); });
   onbEnable(!!(ME.first && ME.last && ME.city && ME.sex));
 }
@@ -1144,12 +1152,13 @@ function syncFiche(){
     el.textContent = need > 0
       ? 'encore ' + need + ' caractère' + (need > 1 ? 's' : '') + ' (minimum ' + t.dataset.min + ')'
       : left + ' caractère' + (left > 1 ? 's' : '') + ' restant' + (left > 1 ? 's' : '');
-    /* En rouge sous le minimum, mais seulement une fois le champ entamé
-       ou après une tentative de publication : pas de rouge d'emblée. */
-    const bad = need > 0 && (t.value.length > 0 || O.tried);
+    /* En rouge sous le minimum, mais seulement après être sorti de la case
+       ou après un clic sur « Publier » : jamais pendant qu'on écrit. */
+    const bad = need > 0 && (t.dataset.touched === '1' || O.tried);
     t.classList.toggle('err', bad); t.setAttribute('aria-invalid', bad);
     el.classList.toggle('bad', bad);
   });
+  markSections('#ficheForm', ruleRows(), O.tried);
   const box = $('#prevBox'); if(box) box.innerHTML = previewCard();
   const pct = completion();
   const pr = $('#prevRing'); if(pr) pr.innerHTML = ringHTML(pct, 62);
@@ -1157,7 +1166,7 @@ function syncFiche(){
   const req = requiredMissing(), nr = req.length;
   if(note) note.innerHTML = !nr
     ? '<span class="mono">'+pct+' %</span> — prête à publier'
-    : 'Encore <span class="mono">'+nr+'</span> section'+(nr > 1 ? 's' : '')+' <b class="req">*</b> à remplir';
+    : '<span class="mono">'+pct+' %</span> — encore <span class="mono">'+nr+'</span> section'+(nr > 1 ? 's' : '')+' à compléter';
   if(!O.sending) onbEnable(!nr);
   const w = $('#why'); if(w && !w.hidden && nr) showWhy();
 }
@@ -1172,13 +1181,36 @@ function syncPerso(){
   });
   const t = $('#pbio'), c = $('#persoForm .cnt-c');
   if(t && c){
-    const n = t.value.trim().length, left = 420 - t.value.length;
-    c.textContent = (n < PERSO_BIO_MIN ? 'encore '+(PERSO_BIO_MIN - n)+' pour les '+PERSO_BIO_MIN+' recommandés · ' : '')
-      + left + ' caractère' + (left > 1 ? 's' : '') + ' restant' + (left > 1 ? 's' : '');
+    const n = t.value.trim().length, left = 420 - t.value.length, need = PERSO_BIO_MIN - n;
+    c.textContent = need > 0 ? 'encore ' + need + ' caractère' + (need > 1 ? 's' : '') + ' (minimum ' + PERSO_BIO_MIN + ')'
+      : left + ' caractère' + (left > 1 ? 's' : '') + ' restant' + (left > 1 ? 's' : '');
+    const bad = need > 0 && t.dataset.touched === '1' && n > 0;
+    t.classList.toggle('err', bad); t.setAttribute('aria-invalid', bad); c.classList.toggle('bad', bad);
   }
+  markSections('#persoForm', ruleRows('perso'), false);
   const box = $('#prevBox'); if(box) box.innerHTML = persoCard();
   const pr = $('#prevRing'); if(pr) pr.innerHTML = ringHTML(persoPct(), 62);
   if(!O.sending) onbEnable(true);
+}
+/* Contour et petit texte rouges sur chaque section incomplète.
+   Visible après un clic sur « Publier », ou dès qu'on quitte une case mal remplie. */
+function markSections(sel, rows, tried){
+  const form = $(sel); if(!form) return;
+  rows.forEach(r => {
+    if(!r.key) return;
+    const ctl = form.querySelector('[data-k="'+r.key+'"]'); if(!ctl) return;
+    const sec = ctl.closest('.fsec'); if(!sec) return;
+    const text = ctl.tagName === 'TEXTAREA', input = ctl.tagName === 'INPUT' && ctl.type !== 'checkbox';
+    const show = !r.ok && (tried || sec.dataset.touched === '1');
+    sec.classList.toggle('fsec-bad', show);
+    sec.classList.toggle('fsec-bad-opt', show && !text && !input);
+    if(input){ ctl.classList.toggle('err', show); ctl.setAttribute('aria-invalid', show); }
+    let e = sec.querySelector('.fsec-err');
+    if(show && !text){
+      if(!e){ e = document.createElement('p'); e.className = 'fsec-err'; e.setAttribute('role', 'alert'); sec.querySelector('.fsec-c').appendChild(e); }
+      e.textContent = r.msg;
+    } else if(e) e.remove();
+  });
 }
 function getPath(k){ return k.startsWith('p.') ? ME.project[k.slice(2)] : k.startsWith('x.') ? ME.perso[k.slice(2)] : ME[k]; }
 function setPath(k, v){ if(k.startsWith('p.')) ME.project[k.slice(2)] = v; else if(k.startsWith('x.')) ME.perso[k.slice(2)] = v; else ME[k] = v; }
@@ -1191,8 +1223,8 @@ function syncPhone(){
   const f = phoneFormat(el.value, ME.cc);
   if(el.value !== f){ el.value = f; try{ el.setSelectionRange(f.length, f.length); }catch(e){} }
   ME.phone = f;
-  const n = phoneDigits(f).length, N = country(ME.cc).len[0];
-  const cnt = $('#phoneCnt'); if(cnt){ cnt.textContent = n + ' / ' + N + ' chiffres'; cnt.classList.toggle('ok', n === N); }
+  const n = phoneNsn(f, ME.cc).length, N = phoneMax(ME.cc);
+  const cnt = $('#phoneCnt'); if(cnt){ cnt.textContent = n + ' / ' + N + ' chiffres'; cnt.classList.toggle('ok', phoneOk(f, ME.cc)); }
   const ok = phoneOk(ME.phone, ME.cc), bad = O.phoneTouched && !!ME.phone.trim() && !ok;
   el.classList.toggle('err', bad); el.setAttribute('aria-invalid', bad);
   const err = $('#phoneErr'); if(err) err.classList.toggle('on', bad);
@@ -1285,16 +1317,12 @@ function listFr(a){
 }
 function showWhy(go){
   const w = $('#why'); if(!w) return;
-  const req = requiredMissing(), k = firstMissingKey();
-  /* Hook ou signature trop courts : on dit exactement combien il en manque. */
-  const len = k === 'p.hook' ? (ME.project.hook||'').trim().length : k === 'bio' ? (ME.bio||'').trim().length : 0;
-  const rest = req.filter(x => !/10 caractères/.test(x));
-  const txt = k === 'p.hook' ? 'Le Hook doit faire au moins '+TXT_REQ_MIN+' caractères : il en a '+len+'.'
-            : k === 'bio'    ? 'Ta signature doit faire au moins '+TXT_REQ_MIN+' caractères : elle en a '+len+'.'
-            : 'Il te manque encore '+listFr(req)+'.';
-  const more = (k === 'p.hook' || k === 'bio') && rest.length ? ' Il te manque aussi '+listFr(rest)+'.' : '';
-  w.innerHTML = ic('info') + '<div><b>Pour publier, remplis toutes les sections marquées *.</b>'
-    + '<span>'+esc(txt + more)+'</span></div>'
+  const rows = ruleRows().filter(r => !r.ok);
+  if(!rows.length){ w.hidden = true; return; }
+  const first = rows[0], rest = rows.slice(1).map(r => r.phrase);
+  const txt = first.label + ' : ' + first.msg + (rest.length ? ' Il reste aussi ' + listFr(rest) + '.' : '');
+  w.innerHTML = ic('info') + '<div><b>Pour publier, complète les sections en rouge.</b>'
+    + '<span>'+esc(txt)+'</span></div>'
     + '<button class="why-x" data-act="why-close" aria-label="Masquer la note">'+ic('x')+'</button>';
   if(w.hidden){ w.hidden = false; w.classList.remove('in'); void w.offsetWidth; w.classList.add('in'); }
   if(go) goToMissing();
@@ -1410,7 +1438,7 @@ function toast(msg, kind){
    Exemples de démonstration — ancrés au Bénin (§7)
    ============================================================ */
 function fillIdentity(){
-  if(!ME.first){ ME.first = 'Koffi'; ME.last = 'Adjovi'; ME.city = 'Cotonou, Bénin'; }
+  if(!ME.first){ ME.first = 'Koffi'; ME.last = 'Adjovi'; ME.cityCc = 'BJ'; ME.city = 'Cotonou, Bénin'; }
   if(!ME.sex) ME.sex = 'm';
 }
 function fillHandle(){
@@ -1516,6 +1544,7 @@ function buildWb(){
    ============================================================ */
 document.addEventListener('click', e => {
   const l = $('#ccList'); if(l && !l.hidden && !e.target.closest('.cc')) ccOpen(false);
+  const cl = $('#cityList'); if(cl && !cl.hidden && !e.target.closest('.city-f')) cityList(false);
   const t = e.target.closest('[data-act]'); if(!t) return;
   const a = t.dataset.act;
   switch(a){
@@ -1603,6 +1632,7 @@ document.addEventListener('click', e => {
     /* Téléphone */
     case 'cc-open': ccOpen($('#ccList').hidden); break;
     case 'cc-pick': ccPick(t.dataset.cc); break;
+    case 'city-pick': cityPick(t.dataset.v); { const c = $('#city'); if(c) c.focus(); } break;
     /* Photos */
     case 'up-clear': setPhoto(t.dataset.k, ''); break;
     case 'photos-later': openDash(); break;
@@ -1614,6 +1644,11 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('change', e => {
+  if(e.target.id === 'cityCc'){
+    ME.cityCc = e.target.value; ME.city = ''; O.cityTouched = false;
+    const c = $('#city'); if(c){ c.value = ''; c.focus(); }
+    cityList(false); checkIdentity(); return;
+  }
   if(e.target.id === 'wbStep' && e.target.value) jumpTo(e.target.value);
   if(e.target.dataset && e.target.dataset.up){ takeFile(e.target.dataset.up, e.target.files[0]); e.target.value = ''; }
 });
@@ -1631,12 +1666,19 @@ document.addEventListener('change', e => {
 /* ---------- Saisie ---------- */
 document.addEventListener('input', e => {
   const el = e.target;
+  if(el.dataset && el.dataset.k && el.type === 'checkbox'){
+    setPath(el.dataset.k, el.checked);
+    const sec = el.closest('.fsec');
+    if(sec){ sec.dataset.touched = '1'; $$('input.inp', sec).forEach(i => { i.disabled = el.checked; }); }
+    syncFiche(); return;
+  }
   if(el.dataset && el.dataset.k){ setPath(el.dataset.k, el.value); syncFiche(); return; }
   if(el.id === 'ident'){ syncIdent(); return; }
   if(el.id === 'pwd'){ syncPwd(); return; }
   if(el.id === 'phone'){ syncPhone(); return; }
   if(el.id === 'handle'){ syncHandle(); return; }
-  if(['first','last','city'].includes(el.id)){ checkIdentity(); return; }
+  if(el.id === 'city'){ cityList(); checkIdentity(); return; }
+  if(['first','last'].includes(el.id)){ checkIdentity(); return; }
   /* Code : un chiffre par case, on avance tout seul ; un collage remplit tout. */
   if(el.closest && el.closest('.otp')){
     const boxes = $$('.otp .inp'), i = boxes.indexOf(el);
@@ -1676,6 +1718,18 @@ document.addEventListener('focusout', e => {
   if(e.target.id === 'pwd'){ O.pwdTouched = true; syncPwd(); }
   if(e.target.id === 'ident'){ O.identTouched = true; syncIdent(); }
   if(e.target.id === 'phone'){ O.phoneTouched = true; syncPhone(); }
+  if(e.target.id === 'city'){
+    setTimeout(() => {
+      const a = document.activeElement; if(a && a.closest && a.closest('.city-f')) return;
+      if(($('#city') || {}).value){ O.cityTouched = true; checkIdentity(); }
+      cityList(false);
+    }, 120);
+  }
+  /* Fiche : une case quittée avec du texte est « touchée » ; son erreur peut s'afficher. */
+  const sec = e.target.closest && e.target.closest('#ficheForm .fsec, #persoForm .fsec');
+  if(sec && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') && e.target.type !== 'checkbox' && String(e.target.value || '').trim()){
+    sec.dataset.touched = '1'; e.target.dataset.touched = '1'; syncFiche();
+  }
 }, true);
 document.addEventListener('keydown', e => {
   const t = e.target;
@@ -1687,6 +1741,15 @@ document.addEventListener('keydown', e => {
   }
   if(!O.step) return;
   /* Liste des pays : flèches, Entrée, Échap. */
+  /* Ville : flèches pour parcourir la liste, Entrée pour choisir, Échap pour fermer. */
+  if(t.id === 'city' || (t.closest && t.closest('#cityList'))){
+    const items = $$('#cityList li'), i = items.indexOf(t), open = !$('#cityList').hidden;
+    if(e.key === 'ArrowDown'){ e.preventDefault(); if(!open) cityList(); const it = $$('#cityList li'); (it[i+1] || it[0] || {focus(){}}).focus(); return; }
+    if(e.key === 'ArrowUp' && i > -1){ e.preventDefault(); (items[i-1] || $('#city')).focus(); return; }
+    if(e.key === 'Escape' && open){ e.preventDefault(); cityList(false); $('#city').focus(); return; }
+    if(e.key === 'Enter' && i > -1){ e.preventDefault(); cityPick(t.dataset.v); $('#city').focus(); return; }
+    if(e.key === 'Enter' && open && items[0] && !ME.city){ e.preventDefault(); cityPick(items[0].dataset.v); return; }
+  }
   if(t.closest && t.closest('#ccList')){
     const items = $$('#ccList li'), i = items.indexOf(t);
     if(e.key === 'ArrowDown'){ e.preventDefault(); (items[i+1] || items[0]).focus(); }
@@ -1800,40 +1863,7 @@ document.addEventListener('scroll', e => { const c = e.target; if(c && c.classLi
     setTimeout(finishLogin, 500);
   }, true);
 
-  /* Jauge de la fiche projet : mêmes poids et mêmes seuils que l'outil,
-     pour que le pourcentage affiché à « Prêt » soit celui qu'on retrouve
-     dans le tableau de bord. Rythme et proposition restent obligatoires. */
-  completionRows = function(){
-    const m = ME, p = m.project;
-    return m.role === 'tal' ? [
-      [!!(m.first && m.last), 6, 'ton nom', true], [!!m.handle, 5, 'ton pseudo', true], [!!m.city, 5, 'ta ville', true],
-      [m.skills.length >= 2, 18, 'au moins 2 compétences clés', true, 'skills'],
-      [!!m.level, 6, "ton niveau d'expérience", true, 'level'], [!!m.diploma, 6, 'ton diplôme', true, 'diploma'],
-      [!!m.status, 6, 'ton statut professionnel', true, 'status'],
-      [m.sectors.length >= 1, 10, 'au moins un secteur', true, 'sectors'], [!!m.pace, 12, 'ton rythme', true, 'pace'],
-      [(m.bio||'').trim().length >= TXT_REQ_MIN, 15, 'ta signature personnelle (10 caractères min.)', true, 'bio'],
-      [!!m.portfolio, 5, 'un lien portfolio', false],
-    ] : [
-      [!!(m.first && m.last), 5, 'ton nom', true], [!!m.handle, 5, 'ton pseudo', true],
-      [!!(p.title||'').trim(), 8, 'le titre du projet', true, 'p.title'], [p.sectors.length >= 1 && p.sectors.length <= MAX_SECTORS, 10, '1 à 3 secteurs', true, 'p.sectors'],
-      [p.seeking.length >= 1, 18, 'une compétence recherchée', true, 'p.seeking'], [!!m.pace, 0, 'le rythme attendu', true, 'pace'],
-      [!!p.offer, 0, 'ce que tu proposes aux talents', true, 'p.offer'],
-      [(p.hook||'').trim().length >= TXT_REQ_MIN, 16, 'le Hook (10 caractères min.)', true, 'p.hook'],
-      [(p.vision||'').trim().length >= 60, 12, 'la Vision (60 caractères)', false],
-      [(p.traction||'').trim().length >= 40, 10, 'la Traction (40 caractères)', false],
-      [(p.challenges||'').trim().length >= 40, 10, 'les Défis (40 caractères)', false],
-      [!!p.link, 6, 'un lien externe', false],
-    ];
-  };
-
-  /* Fiche perso : même calcul que l'onglet « Ma fiche perso » de l'outil
-     (diplôme, statut et secteurs se complètent ensuite dans l'outil). */
-  persoPct = function(){
-    const m = ME, x = ME.perso;
-    const r = [[!!(m.first && m.last), 6], [!!m.handle, 5], [!!m.city, 5], [x.skills.length >= 2, 18], [!!x.level, 6],
-      [false, 6], [false, 6], [false, 10], [!!m.pace, 12], [(x.bio || '').trim().length >= TXT_REQ_MIN, 15], [!!(x.portfolio || '').trim(), 5]];
-    return Math.round(r.filter(y => y[0]).reduce((a, b) => a + b[1], 0) / r.reduce((a, b) => a + b[1], 0) * 100);
-  };
+  /* Jauges : voir js/fiche-rules.js (mêmes règles que l'outil). */
 
   addEventListener('message', e => {
     const d = e.data; if(!d || !d.tm || e.source !== parent) return;

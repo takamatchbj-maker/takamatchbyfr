@@ -49,6 +49,10 @@
     /* Messages écrits en français dans la base (fonctions métier) : on les garde. */
     if(raw && /[éèàçêù]|^(Tu |Ta |Ce |Cette |Il |Une |Vous |Action |Connecte)/.test(raw)) return raw;
     if(/Signups not allowed/i.test(raw || '')) return MSG.otp_disabled;
+    /* Fichiers (photos, couvertures) */
+    if(status === 413 || /too large|exceeded the maximum/i.test(raw || '')) return 'Cette image est trop lourde. Choisis-en une plus légère (2 Mo maximum pour la photo, 3 Mo pour la couverture).';
+    if(/mime type|invalid_mime/i.test(raw || '')) return 'Ce format d\'image n\'est pas accepté. Utilise une image JPG, PNG ou WebP.';
+    if(/row-level security|AccessDenied/i.test(raw || '') || (data && data.code === 'AccessDenied')) return 'Ton image n\'a pas pu être enregistrée : ta session a peut-être expiré. Reconnecte-toi puis réessaie.';
     if(/expired|invalid.*(otp|token)/i.test(raw || '')) return MSG.otp_expired;
     if(status === 401) return 'Ta session a expiré. Reconnecte-toi.';
     if(status === 429) return MSG.over_request_rate_limit;
