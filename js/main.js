@@ -185,7 +185,7 @@ window.TM_SHELL = true;
       pace:p.pace || 'serieux', bio:p.bio || '', portfolio:p.portfolio_url || '', portfolioTitle:p.portfolio_title || '', noPortfolio:!!p.no_portfolio,
       perso:{skills:p.skills || [], level:p.level || '', bio:p.bio || '', portfolio:p.portfolio_url || '', noPortfolio:!!p.no_portfolio},
       project:{title:pr.title || '', sectors:pr.sectors || [], seeking:pr.seeking || [], hook:pr.hook || '', vision:pr.vision || '',
-        traction:pr.traction || '', challenges:pr.challenges || '', link:pr.link || '', noLink:!!pr.no_link, offer:pr.offer || 'equity', cover:pr.cover_url || ''},
+        traction:pr.traction || '', assets:pr.assets || '', challenges:pr.challenges || '', link:pr.link || '', noLink:!!pr.no_link, offer:pr.offer || 'equity', cover:pr.cover_url || ''},
       projIconGlyph:pr.glyph || '💡'
     };
   }

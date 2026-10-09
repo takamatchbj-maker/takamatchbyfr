@@ -2055,7 +2055,7 @@ function rulesData(kind){
   return {first:m.first, last:m.last, handle:m.handle, city:m.city, skills:m.skills, level:m.level, diploma:m.diploma, status:m.status,
     sectors:m.sectors, pace:m.pace, bio:m.bio, portfolio:m.portfolio, noPortfolio:m.noPortfolio,
     project:{title:p.title, sectors:p.sectors, seeking:p.seeking, pace:p.pace, offer:p.pay, hook:p.hook, vision:p.vision,
-      traction:p.traction, challenges:p.challenges, link:p.link, noLink:p.noLink}};
+      traction:p.traction, assets:p.assets, cover:p.photo, challenges:p.challenges, link:p.link, noLink:p.noLink}};
 }
 function completion(kind){
   kind = kind || ficheKind();
@@ -3533,7 +3533,7 @@ const RMD_KEY = {
   'Nom et prénoms':'@acct', 'Pseudo public':'@acct', 'Ville':'@acct', 'Compétences clés':'compétences', "Niveau d'expérience":'niveau',
   'Diplôme le plus élevé':'diplôme', 'Statut professionnel':'statut', "Secteurs qui t'attirent":'secteurs', 'Rythme':'temps',
   'Signature personnelle':'signature', 'Lien portfolio':'portfolio', 'Titre du projet':'titre', 'Secteurs du projet':'secteurs',
-  'Compétences recherchées':'compétences', 'Le Hook':'hook', 'La Vision':'vision', 'La Traction':'traction', 'Les Défis':'défis', 'Lien externe':'lien externe',
+  'Compétences recherchées':'compétences', 'Le Hook':'hook', 'La Vision':'vision', 'La Traction':'traction', 'Les Ressources':'ressources', 'La couverture':'couverture', 'Les Défis':'défis', 'Lien externe':'lien externe',
   'Rythme attendu':'rythme', 'Ce que tu proposes':'proposes'};
 let rmdT = null;
 function scheduleReminder(delay){
@@ -3621,7 +3621,8 @@ const REQ_LABEL = {'Compétences clés':'Compétences clés (2 au moins)', 'Comp
   'Signature personnelle':'Signature personnelle ('+TMRules.MIN.bio+' caractères min.)', 'Le Hook':'Le Hook ('+TMRules.MIN.hook+' caractères min.)',
   'La Vision':'La Vision ('+TMRules.MIN.vision+' caractères min.)', 'La Traction':'La Traction ('+TMRules.MIN.traction+' caractères min.)',
   'Les Défis':'Les Défis ('+TMRules.MIN.challenges+' caractères min.)', 'Lien portfolio':'Lien portfolio (ou « pas encore »)', 'Lien externe':'Lien externe (ou « pas encore »)'};
-function isReqRow(label, kind){ kind = kind || (isTalMode() ? 'tal' : 'vis'); return kind === 'perso' || label === 'La Traction' ? 0 : 1; }
+const OPT_ROWS = ['La Traction', 'Les Ressources', 'La couverture'];
+function isReqRow(label, kind){ kind = kind || (isTalMode() ? 'tal' : 'vis'); return kind === 'perso' || OPT_ROWS.includes(label) ? 0 : 1; }
 /* Le rythme et la proposition d'un projet ont toujours une valeur : ils ne peuvent pas manquer. */
 function missingReq(kind){
   kind = kind || (isTalMode() ? 'tal' : 'vis');
@@ -3909,7 +3910,7 @@ function tmSecondTalHTML(){
       m.perso = {skills:(x.skills || []).slice(), level:x.level || '', bio:x.bio || '', portfolio:x.portfolio || '', portfolioTitle:x.portfolioTitle || '', noPortfolio:!!x.noPortfolio};
       m.projects = [Object.assign(blankProject(), {
         title:p.title || '', sectors:p.sectors || [], seeking:p.seeking || [], hook:p.hook || '', vision:p.vision || '',
-        traction:p.traction || '', challenges:p.challenges || '', link:p.link || '', noLink:!!p.noLink, pace:o.pace || 'serieux',
+        traction:p.traction || '', assets:p.assets || '', challenges:p.challenges || '', link:p.link || '', noLink:!!p.noLink, pace:o.pace || 'serieux',
         pay:p.offer || 'equity', photo:p.cover || '', glyph:o.projIconGlyph || '💡', online:true})];
     }
     m.projIdx = 0; m.visUnlocked = false; m.visSince = null; m.slots = 1;

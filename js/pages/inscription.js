@@ -156,7 +156,7 @@ const DEFAULT_ME = {
   skills:[], sectors:[], level:'', diploma:'', status:'',
   pace:'', bio:'', portfolio:'', portfolioTitle:'', noPortfolio:false,
   photo:'', phone:'', cc:'BJ',
-  project:{title:'', sectors:[], seeking:[], hook:'', vision:'', traction:'', challenges:'', link:'', noLink:false, offer:'', icon:'', cover:''},
+  project:{title:'', sectors:[], seeking:[], hook:'', vision:'', traction:'', assets:'', challenges:'', link:'', noLink:false, offer:'', icon:'', cover:''},
   /* Fiche perso du visionnaire : l'humain derrière le projet. Facultative,
      sans statistiques ; les talents l'ouvrent depuis la fiche projet. */
   perso:{skills:[], level:'', bio:'', portfolio:'', noPortfolio:false},
@@ -273,7 +273,7 @@ function rulesData(kind){
   return {first:m.first, last:m.last, handle:m.handle, city:m.city, skills:m.skills, level:m.level, diploma:m.diploma, status:m.status,
     sectors:m.sectors, pace:m.pace, bio:m.bio, portfolio:m.portfolio, noPortfolio:m.noPortfolio,
     project:{title:p.title, sectors:p.sectors, seeking:p.seeking, pace:m.pace, offer:p.offer, hook:p.hook, vision:p.vision,
-      traction:p.traction, challenges:p.challenges, link:p.link, noLink:p.noLink}};
+      traction:p.traction, assets:p.assets, cover:p.cover, challenges:p.challenges, link:p.link, noLink:p.noLink}};
 }
 const ficheKind = () => ME.role === 'tal' ? 'tal' : 'vis';
 function ruleRows(kind){ kind = kind || ficheKind(); return TMRules.rows(kind, rulesData(kind)); }
@@ -938,6 +938,7 @@ function projectFields(){
   + fsec('zap', 'Le Hook', true, area('hook','p.hook',400,"Le problème que tu résous, en une ou deux phrases. Un chiffre vaut mieux qu'une intention.",p.hook,MINS.hook), "Impact : capte l'attention en trois secondes. "+MINS.hook+" caractères au moins.")
   + fsec('rocket', 'La Vision', true, area('vision','p.vision',320,'Ce que le projet devient dans cinq ans si tout va bien.',p.vision,MINS.vision), "Impact : permet au talent d'adhérer à ton ambition. "+MINS.vision+" caractères au moins.")
   + fsec('trend', 'La Traction', false, area('traction','p.traction',320,'Prototype, utilisateurs, premiers revenus, partenariats signés… ce qui prouve que ça avance déjà.',p.traction,MINS.traction), "Facultatif, mais compte pour atteindre 100 % de remplissage ("+MINS.traction+" caractères au moins pour compter). Impact : c'est la section qui fait la différence entre une idée et un projet.")
+  + fsec('shield', 'Les Ressources sécurisées', false, area('assets','p.assets',320,'Financements, agréments, matériel, locaux, partenaires déjà acquis.',p.assets,MINS.assets), "Facultatif, mais compte pour atteindre 100 % de remplissage ("+MINS.assets+" caractères au moins pour compter). Impact : rassure le talent sur ce qu'il n'aura pas à construire.")
   + fsec('target', 'Les Défis', true, area('challenges','p.challenges',320,"Ce qui te bloque aujourd'hui et pour quoi tu cherches de l'aide.",p.challenges,MINS.challenges), "Impact : aide le talent à voir où il apporterait de la valeur. "+MINS.challenges+" caractères au moins.")
   + fsec('link', 'Lien externe', true, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'"'+(p.noLink ? ' disabled' : '')+'>'
       + noneBox('p.noLink', p.noLink, 'Mon projet n\'a pas encore de site ni de page'), 'Site, page Facebook, LinkedIn, vidéo de démonstration…');

@@ -163,7 +163,7 @@
     if(!tal){
       const cover = await uploadImage('covers', p.cover, 'couverture');
       const row = {title:p.title || '', glyph:(typeof projIcon === 'function' && projIcon()) || '💡', cover_url:cover,
-        sectors:p.sectors || [], seeking:p.seeking || [], hook:p.hook || '', vision:p.vision || '', traction:p.traction || '',
+        sectors:p.sectors || [], seeking:p.seeking || [], hook:p.hook || '', vision:p.vision || '', traction:p.traction || '', assets:p.assets || '',
         challenges:p.challenges || '', link:p.noLink ? '' : (p.link || ''), no_link:!!p.noLink, pace:ME.pace || 'serieux', offer:p.offer || 'equity', online:true};
       const mine = await DB.select('projects', 'owner_id=eq.' + id + '&select=id&order=created_at.asc&limit=1');
       if(mine && mine[0]) await DB.update('projects', 'id=eq.' + mine[0].id, row);

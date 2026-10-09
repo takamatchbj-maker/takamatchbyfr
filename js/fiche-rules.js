@@ -12,7 +12,7 @@
    ============================================================ */
 (function(){
   'use strict';
-  var MIN = {bio:60, hook:30, vision:60, traction:40, challenges:40, persoBio:60};
+  var MIN = {bio:60, hook:30, vision:60, traction:40, assets:30, challenges:40, persoBio:60};
 
   function len(v){ return String(v || '').trim().length; }
   function linkOk(v){ return /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(:\d+)?(\/\S*)?$/i.test(String(v || '').trim()); }
@@ -64,6 +64,11 @@
       add('traction', 'La Traction', 'la Traction (facultative)', 10, len(p.traction) >= MIN.traction,
         len(p.traction) ? textMsg(p.traction, MIN.traction) + ' La Traction est facultative, mais elle ne compte pour tes 100 % qu\'à partir de ' + MIN.traction + ' caractères.'
                         : 'Facultative, mais elle compte pour atteindre 100 % de remplissage.', 'p.traction', true, len(p.traction) > 0);
+      add('assets', 'Les Ressources', 'les Ressources sécurisées (facultatives)', 6, len(p.assets) >= MIN.assets,
+        len(p.assets) ? textMsg(p.assets, MIN.assets) + ' Facultatif : ça compte pour tes 100 % à partir de ' + MIN.assets + ' caractères.'
+                      : 'Facultatif, mais ça compte pour atteindre 100 % de remplissage.', 'p.assets', true, len(p.assets) > 0);
+      add('cover', 'La couverture', 'une image de couverture (facultative)', 4, !!p.cover,
+        'Facultatif : sans image, l\'icône de ton secteur s\'affiche. Une photo compte pour les 100 %.', 'p.cover', true, false);
       add('challenges', 'Les Défis', 'les Défis (' + MIN.challenges + ' caractères min.)', 8, len(p.challenges) >= MIN.challenges, textMsg(p.challenges, MIN.challenges), 'p.challenges');
       add('link', 'Lien externe', 'le lien externe', 8, p.noLink || linkOk(p.link), linkMsg(p.link, p.noLink, 'le lien de ton projet'), 'p.link');
     }
