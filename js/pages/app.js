@@ -1138,10 +1138,17 @@ document.addEventListener('click', e => {
       const p = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(txt) : Promise.reject();
       p.then(() => toast(lbl+' copié.', 'ok'), () => toast(lbl+' : '+txt));
       break; }
-    case 'qr': modal('Ton code QR',
-        '<p>Montre-le dans un incubateur, un meetup ou un salon : la personne tombe directement sur ta fiche publique.</p>'
-        + '<div style="display:grid;place-items:center;padding:6px">'+qrSvg()+'</div><p class="hint mono" style="text-align:center">takamatch.bj/'+esc(myHandle())+'</p>',
-        '<button class="btn btn-ghost" data-act="copy" data-t="https://takamatch.bj/'+esc(myHandle())+'" data-l="Lien">'+ic('copy')+'Copier le lien</button><button class="btn btn-a" data-act="close">Fermer</button>'); break;
+    case 'qr': { const link = publicLink();
+      modal('Ton code QR',
+        '<p>Montre-le dans un incubateur, un meetup ou un salon : la personne tombe directement sur '+(isTalMode() ? 'ta fiche Talent' : 'ta fiche projet et ta fiche perso')+', même sans compte TakaMatch.</p>'
+        + '<div style="display:grid;place-items:center;padding:6px" id="qrBox"><div style="width:210px;height:210px;display:grid;place-items:center" class="hint">Création du code…</div></div>'
+        + '<p class="hint mono" style="text-align:center;word-break:break-all">'+esc(link.replace(/^https?:\/\//, ''))+'</p>',
+        '<button class="btn btn-ghost" data-act="qr-dl">'+ic('dl')+'Télécharger</button><button class="btn btn-ghost" data-act="copy" data-t="'+esc(link)+'" data-l="Lien">'+ic('copy')+'Copier le lien</button><button class="btn btn-a" data-act="close">Fermer</button>');
+      drawQr(link); break; }
+    case 'qr-dl': { const svg = $('#qrBox svg'); if(!svg) break;
+      const url = URL.createObjectURL(new Blob([svg.outerHTML], {type:'image/svg+xml'}));
+      const a = document.createElement('a'); a.href = url; a.download = 'takamatch-'+(S.me.handle || 'fiche')+'.svg'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000); break; }
     case 'preview-public': if(S.layer) closeLayer(); openPublic(); break;
     case 'stats': statsModal(); break;
 
@@ -1285,6 +1292,33 @@ addEventListener('offline', syncOnline);
 if(window.matchMedia) try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => renderTop()); }catch(e){}
 
 /* Un code QR décoratif, stable pour un pseudo donné. */
+/* ---------- Lien public et code QR ----------
+   Le lien ouvre profil.html : la fiche visible sans compte (nom et photo masqués).
+   Une personne déjà connectée sur son navigateur est envoyée vers la même fiche dans l'outil. */
+function publicLink(){
+  const u = new URL('profil.html', location.href); u.search = ''; u.hash = '';
+  u.searchParams.set('h', S.me.handle || '');
+  u.searchParams.set('r', isTalMode() ? 'tal' : 'vis');
+  const p = S.me.project;
+  if(!isTalMode() && p && /^[0-9a-f-]{36}$/i.test(p.id)) u.searchParams.set('p', p.id);
+  return u.href;
+}
+let QR_LIB = null;
+function loadQrLib(){
+  if(window.qrcode) return Promise.resolve();
+  if(!QR_LIB) QR_LIB = new Promise((ok, ko) => { const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+  return QR_LIB;
+}
+function drawQr(text){
+  loadQrLib().then(() => {
+    const q = qrcode(0, 'M'); q.addData(text); q.make();
+    const n = q.getModuleCount(), m = 4, sz = n + m * 2; let d = '';
+    for(let y = 0; y < n; y++) for(let x = 0; x < n; x++) if(q.isDark(y, x)) d += 'M'+(x+m)+' '+(y+m)+'h1v1h-1z';
+    const box = $('#qrBox');
+    if(box) box.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+sz+' '+sz+'" width="220" height="220" role="img" aria-label="Code QR de ta fiche publique" shape-rendering="crispEdges" style="border-radius:12px;border:1px solid var(--line)"><rect width="'+sz+'" height="'+sz+'" fill="#fff"/><path d="'+d+'" fill="#14120f"/></svg>';
+  }).catch(() => { const box = $('#qrBox'); if(box) box.innerHTML = '<p class="hint">Le code QR n\'a pas pu être créé. Vérifie ta connexion, ou copie le lien.</p>'; });
+}
 function qrSvg(){
   const n = 25, cell = 7; let seed = 0; for(const ch of myHandle()) seed = (seed*31 + ch.charCodeAt(0)) >>> 0;
   const rnd = () => (seed = (seed*1664525 + 1013904223) >>> 0) / 4294967296;
@@ -2285,7 +2319,7 @@ function vFiche(){
   const m = S.me, tal = isTalMode(), kind = ficheKind(), c = completion(kind), p = m.project;
   if(!S.saved) saveBaseline();
   const sk = tal ? m.skills : p.seeking;
-  const link = 'takamatch.bj/'+myHandle();
+  const link = publicLink();
   return '<div class="page-h"><div><h1>'+(tal ? 'Ta fiche <span class="acc">Talent</span>' : 'Tes fiches · <span class="acc">'+esc(projName(p))+'</span>')+'</h1>'
     + '<p class="sub">'+(tal ? 'Publiée sous '+esc(myHandle())+". Seuls les visionnaires la voient, et les visiteurs arrivés par ton lien." : 'Jusqu\'à 3 fiches projet. Seuls les talents les voient, et les visiteurs arrivés par ton lien.')+'</p></div>'
     + '<div class="spacer"></div>' + onlineCard() + '</div>'
@@ -2304,7 +2338,7 @@ function vFiche(){
     +   '<div class="fiche-id-f"><div class="fiche-tools">'
     +     '<button class="btn btn-ghost btn-sm" data-act="stats">'+ic('chart')+'Statistiques de '+(tal?'ta fiche':'cette fiche')+'</button>'
     +     '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="'+esc(myHandle())+'" data-l="Pseudo">'+ic('copy')+'<span class="mono">'+esc(myHandle())+'</span></button>'
-    +     '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="https://'+esc(link)+'" data-l="Lien">'+ic('link')+'Copier le lien</button>'
+    +     '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="'+esc(link)+'" data-l="Lien">'+ic('link')+'Copier le lien</button>'
     +     '<button class="btn btn-ghost btn-sm" data-act="qr">'+ic('qr')+'Code QR</button></div></div></div>'
     + '<div class="cols cols-fiche">'
     +   '<div class="card card-pad"><div id="ficheForm" class="col" style="gap:28px">'+ficheFields()+'</div>'
@@ -3417,7 +3451,7 @@ function vFiche(){
   const m = S.me, tal = isTalMode(), kind = ficheKind(), c = completion(kind), p = m.project, perso = kind === 'perso';
   if(!S.saved || S.saved.kind !== kind) saveBaseline();
   const sk = kind === 'vis' ? p.seeking : kind === 'perso' ? persoOf().skills : m.skills;
-  const link = 'takamatch.bj/'+myHandle();
+  const link = publicLink();
   const title = tal ? 'Ta fiche <span class="acc">Talent</span>'
     : 'Tes fiches · <span class="acc">'+(perso ? 'Ta fiche perso' : esc(projName(p)))+'</span>';
   const sub = tal ? 'Publiée sous '+esc(myHandle())+". Seuls les visionnaires la voient, et les visiteurs arrivés par ton lien."
@@ -3443,7 +3477,7 @@ function vFiche(){
     +   (perso ? '' : '<div class="fiche-id-f"><div class="fiche-tools">'
     +     '<button class="btn btn-ghost btn-sm" data-act="stats">'+ic('chart')+'Statistiques de '+(tal?'ta fiche':'cette fiche')+'</button>'
     +     '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="'+esc(myHandle())+'" data-l="Pseudo">'+ic('copy')+'<span class="mono">'+esc(myHandle())+'</span></button>'
-    +     '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="https://'+esc(link)+'" data-l="Lien">'+ic('link')+'Copier le lien</button>'
+    +     '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="'+esc(link)+'" data-l="Lien">'+ic('link')+'Copier le lien</button>'
     +     '<button class="btn btn-ghost btn-sm" data-act="qr">'+ic('qr')+'Code QR</button></div></div>')+'</div>'
     + '<div class="cols cols-fiche">'
     +   '<div class="card card-pad"><div id="ficheForm" class="col'+(perso ? ' perso-form' : '')+'" style="gap:28px">'+ficheFields()+'</div>'

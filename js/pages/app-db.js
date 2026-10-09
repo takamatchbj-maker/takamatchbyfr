@@ -337,6 +337,7 @@
       S.ctxs = {}; S.prof = {};
       loadCtx(); saveBaseline(true);
       S._painted = null; render();
+      openShared();
       setInterval(() => { if(document.visibilityState === 'visible' && navigator.onLine !== false) refresh(false); }, 15000);
       document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refresh(false); });
     }catch(e){
@@ -344,6 +345,29 @@
       toast('Les données n\'ont pas pu être chargées. Recharge la page.', 'bad');
     }finally{ if(top) top.classList.remove('busy'); }
   }
+  /* Lien public (profil.html) ouvert par un membre déjà connecté : la fiche s'ouvre ici. */
+  function openShared(){
+    const q = new URLSearchParams(location.search), h = (q.get('voir') || '').replace(/^@/, '').toLowerCase();
+    if(!h) return;
+    const r = q.get('r'), pid = q.get('p');
+    try{ history.replaceState(history.state, '', location.pathname); }catch(e){}
+    if(h === String(S.me.handle || '').toLowerCase()){ go('fiche'); return; }
+    const low = v => String(v || '').toLowerCase();
+    /* Une fiche projet se consulte en profil Talent, une fiche Talent en profil Visionnaire. */
+    const findIn = mode => mode === 'tal'
+      ? (pid && PROJECTS.find(x => x.id === pid && !x.hidden)) || PROJECTS.find(x => !x.hidden && low(x.ownerHandle) === h)
+      : TALENTS.find(x => !x.hidden && low(x.handle) === h);
+    const want = r === 'tal' ? 'vis' : r === 'vis' ? 'tal' : null;
+    const order = want ? [want] : [S.me.role, S.me.role === 'tal' ? 'vis' : 'tal'];
+    for(const mode of order){
+      const x = findIn(mode); if(!x) continue;
+      if(mode !== S.me.role){ if(!tmRoleOpen(mode)) continue; switchRole(); }
+      setTimeout(() => openFiche(x.id), 350);
+      return;
+    }
+    location.href = 'profil.html?h=' + encodeURIComponent(h) + (r ? '&r=' + r : '') + (pid ? '&p=' + encodeURIComponent(pid) : '') + '&public=1';
+  }
+
   addEventListener('message', e => {
     const d = e.data; if(!d || !d.tm || d.type !== 'account') return;
     if(d.acc && d.acc.kind === 'fresh' && DB.uid()) setTimeout(boot, 0);
