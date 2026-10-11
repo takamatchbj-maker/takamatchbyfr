@@ -535,9 +535,13 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 </script>
 <!-- Espace équipe en ligne : comptes, rôles, prix et journal dans Supabase. -->
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
-<script src="js/supabase.js?v=20261009b"></script>
-<script src="js/geo.js?v=20261009b"></script>
-<script src="js/prix.js?v=20261009b"></script>
+<script src="js/supabase.js?v=20261010a"></script>
+<script src="js/geo.js?v=20261010a"></script>
+<script src="js/prix.js?v=20261010a"></script>
+<link rel="stylesheet" href="css/pacte.css?v=20261010a">
+<script src="js/pacte.js?v=20261010a"></script>
+<script src="js/pacte-pdf.js?v=20261010a"></script>
+<script src="js/pacte-editor.js?v=20261010a"></script>
 </head>
 <body>
 <div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
@@ -603,6 +607,7 @@ const P = {
   arrow:'<path d="M4 12h15"/><path d="m13 6 6 6-6 6"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 1.9"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8h.01"/>',
+  takam:'<rect x="4.5" y="8" width="15" height="11.5" rx="3.2"/><path d="M12 4.5V8"/><circle cx="12" cy="3.6" r="1.1"/><path d="M9.2 13.2h.01M14.8 13.2h.01"/><path d="M9.5 16.3h5"/>',
   refresh:'<path d="M20.5 11A8.5 8.5 0 0 0 6 6.5L3.5 9"/><path d="M3.5 4v5h5"/><path d="M3.5 13a8.5 8.5 0 0 0 14.5 4.5L20.5 15"/><path d="M20.5 20v-5h-5"/>',
 };
 const ic = (n, cls) => n === 'verif' ? '<svg class="ic '+(cls||'')+'" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="'+VB_PATH+'"/></svg>' : '<svg class="ic '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||'')+'</svg>';
@@ -650,17 +655,20 @@ const MODULES = [
   {id:'content', l:'Projets et fiches', i:'file', grp:'Plateforme'},
   {id:'teams', l:'Matchs et Ateliers', i:'tools', grp:'Plateforme'},
   {id:'payments', l:'Paiements', i:'card', grp:'Plateforme'},
+  {id:'pactes', l:'Pactes d\'associés', i:'file', grp:'Plateforme'},
+  {id:'takam', l:'Takam', i:'takam', grp:'Plateforme'},
   {id:'staff', l:'Équipe et accès', i:'key', grp:'Administration'},
   {id:'audit', l:'Journal d\'audit', i:'list', grp:'Administration'},
   {id:'settings', l:'Paramètres', i:'cog', grp:'Administration'},
 ];
 const ROLES = {
   super:  {l:'Super admin', d:'Tous les modules, la gestion des accès et le journal.',
-           can:['overview','verifs','reports','support','users','content','teams','payments','staff','audit','settings'], act:['users','credits','refund','messages']},
+           can:['overview','verifs','reports','support','users','content','teams','payments','pactes','takam','staff','audit','settings'], act:['users','credits','refund','messages']},
   verif:  {l:'Vérificateur', d:'Traite les dossiers de vérification de profil.', can:['overview','verifs','users'], act:[]},
-  moder:  {l:'Modérateur', d:'Signalements, fiches, suspensions et bannissements, litiges.', can:['overview','reports','content','teams','users'], act:['users','messages']},
+  moder:  {l:'Modérateur', d:'Signalements, fiches, suspensions et bannissements, litiges.', can:['overview','reports','content','teams','takam','users'], act:['users','messages']},
   support:{l:'Support', d:'Répond aux messages et consulte les comptes.', can:['overview','support','users'], act:[]},
   finance:{l:'Finance', d:'Paiements, remboursements et crédits.', can:['overview','payments','users'], act:['credits','refund']},
+  juriste:{l:'Juriste', d:'Relit, complète et publie les pactes d\'associés.', can:['overview','pactes'], act:[]},
 };
 const canSee = m => !!(A.me && ROLES[A.me.role].can.includes(m));
 const canDo = a => !!(A.me && ROLES[A.me.role].act.includes(a));
@@ -874,7 +882,11 @@ function renderView(){
   if(!A.me) return renderLogin();
   if(!canSee(A.view)) A.view = 'overview';
   const counts = {verifs:D.verifs.filter(v => v.status === 'pending').length, reports:D.reports.filter(r => r.status !== 'done').length,
-    support:D.tickets.filter(t => t.status === 'open').length, teams:D.teams.filter(t => t.state === 'dispute').length};
+    support:D.tickets.filter(t => t.status === 'open').length, teams:D.teams.filter(t => t.state === 'dispute').length,
+    pactes:A.pactes ? A.pactes.rows.filter(r => r.status === 'relecture').length : 0,
+    takam:A.takam && A.takam.teams ? A.takam.teams.filter(t => t.warn > 0).length : 0};
+  if(!A.pactes && canSee('pactes')) setTimeout(loadPactes, 0);
+  if(!A.takam && !A.takamLoading && canSee('takam')) setTimeout(loadTakam, 0);
   let grp = '';
   const nav = MODULES.filter(m => canSee(m.id)).map(m => { const g = m.grp !== grp ? '<div class="grp">'+m.grp+'</div>' : ''; grp = m.grp;
     return g + '<button class="nav'+(A.view === m.id ? ' on' : '')+'" data-act="go" data-v="'+m.id+'"'+(A.view === m.id ? ' aria-current="page"' : '')+'>'+ic(m.i)+'<span>'+m.l+'</span>'
@@ -896,7 +908,7 @@ function renderView(){
   if(A.view === 'settings') prixPreview();
 }
 /* Modules déjà branchés sur la vraie base ; les autres montrent encore la démo. */
-const LIVE_VIEWS = ['staff', 'audit', 'settings'];
+const LIVE_VIEWS = ['staff', 'audit', 'settings', 'pactes', 'takam'];
 const DEMO_NOTE = '<div class="demo-note">'+'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>'
   + '<span><b>Données de démonstration.</b> Ce module sera branché sur les vraies données à la phase 2 : ce que tu fais ici n\'agit pas sur le site.</span></div>';
 function rerender(){ const y = ($('.main') || {}).scrollTop; render(); }
@@ -1451,6 +1463,217 @@ function motifModal(title, text, act, id, opts){
     + '<div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn '+(opts.danger ? 'btn-bad' : 'btn-a')+'" data-act="'+act+'" data-id="'+id+'">'+(opts.ok || 'Confirmer')+'</button></div>');
 }
 const motifVal = () => [($('#mR') || {}).value, ($('#mT') || {}).value.trim()].filter(Boolean).join(' · ');
+
+/* ============================================================
+   Pactes d'associés (branché sur la vraie base)
+   Le juriste relit, complète et publie la version à signer.
+   ============================================================ */
+const PACTE_DOMAINS = [{id:'produit', l:'Produit'}, {id:'tech', l:'Technique'}, {id:'finance', l:'Finances et levée'}, {id:'terrain', l:'Terrain et ventes'}, {id:'juridique', l:'Juridique et conformité'}];
+const PACTE_PACE = {side:'Projet à côté (moins de 10 h / semaine)', serieux:'Engagement sérieux (10 à 25 h / semaine)', plein:'Temps plein (plus de 25 h / semaine)'};
+const PST = {brouillon:['Brouillon',''], relecture:['À relire','c-warn'], signature:['En signature','c-tal'], signe:['Signé','c-ok']};
+const pacteMissing = e => e && (e.status === 404 || e.code === 'PGRST205' || e.code === '42P01' || /does not exist|schema cache/i.test(e.message || ''));
+async function loadPactes(){
+  if(A.pactesLoading) return; A.pactesLoading = true;
+  try{
+    const rows = await TMDB.select('pactes', 'select=project_id,status,version,updated_at,ordered_at,published_at,signed_at,payment_id,final_path&order=updated_at.desc') || [];
+    const ids = rows.map(r => r.project_id);
+    let proj = [], team = [], ident = [], sigs = [];
+    if(ids.length){
+      const inl = 'in.(' + ids.join(',') + ')';
+      [proj, team, sigs] = await Promise.all([TMDB.select('projects', 'select=id,title,owner_id&id=' + inl), TMDB.select('team_members', 'select=project_id,user_id,role,equity,left_at&project_id=' + inl), TMDB.select('pacte_signatures', 'select=project_id,user_id,version&project_id=' + inl)]);
+      const uids = Array.from(new Set(proj.map(p => p.owner_id).concat(team.map(m => m.user_id))));
+      if(uids.length) ident = await TMDB.select('profile_identity', 'select=id,first_name,last_name,sex&id=in.(' + uids.join(',') + ')') || [];
+    }
+    A.pactes = {rows, proj:new Map(proj.map(p => [p.id, p])), team, ident:new Map(ident.map(i => [i.id, i])), sigs, missing:false};
+  }catch(e){ A.pactes = {rows:[], proj:new Map(), team:[], ident:new Map(), sigs:[], missing:pacteMissing(e), err:pacteMissing(e) ? '' : e.message}; }
+  A.pactesLoading = false;
+  if(A.view === 'pactes' || A.view === 'overview') render();
+}
+const pName = id => { const i = A.pactes && A.pactes.ident.get(id); return i ? ((i.first_name || '') + ' ' + (i.last_name || '')).trim() : '—'; };
+VIEWS.pactes = () => {
+  if(!A.pactes){ loadPactes(); return pageH('Pactes d\'associés', 'Chargement…') + '<div class="card empty"><b>Chargement des pactes…</b></div>'; }
+  const P = A.pactes;
+  if(P.missing) return pageH('Pactes d\'associés', 'Relecture et signature des pactes des équipes.')
+    + '<div class="card card-pad"><b>La base des pactes n\'est pas encore installée.</b><p style="margin:6px 0 0;color:var(--ink-2)">Dans Supabase, ouvre <b>SQL Editor</b>, colle le contenu du fichier <span class="mono">supabase/11_pactes.sql</span> et exécute-le une fois. Ce module se remplira ensuite tout seul.</p></div>';
+  if(P.err) return pageH('Pactes d\'associés', '') + '<div class="card empty"><b>Chargement impossible</b>' + esc(P.err) + '</div>';
+  const tab = curTab('pactes', 'relecture');
+  const n = s => P.rows.filter(r => r.status === s).length;
+  const list = P.rows.filter(r => tab === 'tous' || r.status === tab);
+  return pageH('Pactes d\'associés', 'Les équipes préparent leur pacte dans l\'Atelier. Après commande, tu le relis, le complètes, puis tu publies la version à signer.', '<button class="btn btn-ghost" data-act="pactes-reload">' + ic('refresh') + 'Actualiser</button>')
+    + tabs('pactes', [['relecture', 'À relire', n('relecture')], ['signature', 'En signature', n('signature')], ['signe', 'Signés', n('signe')], ['brouillon', 'Brouillons', n('brouillon')], ['tous', 'Tous', P.rows.length]])
+    + table(['Projet', 'Porteur', 'Associés', 'Statut', 'Version', 'Mis à jour', ''], list.map(r => {
+      const pr = P.proj.get(r.project_id) || {}, mem = P.team.filter(m => m.project_id === r.project_id && !m.left_at && m.role !== 'vis');
+      const nb = mem.length + 1, sg = P.sigs.filter(s => s.project_id === r.project_id && s.version === r.version).length;
+      const st = PST[r.status] || [r.status, ''];
+      return '<tr class="click" data-act="pacte-open" data-id="' + r.project_id + '"><td><b>' + esc(pr.title || 'Projet') + '</b></td><td>' + esc(pName(pr.owner_id)) + '</td><td>' + nb + '</td>'
+        + '<td><span class="chip ' + st[1] + '">' + st[0] + '</span>' + (r.status === 'signature' ? ' <span class="mono hint">' + sg + '/' + nb + '</span>' : '') + '</td><td class="mono">v' + r.version + '</td><td>' + ago(Date.parse(r.updated_at)) + '</td>'
+        + '<td style="white-space:nowrap">' + (r.status === 'signature' ? '<button class="btn btn-quiet btn-sm" data-act="pacte-paper" data-id="' + r.project_id + '" title="Déposer une version signée à la main">' + ic('dl') + 'Version papier</button>' : '')
+        + (r.final_path ? '<button class="btn btn-quiet btn-sm" data-act="pacte-final" data-id="' + r.project_id + '">' + ic('dl') + 'PDF signé</button>' : '') + '</td></tr>';
+    }), tab === 'relecture' ? 'Aucun pacte à relire' : 'Aucun pacte');
+};
+/* Contexte d'équipe pour l'éditeur, reconstruit depuis la base. */
+async function pacteCtxAdmin(pid){
+  const q = 'project_id=eq.' + pid;
+  const [pr, team, at] = await Promise.all([TMDB.one('projects', 'id=eq.' + pid + '&select=id,title,owner_id,sectors,hook,pace'), TMDB.select('team_members', q + '&select=*'), TMDB.one('ateliers', q + '&select=data')]);
+  if(!pr) throw new Error('Projet introuvable.');
+  const tals = (team || []).filter(m => !m.left_at && m.role !== 'vis' && m.user_id !== pr.owner_id);
+  const uids = [pr.owner_id].concat(tals.map(m => m.user_id));
+  const [ids, profs] = await Promise.all([TMDB.select('profile_identity', 'select=id,first_name,last_name,sex&id=in.(' + uids.join(',') + ')'), TMDB.select('profiles', 'select=id,city,country,pace,skills&id=in.(' + uids.join(',') + ')')]);
+  const I = new Map((ids || []).map(i => [i.id, i])), PR = new Map((profs || []).map(p => [p.id, p]));
+  const app = (at && at.data && at.data.app) || {};
+  const nm = id => { const i = I.get(id) || {}; return {first:i.first_name || 'Associé', legal:((i.first_name || '') + ' ' + (i.last_name || '')).trim(), sex:i.sex === 'm' || i.sex === 'f' ? i.sex : 'n'}; };
+  const talShare = tals.reduce((a, m) => a + (Number(m.equity) || 0), 0);
+  const members = [Object.assign(nm(pr.owner_id), {uid:pr.owner_id, role:'vis', share:100 - talShare, pace:PACTE_PACE[pr.pace] || '', skills:[]})]
+    .concat(tals.map(m => Object.assign(nm(m.user_id), {uid:m.user_id, role:'tal', share:Number(m.equity) || 0, pace:PACTE_PACE[(PR.get(m.user_id) || {}).pace] || '', skills:((PR.get(m.user_id) || {}).skills || []).map(s => (DATA.SKILLS.find(x => x.id === s) || {l:s}).l)})));
+  const own = PR.get(pr.owner_id) || {};
+  const roles = app.roles || {};
+  return {ref:'TM-PA-' + (() => { let h = 0; for(const c of String(pid)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h.toString(36).toUpperCase().padStart(6, '0').slice(-6); })(),
+    project:{id:pid, title:pr.title || '', hook:pr.hook || '', sectors:(pr.sectors || []).map(s => (DATA.SECTORS.find(x => x.id === s) || {l:s}).l), city:String(own.city || '').split(',')[0].trim(), country:own.country || 'BJ'},
+    members, roles:PACTE_DOMAINS.map(d => ({domain:d.l, uid:roles[d.id] && uids.includes(roles[d.id]) ? roles[d.id] : ''})),
+    vesting:app.vesting || 'Pas encore décidé', since:app.since || null,
+    objectives:(app.objectives || []).map(o => ({t:o.t, tasks:(o.tasks || []).map(k => ({t:k.t, owner:k.owner, due:k.due, status:k.status}))})),
+    pending:(app.props || []).filter(p => tals.some(m => !(p.val || {})[m.user_id])).length};
+}
+async function pacteStateAdmin(pid){
+  const q = 'project_id=eq.' + pid;
+  const [rows, parts, sigs, evs] = await Promise.all([TMDB.select('pactes', q + '&select=*'), TMDB.select('pacte_parties', q + '&select=*'), TMDB.select('pacte_signatures', q + '&select=*'), TMDB.select('pacte_events', q + '&select=*&order=at.desc&limit=100')]);
+  const r = (rows || [])[0]; if(!r) throw new Error('Pacte introuvable.');
+  const parties = {}; (parts || []).forEach(x => { parties[x.user_id] = {legal:x.legal || '', birthDate:x.birth_date || '', birthPlace:x.birth_place || '', nationality:x.nationality || '', address:x.address || '', idDoc:x.id_doc || '', profession:x.profession || ''}; });
+  const signatures = {}; (sigs || []).filter(x => x.version === r.version).forEach(x => { signatures[x.user_id] = {name:x.signed_name, at:x.signed_at, hash:x.doc_hash}; });
+  return {status:r.status, version:r.version, spec:r.spec, snapshot:r.snapshot, hash:r.doc_hash, reviewNote:r.review_note || '', finalPath:r.final_path, parties, signatures,
+    events:(evs || []).map(x => ({at:x.at, action:x.action, detail:x.detail, version:x.version, who:x.actor_kind === 'equipe' ? 'Équipe TakaMatch' : pName(x.actor)}))};
+}
+async function openPacteAdmin(pid){
+  if(!window.TMPacteEditor){ toast('Le module du pacte n\'a pas pu se charger.', 'bad'); return; }
+  let ctx, st;
+  try{ [ctx, st] = await Promise.all([pacteCtxAdmin(pid), pacteStateAdmin(pid)]); }catch(e){ toast(e.message, 'bad'); return; }
+  let ed;
+  const reload = async () => { const s = await pacteStateAdmin(pid); ed.update(s, await pacteCtxAdmin(pid)); return s; };
+  const after = async () => { await reload(); A.pactes = null; loadPactes(); };
+  ed = TMPacteEditor.open({ctx, state:st, me:{uid:TMDB.uid(), staff:true, name:A.me.name}, z:65, backLabel:'Pactes',
+    actions:{
+      save:spec => TMDB.rpc('pacte_save', {p_project:pid, p_spec:spec}),
+      saveParty:async (uid, data) => { await TMDB.rpc('pacte_party_save', {p_project:pid, p_data:data, p_user:uid}); await reload(); },
+      publish:async (snap, hash, note) => { await TMDB.rpc('pacte_publish', {p_project:pid, p_snapshot:snap, p_hash:hash, p_note:note || ''}); TMDB.rpc('admin_note', {p_action:'Pacte publié pour signature', p_detail:(ctx.project.title || pid) + ' · v' + snap.version}).catch(() => {}); await after(); },
+      reopen:async reason => { await TMDB.rpc('pacte_reopen', {p_project:pid, p_reason:reason}); await after(); },
+      order:async () => { throw new Error('La commande se fait depuis l\'Atelier de l\'équipe.'); },
+      sign:async () => { throw new Error('Seuls les associés signent.'); },
+      finalPdf:() => pacteFinal(pid),
+      reload,
+    },
+    onClose:() => { A.pactes = null; loadPactes(); }});
+}
+async function pacteFinal(pid){
+  try{
+    const r = await TMDB.one('pactes', 'project_id=eq.' + pid + '&select=final_path'); if(!r || !r.final_path) return false;
+    const s = TMDB.session(), res = await fetch(TMDB.url + '/storage/v1/object/authenticated/pactes/' + r.final_path, {headers:{apikey:TMDB.key, Authorization:'Bearer ' + (s && s.access_token)}});
+    if(!res.ok) throw new Error('Fichier introuvable.');
+    const b = await res.blob(), url = URL.createObjectURL(b), a = document.createElement('a');
+    a.href = url; a.download = r.final_path.split('/').pop(); document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 4000);
+    return true;
+  }catch(e){ toast(e.message, 'bad'); return false; }
+}
+function pactePaper(pid){
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/pdf';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    if(f.type !== 'application/pdf') return toast('Choisis un fichier PDF.', 'bad');
+    if(f.size > 10 * 1024 * 1024) return toast('Le PDF dépasse 10 Mo.', 'bad');
+    try{
+      const path = pid + '/pacte-papier-' + Date.now() + '.pdf';
+      await TMDB.upload('pactes', path, f);
+      await TMDB.rpc('pacte_set_final', {p_project:pid, p_path:path, p_paper:true});
+      TMDB.rpc('admin_note', {p_action:'Pacte signé sur papier déposé', p_detail:path}).catch(() => {});
+      toast('Version signée archivée : le pacte passe à « Signé ».'); A.pactes = null; loadPactes();
+    }catch(e){ toast(e.message, 'bad'); }
+  };
+  inp.click();
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-act]'); if(!t) return;
+  const a = t.dataset.act;
+  if(a === 'pacte-open'){ if(e.target.closest('button[data-act="pacte-paper"], button[data-act="pacte-final"]')) return; openPacteAdmin(t.dataset.id); }
+  else if(a === 'pacte-paper'){ e.stopPropagation(); pactePaper(t.dataset.id); }
+  else if(a === 'pacte-final'){ e.stopPropagation(); pacteFinal(t.dataset.id); }
+  else if(a === 'pactes-reload'){ A.pactes = null; render(); }
+}, true);
+
+/* ============================================================
+   Takam (branché sur la vraie base)
+   La veille quotidienne : équipes à risque, derniers passages,
+   réglages des relances et de l'IA.
+   ============================================================ */
+const TK_DEF = {active:true, notifs:true, emails:false, ai:true, ai_daily:15, notif_cap:3, renotify_days:3, email_every_days:3};
+async function loadTakam(){
+  if(A.takamLoading) return; A.takamLoading = true;
+  try{ const r = await TMDB.rpc('takam_overview'); A.takam = Object.assign({teams:[], runs:[]}, r || {}); A.takam.settings = Object.assign({}, TK_DEF, A.takam.settings || {}); }
+  catch(e){ A.takam = {err:e.message, teams:[], runs:[], settings:Object.assign({}, TK_DEF)}; }
+  A.takamLoading = false;
+  if(A.view === 'takam' || A.view === 'overview') render();
+}
+VIEWS.takam = () => {
+  if(!A.takam){ loadTakam(); return pageH('Takam', 'Chargement…') + '<div class="card empty"><b>Chargement…</b></div>'; }
+  const T = A.takam, S = T.settings, sup = A.me.role === 'super';
+  if(T.err) return pageH('Takam', '') + '<div class="card empty"><b>Chargement impossible</b>' + esc(T.err) + '</div>';
+  const last = (T.runs || [])[0];
+  const risk = (T.teams || []).filter(t => t.warn > 0);
+  const lastTxt = last ? ago(Date.parse(last.started_at)) : 'jamais';
+  const lastD = last ? (last.error ? 'Erreur : ' + last.error : last.teams + ' équipes · ' + last.notifs + ' notifications · ' + last.emails + ' e-mails') : 'Premier passage demain à 8 h';
+  const chk = (k, l, h) => '<label class="row" style="gap:10px;align-items:flex-start;padding:8px 0;cursor:pointer"><input type="checkbox" data-tk="' + k + '"' + (S[k] ? ' checked' : '') + (sup ? '' : ' disabled') + ' style="margin-top:3px"><span><b style="font-size:14px">' + l + '</b><br><span class="hint">' + h + '</span></span></label>';
+  const num = (k, l, unit) => '<div class="field"><label for="tk_' + k + '">' + l + '</label><div class="row"><input class="inp mono" id="tk_' + k + '" data-tkn="' + k + '" type="number" min="1" max="99" value="' + esc(S[k]) + '"' + (sup ? '' : ' disabled') + '><span class="hint" style="white-space:nowrap">' + unit + '</span></div></div>';
+  return pageH('Takam', 'L\'assistant des équipes. Chaque matin à 8 h (Cotonou), il relit tous les Ateliers, prévient les membres dans l\'app et répond à leurs questions.',
+      '<button class="btn btn-ghost" data-act="tk-reload">' + ic('refresh') + 'Actualiser</button>' + (sup ? '<button class="btn btn-a" data-act="tk-run">' + ic('play') + 'Lancer maintenant</button>' : ''))
+    + '<div class="grid g4" style="margin-bottom:14px">'
+    +   kpi('takam', 'Veille quotidienne', S.active ? 'Active' : 'En pause', S.active ? 'Tous les jours à 8 h' : 'Aucune relance automatique', S.active)
+    +   kpi('clock', 'Dernier passage', lastTxt, lastD)
+    +   kpi('alert', 'Équipes à risque', String(risk.length), (T.teams || []).length + ((T.teams || []).length > 1 ? ' équipes' : ' équipe') + ' avec au moins une alerte')
+    +   kpi('chat', 'Questions à l\'IA', nf(T.usage_today || 0), 'aujourd\'hui · ' + nf(T.emails_week || 0) + ' e-mails sur 7 jours')
+    + '</div>'
+    + '<section class="card card-pad" style="margin-bottom:14px"><h3 style="font-size:17px;margin-bottom:4px">Équipes à surveiller</h3><p class="hint" style="margin:0 0 12px">Les alertes importantes encore ouvertes, de la plus ancienne à la plus récente. Une équipe silencieuse depuis longtemps mérite un message de l\'équipe TakaMatch.</p>'
+    + table(['Projet', 'Membres', 'Importantes', 'Infos', 'Ouverte depuis', 'Dernière relance', 'Ce que Takam voit'], (T.teams || []).map(t =>
+        '<tr><td><b>' + esc(t.title || 'Projet') + '</b></td><td class="tnum">' + t.members + '</td>'
+        + '<td>' + (t.warn ? '<span class="chip c-warn">' + t.warn + '</span>' : '<span class="hint">0</span>') + '</td><td class="tnum">' + t.info + '</td>'
+        + '<td>' + (t.oldest ? ago(Date.parse(t.oldest)) : '—') + '</td><td>' + (t.notified ? ago(Date.parse(t.notified)) : '—') + '</td>'
+        + '<td style="max-width:420px;font-size:12.5px;color:var(--ink-2)">' + ((t.top || []).slice(0, 3).map(esc).join('<br>') || '<span class="hint">Alertes individuelles seulement</span>') + '</td></tr>'), 'Aucune équipe en difficulté') + '</section>'
+    + '<div class="grid g2">'
+    + '<section class="card card-pad"><h3 style="font-size:17px;margin-bottom:8px">Réglages</h3>'
+    +   chk('active', 'Veille quotidienne', 'Les alertes sont recalculées chaque matin pour toutes les équipes.')
+    +   chk('notifs', 'Notifications dans l\'app', 'Seulement les alertes importantes, sans répéter la même avant le délai ci-dessous.')
+    +   chk('emails', 'Récapitulatifs par e-mail', 'Coupé pour l\'instant. Pour les alertes non traitées depuis plus d\'un jour ; nécessite la clé Brevo.')
+    +   chk('ai', 'Réponses par IA', 'Sinon, Takam donne des réponses toutes prêtes.')
+    +   '<div class="grid g2" style="margin-top:10px">' + num('ai_daily', 'Questions à l\'IA', 'par personne et par jour') + num('notif_cap', 'Notifications Takam', 'par personne et par jour')
+    +   num('renotify_days', 'Relancer la même alerte', 'jours après') + num('email_every_days', 'Un e-mail au plus tous les', 'jours') + '</div>'
+    +   (sup ? '<button class="btn btn-a" data-act="tk-save" style="margin-top:10px">' + ic('check') + 'Enregistrer</button>' : '<p class="hint" style="margin-top:8px">Seul un super admin peut modifier ces réglages.</p>')
+    + '</section>'
+    + '<section class="card card-pad"><h3 style="font-size:17px;margin-bottom:8px">Derniers passages</h3>'
+    +   ((T.runs || []).length ? '<div class="tbl-w"><table><thead><tr><th>Quand</th><th>Lancé par</th><th>Équipes</th><th>Notifs</th><th>E-mails</th><th></th></tr></thead><tbody>'
+        + T.runs.map(r => '<tr><td>' + fmt(Date.parse(r.started_at)) + '</td><td>' + ({cron:'Réveil', admin:'Équipe', test:'Test'}[r.trigger] || esc(r.trigger)) + '</td><td class="tnum">' + r.teams + '</td><td class="tnum">' + r.notifs + '</td><td class="tnum">' + r.emails + '</td><td>'
+          + (r.error ? '<span class="chip c-bad" title="' + esc(r.error) + '">Erreur</span>' : r.finished_at ? '<span class="chip c-ok">OK</span>' : '<span class="chip c-warn">En cours</span>') + '</td></tr>').join('') + '</tbody></table></div>'
+        : '<p class="hint">Pas encore de passage.</p>')
+    +   '<div class="demo-note" style="margin-top:14px">' + ic('key') + '<span><b>IA gratuite (Groq) active.</b> La clé est rangée dans le coffre sécurisé de la base (Vault, nom <span class="mono">groq_api_key</span>). Pour la changer : Supabase → Project Settings → Vault. Les e-mails sont coupés pour l\'instant ; ils demanderont plus tard une clé Brevo (<span class="mono">brevo_api_key</span>).</span></div>'
+    + '</section></div>';
+};
+document.addEventListener('click', async e => {
+  const t = e.target.closest && e.target.closest('[data-act]'); if(!t) return;
+  const a = t.dataset.act;
+  if(a === 'tk-reload'){ A.takam = null; render(); }
+  else if(a === 'tk-run'){
+    t.disabled = true;
+    try{ await TMDB.rpc('takam_run_now'); toast('Takam est lancé. Les résultats arrivent dans quelques secondes.'); setTimeout(() => { A.takam = null; loadTakam(); }, 6000); }
+    catch(err){ toast(err.message, 'bad'); t.disabled = false; }
+  }
+  else if(a === 'tk-save'){
+    const v = Object.assign({}, A.takam.settings);
+    $$('[data-tk]').forEach(c => { v[c.dataset.tk] = c.checked; });
+    $$('[data-tkn]').forEach(c => { const n = Math.round(Number(c.value)); if(n >= 1 && n <= 99) v[c.dataset.tkn] = n; });
+    t.disabled = true;
+    try{
+      await TMDB.update('app_settings', 'key=eq.takam', {value:v, updated_at:new Date().toISOString()});
+      TMDB.rpc('admin_note', {p_action:'Réglages de Takam modifiés', p_detail:JSON.stringify(v)}).catch(() => {});
+      A.takam.settings = v; toast('Réglages de Takam enregistrés.'); render();
+    }catch(err){ toast(err.message, 'bad'); t.disabled = false; }
+  }
+}, true);
 
 /* ============================================================
    Événements

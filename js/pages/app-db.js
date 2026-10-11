@@ -48,6 +48,8 @@
       sel('notifications', 'select=*&order=created_at.desc&limit=60'),
       sel('payments', 'select=*&order=created_at.desc&limit=50'),
       sel('verifications', 'select=status,created_at&order=created_at.desc&limit=1'),
+      sel('pactes', 'select=project_id,status,version,doc_hash,updated_at'),
+      sel('pacte_signatures', 'select=project_id,user_id,version,signed_at'),
     ]);
     const me = r[0];
     D.uid = DB.uid(); D.me = me; D.acc = (me && me.account) || {};
@@ -60,6 +62,8 @@
     D.convs = r[8] || []; D.cmem = r[9] || []; D.msgs = r[10] || [];
     D.favs = r[11] || []; D.notifs = r[12] || []; D.pays = r[13] || [];
     D.verif = (r[14] || [])[0] || null;
+    D.pactes = new Map((r[15] || []).map(x => [x.project_id, x]));
+    D.pacteSigs = r[16] || [];
   }
 
   /* ---------- Conversion vers le format de l'outil ---------- */
@@ -226,6 +230,7 @@
       if(data.state === 'dispute') teamLog(t, 'Litige ouvert', (data.dispute && data.dispute.reason) || '', new Date(Date.now() - 3 * 864e5));
     }
     t.dbOwner = pr.owner_id;
+    pacteSummary(t, pid);
     D.lastAt[pid] = serialize(t, pid, pr.owner_id);
     /* Le groupe de l'équipe. */
     const gc = D.convs.find(c => c.project_id === pid && c.kind === 'team');
@@ -303,7 +308,8 @@
   /* ---------- Rechargement ---------- */
   function signature(){
     return [D.inv.length, D.inv.map(i => i.status).join(''), D.matches.length, D.matches.filter(m => m.ended_at).length,
-      D.msgs.length, D.notifs.length, D.notifs.filter(n => !n.read).length, D.team.length, D.acc && D.acc.credits].join('|');
+      D.msgs.length, D.notifs.length, D.notifs.filter(n => !n.read).length, D.team.length, D.acc && D.acc.credits,
+      Array.from((D.pactes || new Map()).values()).map(x => x.status + x.version + x.updated_at).join(','), (D.pacteSigs || []).length].join('|');
   }
   async function refresh(force){
     if(D.busy) return; D.busy = true;
@@ -320,6 +326,8 @@
       const typing = document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
       if(!typing && !S.layer){ S.view = view; render(); if(view === 'messages') scrollChat(); }
       else { renderTop(); syncSide(); }
+      /* Une signature ou une publication arrive pendant que le pacte est ouvert : on le met à jour. */
+      if(typeof PACTE_ED !== 'undefined' && PACTE_ED && S.teams[PACTE_ED.tid]) pacteRefresh(S.teams[PACTE_ED.tid]);
     }catch(e){ console.warn('[TakaMatch] rechargement', e); }
     finally{ D.busy = false; }
   }
@@ -338,6 +346,7 @@
       loadCtx(); saveBaseline(true);
       S._painted = null; render();
       openShared();
+      TMTakam.loadPref();
       setInterval(() => { if(document.visibilityState === 'visible' && navigator.onLine !== false) refresh(false); }, 15000);
       document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refresh(false); });
     }catch(e){
@@ -677,4 +686,150 @@
   /* Après chaque affichage : messages lus, Atelier enregistré. */
   const _render = render;
   render = function(){ _render.apply(this, arguments); if(D.on){ markRead(); scheduleAtelier(); } };
+
+  /* ============================================================
+     Pacte d'associés : stockage dans la base
+     (tables pactes, pacte_parties, pacte_signatures, pacte_events
+     — supabase/11_pactes.sql). Si ces tables n'existent pas
+     encore, le pacte reste dans ce navigateur, avec un avertissement.
+     ============================================================ */
+  const LocalPacte = Object.assign({}, PacteStore);
+  D.pacteDb = null;
+  const missingTable = e => e && (e.status === 404 || e.code === 'PGRST205' || e.code === '42P01' || /does not exist|schema cache/i.test(e.message || ''));
+  const useDb = t => D.on && D.pacteDb !== false && t && isUuid(t.id);
+  const memberUid = (t, m) => m.me ? D.uid : String(m.id).startsWith('P-') ? ((D.proj.get(t.id) || {}).owner_id || m.id) : m.id;
+  const nameOfUid = id => fullName(id) || ('@' + ((D.prof.get(id) || {}).handle || 'membre'));
+  function pacteSummary(t, pid){
+    const r = D.pactes && D.pactes.get(pid);
+    if(!r){ t.pacte = null; return; }
+    const sigs = {};
+    (D.pacteSigs || []).filter(x => x.project_id === pid && x.version === r.version).forEach(x => { sigs[x.user_id] = {at:x.signed_at}; });
+    t.pacte = {status:r.status, version:r.version, signatures:sigs, snapshot:{parties:t.members.map(m => ({uid:memberUid(t, m)}))}};
+  }
+  function toState(t, rows){
+    const r = rows[0][0] || null;
+    const parties = {};
+    (rows[1] || []).forEach(x => { parties[x.user_id] = {legal:x.legal || '', birthDate:x.birth_date || '', birthPlace:x.birth_place || '', nationality:x.nationality || '', address:x.address || '', idDoc:x.id_doc || '', profession:x.profession || ''}; });
+    const version = r ? r.version : 1;
+    const signatures = {};
+    (rows[2] || []).filter(x => x.version === version).forEach(x => { signatures[x.user_id] = {name:x.signed_name, at:x.signed_at, hash:x.doc_hash}; });
+    const events = (rows[3] || []).map(x => ({at:x.at, action:x.action, detail:/^Paiement /.test(x.detail) ? '' : x.detail, version:x.version, who:x.actor_kind === 'equipe' ? 'Équipe TakaMatch' : (x.actor ? nameOfUid(x.actor) : '')}));
+    return {status:r ? r.status : 'brouillon', version, spec:r ? r.spec : null, snapshot:r ? r.snapshot : null, hash:r ? r.doc_hash : '',
+      reviewNote:r ? r.review_note || '' : '', finalPath:r ? r.final_path : null, exists:!!r, parties, signatures, events};
+  }
+  Object.assign(PacteStore, {
+    uid(t, m){ return useDb(t) ? memberUid(t, m) : LocalPacte.uid(t, m); },
+    me(t){ return useDb(t) ? D.uid : LocalPacte.me(t); },
+    async load(t){
+      if(!useDb(t)){ const st = await LocalPacte.load(t); if(D.on){ st.demo = false; st.localOnly = true; } return st; }
+      const pid = t.id, q = 'project_id=eq.' + pid;
+      let rows;
+      try{
+        rows = await Promise.all([DB.select('pactes', q + '&select=*'), DB.select('pacte_parties', q + '&select=*'),
+          DB.select('pacte_signatures', q + '&select=*'), DB.select('pacte_events', q + '&select=*&order=at.desc&limit=100')]);
+        D.pacteDb = true;
+      }catch(e){
+        if(missingTable(e)){ D.pacteDb = false; console.warn('[TakaMatch] tables du pacte absentes : exécuter supabase/11_pactes.sql'); return this.load(t); }
+        throw e;
+      }
+      const st = toState(t, rows);
+      const live = S.teams[t.id] || t;
+      live.pacte = {status:st.status, version:st.version, signatures:st.signatures, snapshot:st.snapshot || {parties:live.members.map(m => ({uid:memberUid(live, m)}))}};
+      return st;
+    },
+    async save(t, spec){
+      if(!useDb(t)) return LocalPacte.save(t, spec);
+      await DB.rpc('pacte_save', {p_project:t.id, p_spec:spec});
+    },
+    async saveParty(t, uid, data){
+      if(!useDb(t)) return LocalPacte.saveParty(t, uid, data);
+      /* Le pacte doit exister avant d'y rattacher un signataire : le porteur le crée en l'ouvrant. */
+      await DB.rpc('pacte_party_save', {p_project:t.id, p_data:data, p_user:uid === D.uid ? null : uid});
+    },
+    async order(t, payId){
+      if(!useDb(t)) return LocalPacte.order(t, payId);
+      await DB.rpc('pacte_order', {p_project:t.id, p_payment:payId});
+      setTimeout(() => refresh(true), 800);
+    },
+    async sign(t, name, hash){
+      if(!useDb(t)) return LocalPacte.sign(t, name, hash);
+      const res = await DB.rpc('pacte_sign', {p_project:t.id, p_hash:hash, p_name:name, p_agent:navigator.userAgent || ''});
+      if(res === 'signe'){
+        /* Dernière signature : on archive le PDF signé dans l'espace privé « pactes ». */
+        try{
+          const st = await this.load(t);
+          const doc = Object.assign({}, st.snapshot, {status:'signe'});
+          const blob = await TMPacte.pdf.blob(doc, {signatures:st.signatures, hash:st.hash, draft:false});
+          const path = t.id + '/pacte-v' + st.version + '-signe.pdf';
+          await DB.upload('pactes', path, blob);
+          await DB.rpc('pacte_set_final', {p_project:t.id, p_path:path});
+        }catch(e){ console.warn('[TakaMatch] archivage du pacte', e); }
+        pacteSigned(S.teams[t.id] || t);
+      }
+      setTimeout(() => refresh(true), 800);
+    },
+    async reopen(t, reason){
+      if(!useDb(t)) return LocalPacte.reopen(t, reason);
+      await DB.rpc('pacte_reopen', {p_project:t.id, p_reason:reason});
+      setTimeout(() => refresh(true), 800);
+    },
+    /* PDF signé archivé : on le récupère tel quel (lien privé). */
+    async finalPdf(t){
+      if(!useDb(t)) return false;
+      const r = await DB.one('pactes', 'project_id=eq.' + t.id + '&select=final_path');
+      if(!r || !r.final_path) return false;
+      try{
+        const s = DB.session(), res = await fetch(DB.url + '/storage/v1/object/authenticated/pactes/' + r.final_path, {headers:{apikey:DB.key, Authorization:'Bearer ' + (s && s.access_token)}});
+        if(!res.ok) return false;
+        const b = await res.blob(), url = URL.createObjectURL(b), a = document.createElement('a');
+        a.href = url; a.download = r.final_path.split('/').pop(); document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 4000);
+        return true;
+      }catch(e){ return false; }
+    },
+  });
+  /* Le porteur crée le pacte (brouillon) dès qu'il l'ouvre, pour que chacun puisse y rattacher ses informations. */
+  const _openPacte = openPacte;
+  openPacte = async function(t){
+    if(useDb(t) && isAdmin(t)){
+      try{ const r = await DB.one('pactes', 'project_id=eq.' + t.id + '&select=project_id'); if(!r){ const ctx = pacteCtx(t); await DB.rpc('pacte_save', {p_project:t.id, p_spec:TMPacte.defaults(ctx)}); } }
+      catch(e){ if(missingTable(e)) D.pacteDb = false; }
+    }
+    return _openPacte(t);
+  };
+  /* ============================================================
+     Takam : questions à l'IA (fonction serveur « takam ») et
+     préférence pour les récapitulatifs par e-mail
+     ============================================================ */
+  window.TMTakam = {
+    ready: t => D.on && !!t && isUuid(t.id),
+    ask: async (t, q) => {
+      const s = await DB.ensure(); if(!s) return '';
+      const history = (t.takChat || []).filter(m => !m.wait).slice(-7, -1).map(m => ({me:!!m.me, txt:String(m.txt || '').slice(0, 600)}));
+      const ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(() => ctl.abort(), 30000) : 0;
+      try{
+        const r = await fetch(DB.url + '/functions/v1/takam', {method:'POST', signal:ctl ? ctl.signal : undefined,
+          headers:{'Content-Type':'application/json', apikey:DB.key, Authorization:'Bearer ' + s.access_token},
+          body:JSON.stringify({mode:'ask', project_id:t.id, question:q, history})});
+        const d = await r.json().catch(() => ({}));
+        if(!r.ok || !d.reply) return '';
+        if(d.note === 'quota') return d.reply + ' (Tu as posé toutes tes questions du jour à Takam : réponse courte en attendant demain.)';
+        return d.reply;
+      }finally{ clearTimeout(tm); }
+    },
+    savePref: async on => {
+      if(!D.on || !D.uid) return;
+      try{
+        const ex = await DB.one('takam_prefs', 'user_id=eq.' + D.uid + '&select=user_id');
+        if(ex) await DB.update('takam_prefs', 'user_id=eq.' + D.uid, {emails:!!on, updated_at:new Date().toISOString()});
+        else await DB.insert('takam_prefs', {user_id:D.uid, emails:!!on});
+      }catch(e){ console.warn('[Takam] préférence', e); toast('La préférence n\'a pas pu être enregistrée. Réessaie.', 'bad'); }
+    },
+    loadPref: async () => {
+      if(!D.on || !D.uid) return;
+      try{ const r = await DB.one('takam_prefs', 'user_id=eq.' + D.uid + '&select=emails'); S.prefs.takam = r ? r.emails !== false : true; }catch(e){}
+      /* Le réglage n'apparaît que si l'équipe TakaMatch a activé les e-mails de Takam. */
+      try{ const s = await DB.one('app_settings', 'key=eq.takam&select=value'); S.takamEmails = !!(s && s.value && s.value.emails); }catch(e){}
+    },
+  };
 })();
+

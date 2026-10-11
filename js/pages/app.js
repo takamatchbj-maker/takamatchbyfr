@@ -317,7 +317,7 @@ const DEMO_ME = structuredClone(DEFAULT_ME);
 S.me = structuredClone(DEMO_ME);
 Object.assign(S, {
   invFilter:'all', showArch:false, loading:false, atelierId:null, ateliers:{},
-  prefs:{inv:true, msg:true, match:true, weekly:false, sms:false},
+  prefs:{inv:true, msg:true, match:true, weekly:false, sms:false, takam:true},
   payments:[],
   reported:new Set(), likes:new Set(), fv:null,
 });
@@ -1205,7 +1205,7 @@ document.addEventListener('click', e => {
       const sx = $('#layer .opt[data-act="sex-pick"][aria-pressed="true"]');
       S.me.first = $('#e1').value.trim() || S.me.first; S.me.city = $('#e3').value.trim() || S.me.city; if(sx) S.me.sex = sx.dataset.v;
       closeLayer(); render(); toast('Compte mis à jour.', 'ok'); break; }
-    case 'pref': { const k = t.dataset.k; S.prefs[k] = !S.prefs[k]; t.setAttribute('aria-pressed', S.prefs[k]); toast('Préférence enregistrée.'); break; }
+    case 'pref': { const k = t.dataset.k; S.prefs[k] = !S.prefs[k]; t.setAttribute('aria-pressed', S.prefs[k]); if(k === 'takam' && window.TMTakam) TMTakam.savePref(S.prefs[k]); toast('Préférence enregistrée.'); break; }
     case 'legal': toast('Document juridique en cours de rédaction avec le cabinet.'); break;
     case 'export': toast('Export préparé. Tu recevras un lien par email.', 'ok'); break;
     case 'logout': closeLayer(); modal('Se déconnecter', '<p>Tu seras déconnecté de cet appareil. Tes conversations et ton Atelier restent intacts.</p>',
@@ -1611,54 +1611,34 @@ const inDays = n => { const d = new Date(); d.setDate(d.getDate()+n); d.setHours
 
 /* ============================================================
    Takam — des alertes calculées à partir de l'état de l'équipe
+   Les règles vivent dans js/takam-rules.js : le même fichier tourne
+   chaque matin sur le serveur pour relancer les membres absents.
    ============================================================ */
+function takamTeam(t){
+  const uid = window.TMData && TMData.on ? TMData.uid : null, sig = {};
+  const s0 = (t.pacte && t.pacte.signatures) || {};
+  Object.keys(s0).forEach(k => { sig[k === uid ? 'me' : k] = true; });
+  return {title:t.title, members:t.members.map(m => ({id:m.id, first:m.first, role:m.role, sex:m.sex})),
+    milestones:t.milestones, objectives:t.objectives, props:t.props, roles:t.roles, group:t.group, log:t.log,
+    vesting:t.vesting, since:t.since, pacte:t.pacte ? {status:t.pacte.status, signatures:sig} : null};
+}
 function takam(t){
-  const T = [], M = [], adm = isAdmin(t), P0 = porteurOf(t);
-  const done = t.milestones.filter(m => m.done).length;
-  const next = t.milestones.findIndex(m => !m.done);
-  if(next >= 0){
-    const last = t.milestones.filter(m => m.done && m.d).map(m => +m.d).sort((a,b)=>a-b).pop() || +t.since;
-    const n = dAgo(last);
-    if(n >= 7) T.push({lvl:'warn', t:'Le jalon '+String(next+1).padStart(2,'0')+' « '+t.milestones[next].t+' » attend depuis '+n+' jours. '+(adm ? 'Tu as la main : fixe une date à l\'équipe.' : 'Demandez une date à '+P0.first+'.')});
-  }
-  if(done >= 4) T.push({lvl:'ok', t:'Bravo : '+done+' jalons sur 6. Vous faites partie des équipes qui tiennent la distance.'});
-  else if(done >= 2) T.push({lvl:'ok', t:done+' jalons franchis. La prochaine vraie épreuve, c\'est la période d\'essai : ne la sautez pas.'});
-  const late = allTasks(t).filter(isLate);
-  if(late.length) T.push({lvl:'warn', t:late.length+' tâche'+(late.length>1?'s':'')+' en retard : '+late.map(k => '« '+k.t+' » ('+memberById(t, k.owner).first+')').join(', ')+'.'});
-  const unset = DOMAINS.filter(d => !t.roles[d.id]);
-  if(unset.length) T.push({lvl:'info', t:unset.length+' domaine'+(unset.length>1?'s':'')+' sans responsable : '+unset.map(d => d.l.toLowerCase()).join(', ')+'. Sans nom, personne ne décide.'});
-  if(!adm){
-    pendingFor(t, 'me').forEach(p => M.push({lvl:'warn', t:'Tu n\'as pas validé « '+p.t+' », proposée '+(dAgo(p.d) ? 'il y a '+dAgo(p.d)+' j' : "aujourd'hui")+'.', act:'at-val', id:p.id}));
-    allTasks(t).filter(k => k.owner === 'me' && k.status !== 'done' && !k.signaled).forEach(k => {
-      const n = dIn(k.due);
-      if(n < 0) M.push({lvl:'warn', t:'Ta tâche « '+k.t+' » est en retard de '+(-n)+' j. Signale-la terminée ou préviens le groupe.'});
-      else if(n <= 2) M.push({lvl:'info', t:'Ta tâche « '+k.t+' » est due '+dueTxt(k)+'.'});
-    });
-    if(t.members.length >= 3){
-      const mine = t.group.filter(x => x.from === 'me').map(x => +x.d).pop();
-      const n = mine ? dAgo(mine) : dAgo(t.since);
-      if(n >= 5) M.push({lvl:'info', t:'Tu n\'as rien écrit dans le groupe depuis '+n+' jours. Un mot suffit pour rester dans le rythme.', act:'at-tab', tab:'groupe'});
-    }
-  } else {
-    t.props.forEach(p => { const miss = missingOn(t, p); if(miss.length) M.push({lvl:'info', t:miss.map(m => m.first).join(' et ')+(miss.length>1?' n\'ont':' n\'a')+' pas encore validé « '+p.t+' ».', act:'at-nudge', id:p.id}); });
-    allTasks(t).filter(k => k.signaled && k.status !== 'done').forEach(k => { const m = memberById(t, k.owner);
-      M.push({lvl:'warn', t:m.first+' a signalé « '+k.t+' » terminée. Confirme-la pour que la progression suive.', act:'at-confirm', id:k.id}); });
-    talentsOf(t).forEach(m => { const last = t.group.filter(x => x.from === m.id).map(x => +x.d).pop();
-      const n = last ? dAgo(last) : dAgo(t.since);
-      if(t.members.length >= 3 && n >= 6) M.push({lvl:'info', t:m.first+' est '+g(m.sex,'silencieux','silencieuse','sans nouvelles')+' dans le groupe depuis '+n+' jours. Un message de ta part ?'}); });
-  }
-  return {team:T, me:M};
+  if(!window.TakamRules) return {team:[], me:[]};
+  try{ return TakamRules.compute(takamTeam(t), 'me', Date.now()); }
+  catch(e){ console.warn('[Takam]', e); return {team:[], me:[]}; }
 }
 function takamMeCount(){ return Object.values(S.teams).reduce((a, t) => a + takam(t).me.filter(x => x.lvl === 'warn').length, 0); }
-const TAKAM_REPLIES = [
-  [/retard|lent|bloqu/i, "Un retard n'est pas un drame, un retard silencieux l'est. Dites dans le groupe ce qui bloque et fixez une nouvelle date ensemble, aujourd'hui."],
-  [/capital|part|equity|vesting/i, "Décidez le capital à froid, maintenant. Le porteur propose, chacun valide ou dit pourquoi pas. Une répartition fixée après six mois se négocie toujours mal."],
-  [/motiv|fatigu|décourag|decourag/i, "Regarde ce que vous avez déjà franchi. Choisis une seule tâche pour cette semaine et termine-la : la motivation revient avec les résultats, pas avant."],
-  [/r[oô]le|qui d[ée]cide/i, "Un domaine, un responsable. Ça n'empêche pas d'en discuter, ça évite de rester bloqués. Le porteur attribue, l'équipe valide."],
-];
-function takamReply(q){
-  const r = TAKAM_REPLIES.find(x => x[0].test(q));
-  return r ? r[1] : "Bien noté. Mon conseil : transforme ça en tâche dans le plan d'action, avec un responsable et une date. Ce qui n'a pas de date n'avance pas.";
+function takamReply(q){ return window.TakamRules ? TakamRules.reply(q) : "Bien noté. Transforme ça en tâche dans le plan d'action, avec un responsable et une date."; }
+/* Question à Takam : l'IA du serveur quand l'outil est branché sur la base, sinon une réponse de secours. */
+async function takamAsk(t, q){
+  t.takChat.push({me:true, txt:q});
+  const wait = {me:false, txt:'…', wait:Date.now()}; t.takChat.push(wait); render();
+  let txt = '';
+  try{ if(window.TMTakam && TMTakam.ready(t)) txt = await TMTakam.ask(t, q); }catch(e){ console.warn('[Takam]', e); }
+  if(!txt) txt = takamReply(q);
+  delete wait.wait; wait.txt = txt;
+  if(S.view === 'atelier' && !S.layer) render(); else syncSide();
+  const i = $('#tkIn'); if(i) i.focus();
 }
 
 /* ============================================================
@@ -1862,24 +1842,7 @@ document.addEventListener('click', e => {
     case 'at-obj-cancel': S.objForm = false; render(); break;
     case 'at-task-new': S.taskForm = el.dataset.o; render(); setTimeout(() => { const i = $('#taskIn'); if(i) i.focus(); }, 0); break;
     case 'at-task-cancel': S.taskForm = null; render(); break;
-    case 'at-pacte': { if(!t) break;
-      if(t.log.some(l => /Pacte d'associés commandé/.test(l.t))){ toast('Le pacte de cette équipe est déjà commandé : aucun nouveau paiement.', 'ok'); break; }
-      const rolesOk = DOMAINS.every(d => t.roles[d.id]);
-      const pend = t.props.filter(p => missingOn(t, p).length);
-      modal('Générer le pacte d\'associés',
-        '<p>Le document est prérempli avec ce que l\'équipe a décidé dans l\'Atelier. Il est relu par un juriste inscrit au barreau de Cotonou avant de vous être remis.</p>'
-        + '<div class="col" style="gap:0">'+[['Répartition', t.members.map(m => (m.me?'toi':m.first)+' '+shareOf(t, m.id)+' %').join(' · ')], ['Vesting', t.vesting],
-            ['Rôles', rolesOk ? DOMAINS.map(d => d.l+' : '+(memberById(t, t.roles[d.id]).me ? 'toi' : memberById(t, t.roles[d.id]).first)).join(' · ') : 'à compléter'],
-            ['Signataires', t.members.length+' associés'], ['Cadre juridique', 'SAS de droit OHADA'], ['Relecture', '72 heures ouvrées']].map(r=>
-          '<div class="row" style="justify-content:space-between;gap:12px;font-size:13.5px;padding:10px 0;border-top:1px solid var(--line)"><span style="color:var(--ink-3);font-weight:600">'+esc(r[0])+'</span><span style="font-weight:600;text-align:right;color:var(--ink)">'+esc(r[1])+'</span></div>').join('')+'</div>'
-        + (pend.length || !rolesOk || t.vesting === 'Pas encore décidé' ? note('warn','alert', pend.length ? pend.length+' proposition'+(pend.length>1?'s attendent':' attend')+' encore la validation d\'un talent. Le pacte ne sera signé qu\'une fois tout validé.' : 'Il reste des choix ouverts : le juriste vous posera la question.') : '')
-        + note('', 'info', 'Dans le produit, le pacte arrive en PDF à signer par chaque associé.'),
-        '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-a" data-act="at-pacte-go">'+ic('file')+'Commander · '+priceH('pacte')+'</button>');
-      break; }
-    case 'at-pacte-go': if(!t) break; closeLayer();
-      if(t.log.some(l => /Pacte d'associés commandé/.test(l.t))){ toast('Le pacte de cette équipe est déjà commandé.', 'ok'); break; }
-      teamLog(t, 'Pacte d\'associés commandé', 'Relecture juridique en cours, retour sous 72 h.');
-      pushNotif('file', 'Pacte en préparation', 'Un juriste relit votre document.'); render(); toast('Commande enregistrée. L\'équipe est prévenue.', 'ok'); break;
+    case 'at-pacte': if(!t) break; openPacte(t); break;
     case 'leave': closeLayer(); leaveModal(el.dataset.id); break;
     case 'leave-reason': el.parentElement.querySelectorAll('.opt').forEach(o => o.setAttribute('aria-pressed', String(o === el))); break;
     case 'leave-go': doLeave(S.leaveId); break;
@@ -1895,8 +1858,8 @@ document.addEventListener('submit', e => {
   if(!['gsend','takam','obj','task'].includes(k)) return;
   e.preventDefault(); if(!t) return;
   if(k === 'gsend') sendGroup(t, $('#gIn').value, 'gIn');
-  else if(k === 'takam'){ const q = $('#tkIn').value.trim(); if(!q) return;
-    t.takChat.push({me:true, txt:q}); t.takChat.push({me:false, txt:takamReply(q)}); render(); const i = $('#tkIn'); if(i) i.focus(); }
+  else if(k === 'takam'){ const q = $('#tkIn').value.trim(); if(!q || t.takChat.some(m => m.wait && Date.now() - m.wait < 30000)) return;
+    $('#tkIn').value = ''; takamAsk(t, q.slice(0, 500)); }
   else if(k === 'obj'){ const v = $('#objIn').value.trim(); if(!v) return;
     t.objectives.push({id:uid(), t:v, tasks:[]}); S.objForm = false; teamLog(t, 'Nouvel objectif : '+v); render(); toast('Objectif ajouté. Takam le suivra.', 'ok'); }
   else if(k === 'task'){ const v = $('#taskIn').value.trim(); if(!v) return;
@@ -2801,12 +2764,13 @@ function vParams(){
     +     settingRow('match','Nouveaux matchs','Push et email')
     +     settingRow('msg','Nouveaux messages','Push, uniquement après un match')
     +     settingRow('sms','Rappels par SMS','Invitation sur le point d\'expirer (2 jours avant)')
-    +     settingRow('weekly','Suggestions hebdomadaires','Un résumé le lundi matin')+'</section>'
+    +     settingRow('weekly','Suggestions hebdomadaires','Un résumé le lundi matin')
+    +     (S.takamEmails ? settingRow('takam','Récapitulatifs de Takam par e-mail','Quand une alerte de ton équipe attend depuis plus d\'un jour. Au plus un e-mail tous les 3 jours') : '')+'</section>'
     +   '<section class="card card-pad"><div class="lbl" style="margin-bottom:8px">Apparence</div>'
     +     '<div class="row"><div style="flex:1"><div style="font-weight:600;font-size:14px">Thème sombre</div><div class="hint">Suit ton système tant que tu n\'as rien choisi.</div></div>'
     +     '<button class="toggle" data-act="theme" aria-pressed="'+themeIsDark()+'" aria-label="Thème sombre"></button></div></section>'
     +   '<section class="card card-pad"><div class="lbl" style="margin-bottom:4px">Centre juridique</div>'
-    +     ["Conditions générales d'utilisation",'Politique de confidentialité','Mentions légales',"Modèle de pacte d'associés (OHADA)"].map(l => linkRow('file', l, 'legal')).join('')+'</section>'
+    +     ["Conditions générales d'utilisation",'Politique de confidentialité','Mentions légales'].map(l => linkRow('file', l, 'legal')).join('') + linkRow('dl', "Modèle de pacte d'associés (OHADA) · PDF", 'pacte-model')+'</section>'
     +   '<section class="card card-pad" style="border-color:var(--bad-bg)"><div class="lbl" style="margin-bottom:4px;color:var(--bad-ink)">Données et compte</div>'
     +     linkRow('dl','Télécharger mes données','export')+linkRow('out','Se déconnecter','logout')+linkRow('trash','Supprimer définitivement mon compte','delete-account',true)+'</section>'
     + '</div><div class="col" style="gap:14px">'
@@ -3060,7 +3024,7 @@ function rmModal(id){
   const m = memberById(t, id), share = shareOf(t, id);
   const roles = DOMAINS.filter(d => t.roles[d.id] === id).map(d => d.l.toLowerCase());
   const tasks = allTasks(t).filter(k => k.owner === id && k.status !== 'done');
-  const pacte = t.log.some(l => /Pacte d'associés commandé/.test(l.t));
+  const pacte = ['relecture','signature','signe'].includes(pacteStatus(t)) || t.log.some(l => /Pacte d'associés commandé/.test(l.t));
   S.rmId = id;
   modal('Retirer '+m.first+' de l\'équipe ?',
     '<ul class="leave-l">'
@@ -3073,7 +3037,7 @@ function rmModal(id){
     + '<li>'+ic('bell')+m.first+' est '+g(m.sex,'prévenu','prévenue','prévenu·e')+' et une place se libère dans ses 3 projets.</li>'
     + '<li>'+ic('archive')+'Votre conversation privée est archivée des deux côtés, en lecture seule. Rien n\'est supprimé.</li>'
     + '<li>'+ic('clock')+'Tu ne pourras pas l\'inviter de nouveau avant '+REINVITE_DAYS+' jours.</li></ul>'
-    + (pacte ? note('warn','alert','Un pacte d\'associés a été commandé : sa sortie devra aussi y être actée avec le juriste.') : '')
+    + (pacte ? note('warn','alert', pacteStatus(t) === 'signe' ? 'Un pacte d\'associés est signé : sa sortie suit les règles de départ du pacte (rachat de ses actions). Demande l\'avis du juriste.' : 'Un pacte d\'associés est en cours : sa sortie devra y être actée avec le juriste.') : '')
     + '<div class="field"><label>Motif <span class="req">*</span></label><div class="col" style="gap:6px" id="rmReasons">'+RM_REASONS.map(l =>
       '<button class="opt radio" data-act="rm-reason" data-v="'+esc(l)+'" aria-pressed="false"><span class="box">'+tick()+'</span><span>'+l+'</span></button>').join('')+'</div><p class="hint" id="rmErr" hidden style="color:var(--bad-ink)">Choisis un motif : il sera inscrit au journal.</p></div>'
     + field('rmTxt','Un mot pour '+m.first+' (facultatif)','<textarea class="inp" id="rmTxt" style="min-height:80px" placeholder="Ce que tu veux lui dire, avec respect."></textarea>'),
@@ -3251,7 +3215,9 @@ function takamPanel(t){
     + (x.act === 'at-val' ? ' <button class="lnk" data-act="at-val" data-id="'+x.id+'">Valider</button>' : '')
     + (x.act === 'at-confirm' ? ' <button class="lnk" data-act="at-confirm" data-id="'+x.id+'">Confirmer</button>' : '')
     + (x.act === 'at-nudge' ? ' <button class="lnk" data-act="at-nudge" data-id="'+x.id+'">Relancer</button>' : '')
-    + (x.act === 'at-tab' ? ' <button class="lnk" data-act="at-group">Ouvrir le groupe</button>' : '')+'</span></li>';
+    + (x.act === 'at-tab' ? ' <button class="lnk" data-act="at-group">Ouvrir le groupe</button>' : '')
+    + (x.act === 'at-pacte' ? ' <button class="lnk" data-act="at-pacte">Ouvrir le pacte</button>' : '')
+    + (x.act === 'at-plan' && isAdmin(t) && !t.objectives.length ? ' <button class="lnk" data-act="at-obj-new">Fixer un objectif</button>' : '')+'</span></li>';
   return '<section class="panel takam"><div class="tk-h">'
     + '<div class="tk-mascot"><div class="tk-av" aria-hidden="true">T</div><span>Mascotte à venir</span></div>'
     + '<div><h3>Takam</h3><p class="hint">Veille sur l\'équipe, relance et encourage.</p></div></div>'
@@ -3259,8 +3225,8 @@ function takamPanel(t){
     +   '<button class="'+(tab==='team'?'on':'')+'" data-act="tk-tab" data-v="team" aria-pressed="'+(tab==='team')+'">Équipe<span class="n">'+a.team.length+'</span></button>'
     +   '<button class="'+(tab==='me'?'on':'')+'" data-act="tk-tab" data-v="me" aria-pressed="'+(tab==='me')+'">Pour toi<span class="n">'+a.me.length+'</span></button></div>'
     + (list.length ? '<ul class="tk-list">'+list.map(item).join('')+'</ul>' : '<p class="hint">Rien à signaler. Continuez comme ça.</p>')
-    + (t.takChat.length ? '<div class="tk-chat">'+t.takChat.slice(-4).map(m => '<div class="tk-b '+(m.me?'me':'')+'">'+esc(m.txt)+'</div>').join('')+'</div>' : '')
-    + '<form class="tk-ask" data-form="takam"><label class="sr" for="tkIn">Demander à Takam</label><input class="inp" id="tkIn" placeholder="Demander à Takam…" autocomplete="off" maxlength="200">'
+    + (t.takChat.length ? '<div class="tk-chat" aria-live="polite">'+t.takChat.slice(-4).map(m => '<div class="tk-b'+(m.me?' me':'')+(m.wait?' wait':'')+'"'+(m.wait?' aria-label="Takam réfléchit"':'')+'>'+esc(m.txt)+'</div>').join('')+'</div>' : '')
+    + '<form class="tk-ask" data-form="takam"><label class="sr" for="tkIn">Demander à Takam</label><input class="inp" id="tkIn" placeholder="Demander à Takam…" autocomplete="off" maxlength="500">'
     + '<button class="iconbtn iconbtn-lg" type="submit" aria-label="Envoyer à Takam">'+ic('send')+'</button></form></section>';
 }
 function vAtelier(){
@@ -3327,8 +3293,7 @@ function vAtelier(){
           + (m.role === 'tal' ? '<label class="sr" for="eq-'+m.id+'">Part de '+esc(m.first)+'</label><input type="range" id="eq-'+m.id+'" data-eq="'+m.id+'" min="0" max="40" step="5" value="'+v+'" class="eq-range"'+lockAttr(t)+'>' : ''); }).join('')+'</div>'
     + '<div class="field" style="margin-top:12px"><label for="vesting2">Vesting</label>'
     +   '<select class="inp" id="vesting2"'+lockAttr(t)+'>'+VESTING.map(v => '<option'+(t.vesting===v?' selected':'')+'>'+v+'</option>').join('')+'</select></div>'
-    + '<button class="btn '+(adm?'btn-a':'btn-ghost')+' btn-block" style="margin-top:14px" data-act="at-pacte"'+lockAttr(t)+'>'+ic('file')+'Générer le pacte d\'associés</button>'
-    + '<p class="hint" style="margin-top:8px;text-align:center">Modèle OHADA, relu par un juriste · <span class="mono">'+priceH('pacte')+'</span></p></section>';
+    + pacteCard(t, adm) + '</section>';
   const log = '<section class="panel"><div class="sec-t">'+ic('book')+'<h3>Journal de décisions</h3><span class="chip"><span class="mono">'+t.log.length+'</span></span></div>'
     + (adm ? '<form class="log-add" data-form="log"><label class="sr" for="logIn">Nouvelle décision</label><input class="inp" id="logIn" placeholder="Ex. : on lance la version test à Bohicon le 15 octobre" maxlength="140" autocomplete="off">'
            + '<button class="btn btn-ghost btn-sm" type="submit" style="height:40px">'+ic('plus')+'Ajouter</button></form>'
