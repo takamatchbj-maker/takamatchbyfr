@@ -1,0 +1,36 @@
+# ============================================================
+# TakaMatch — garder la base Supabase éveillée
+# ------------------------------------------------------------
+# Sur l'offre gratuite, Supabase met le projet en pause après
+# 7 jours sans activité. Cette tâche interroge la base tous les
+# 2 jours pour qu'elle reste active. Gratuit (GitHub Actions).
+# La clé utilisée est la clé PUBLIQUE, déjà visible dans le site.
+# Lancement à la main : onglet Actions → « Réveil Supabase » → Run workflow.
+# ============================================================
+name: Réveil Supabase
+
+on:
+  schedule:
+    - cron: "17 6 */2 * *"   # tous les 2 jours, 6 h 17 UTC (7 h 17 à Cotonou)
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Interroger la base
+        env:
+          SB_URL: https://ucxeopgigfzmuqzuzynr.supabase.co
+          SB_KEY: sb_publishable_j-dzjIrf_94H7f0Ogg_QkQ_sGlLjW-R
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /tmp/r.json -w '%{http_code}' \
+              -H "apikey: $SB_KEY" \
+              "$SB_URL/rest/v1/app_settings?select=key&limit=1")
+            echo "Tentative $i : HTTP $code"
+            if [ "$code" = "200" ]; then echo "Base active."; exit 0; fi
+            sleep 20
+          done
+          echo "::error::La base Supabase ne répond pas (HTTP $code). Elle est peut-être en pause : ouvrir le tableau de bord Supabase et cliquer sur Resume project."
+          exit 1
