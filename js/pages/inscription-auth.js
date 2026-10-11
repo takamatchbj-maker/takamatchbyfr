@@ -104,7 +104,16 @@
     const q = new URLSearchParams({oauth:'google'});
     if(O.login) q.set('mode', 'login');
     if(O.roleSel) q.set('role', O.roleSel);
-    location.href = DB.googleUrl(location.origin + location.pathname + '?' + q.toString());
+    /* Google pas encore activé dans Supabase : page d'explication plutôt qu'une erreur brute. */
+    const keep = new URLSearchParams(); if(O.login) keep.set('mode', 'login'); if(O.roleSel) keep.set('role', O.roleSel);
+    O.sending = true;
+    fetch(DB.url + '/auth/v1/settings', {headers:{apikey:DB.key}})
+      .then(r => r.ok ? r.json() : null).catch(() => null)
+      .then(st => {
+        O.sending = false;
+        if(st && st.external && st.external.google === false){ keep.set('type', 'google'); location.href = 'erreur.html?' + keep.toString(); return; }
+        location.href = DB.googleUrl(location.origin + location.pathname + '?' + q.toString());
+      });
   }, true);
 
   /* ---------- Pseudo : disponibilité en direct, puis réservation ---------- */
@@ -185,7 +194,12 @@
   };
   async function resume(){
     let s = null;
-    try{ s = await DB.takeOAuthReturn(); }catch(e){ toast(e.message, 'bad'); }
+    try{ s = await DB.takeOAuthReturn(); }
+    catch(e){
+      /* Retour de Google en erreur : page d'explication. */
+      if(e && e.kind === 'oauth'){ location.replace('erreur.html?type=oauth&detail=' + encodeURIComponent(String(e.message || '').slice(0, 120))); return; }
+      toast(e.message, 'bad');
+    }
     try{
       s = s || await DB.ensure();
       if(!s) return;

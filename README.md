@@ -82,3 +82,16 @@ Le bouton « Préparer le pacte d'associés » de l'Atelier ouvre un éditeur pl
   (changeable avec le secret `GROQ_MODEL`).
 - **Base** : `supabase/12_takam.sql` (déjà installé sur le projet `takamatch`).
 - **Admin** : module « Takam » (équipes à surveiller, derniers passages, réglages, bouton « Lancer maintenant »).
+
+## Pages d'erreur
+
+- `erreur.html` : une seule page pour tous les incidents, choisie par l'adresse :
+  `?type=google` (connexion Google pas encore activée), `oauth` (retour de Google en échec), `404`,
+  `session` (session expirée), `reseau` (hors connexion), `serveur`, `maintenance`, `acces`.
+  Options : `mode` et `role` (gardés pour revenir à l'inscription), `retour=/page.html` (bouton Réessayer),
+  `detail=…` (texte affiché dans « Détails pour l'équipe »).
+- `404.html` : copie de `erreur.html` (type 404 par défaut). GitHub Pages l'affiche pour toute adresse inconnue.
+  Après une modification de `erreur.html`, recopier le fichier et remettre `data-default="404"` sur la balise `<html>`.
+- Le bouton Google de l'inscription vérifie d'abord dans Supabase que Google est activé ;
+  sinon il envoie vers `erreur.html?type=google` au lieu de la page d'erreur brute de Supabase.
+
