@@ -931,11 +931,11 @@ function renderLogin(){
   $('#root').innerHTML = '<div class="login"><form class="card login-c" id="loginF" autocomplete="off" novalidate>'
     + '<img class="logo" src="'+LOGO_SRC+'" alt="TakaMatch">'
     + '<h1 style="font-size:26px;margin-bottom:4px">Espace équipe</h1>'
-    + '<p style="color:var(--ink-2);margin:0 0 18px">'+(mail ? 'Accès réservé à l\'équipe TakaMatch. Chaque connexion est inscrite au journal.' : 'Code envoyé à <b>'+esc(L.email)+'</b>. Regarde aussi dans les indésirables.')+'</p>'
+    + '<p style="color:var(--ink-2);margin:0 0 18px">'+(mail ? 'Accès réservé à l\'équipe TakaMatch. Chaque connexion est inscrite au journal.' : 'Code envoyé à <b>'+esc(L.email)+'</b>. Il est valable 10 minutes. Regarde aussi dans les indésirables.')+'</p>'
     + '<div class="col">'
     + (mail
         ? '<div class="field"><label for="lgE">Adresse e-mail</label><input class="inp" id="lgE" type="email" placeholder="ton@email.com" autocomplete="username" value="'+esc(L.email)+'"></div>'
-        : '<div class="field"><label for="lgC">Code reçu par e-mail</label><input class="inp mono" id="lgC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="letter-spacing:.35em;font-size:20px"></div>')
+        : '<div class="field"><label for="lgC">Code reçu par e-mail</label><input class="inp mono" id="lgC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" value="'+esc(L.code || '')+'" style="letter-spacing:.35em;font-size:20px"></div>')
     + '<div id="lgErr">'+(L.err ? '<div class="err">'+esc(L.err)+'</div>' : '')+'</div>'
     + '<button class="btn btn-a btn-block" type="submit" style="height:42px"'+(L.busy ? ' disabled' : '')+'>'+ic('lock')+(L.busy ? 'Un instant…' : mail ? 'Recevoir un code' : 'Se connecter')+'</button>'
     + (mail ? '' : '<div class="row" style="justify-content:center;gap:14px;margin-top:4px"><button type="button" class="btn btn-quiet btn-sm" data-act="lg-back">Changer d\'adresse</button><button type="button" class="btn btn-quiet btn-sm" data-act="lg-resend">Renvoyer le code</button></div>')
@@ -953,6 +953,7 @@ async function doLogin(){
     return;
   }
   const code = ($('#lgC').value || '').replace(/\D/g, '');
+  L.code = code;
   if(code.length !== 6){ L.err = 'Le code compte 6 chiffres.'; return renderLogin(); }
   L.busy = true; L.err = ''; renderLogin();
   try{ await TMDB.verifyCode(L.email, code); await enter(); }catch(e){ lgFail(e); }
@@ -1691,7 +1692,7 @@ document.addEventListener('click', e => {
   const need = (ok) => { if(!ok){ toast('Action réservée à un autre rôle.', 'bad'); } return ok; };
   switch(a){
     case 'lg-back': L = {step:'mail', email:L.email, busy:false, err:''}; renderLogin(); break;
-    case 'lg-resend': TMDB.sendCode(L.email, true).then(() => toast('Nouveau code envoyé.')).catch(err => toast(err.message, 'bad')); break;
+    case 'lg-resend': TMDB.sendCode(L.email, true).then(() => { L.code = ''; L.err = ''; renderLogin(); toast('Nouveau code envoyé. Utilise le plus récent.'); }).catch(err => toast(err.message, 'bad')); break;
     case 'save-prix': savePrix(); break;
     case 'go': A.view = t.dataset.v; A.sideOpen = false; A.drawer = null; render(); window.scrollTo(0, 0); break;
     case 'side': A.sideOpen = !A.sideOpen; $('.side').classList.toggle('open', A.sideOpen); break;
