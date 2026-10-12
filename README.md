@@ -95,3 +95,20 @@ Le bouton « Préparer le pacte d'associés » de l'Atelier ouvre un éditeur pl
 - Le bouton Google de l'inscription vérifie d'abord dans Supabase que Google est activé ;
   sinon il envoie vers `erreur.html?type=google` au lieu de la page d'erreur brute de Supabase.
 
+
+## Paiements (FedaPay)
+
+- **Le serveur** : fonction Supabase `paiement` (code dans `supabase/functions/paiement/index.ts`, déjà déployée).
+  Elle remplace le serveur Node du dossier `paiements`, qui ne peut pas tourner sur GitHub Pages.
+  Adresse : `https://ucxeopgigfzmuqzuzynr.supabase.co/functions/v1/paiement` (réglée dans `TM_PAY.apiBase`, `js/pages/app.js`).
+- **Ce qu'elle fait** : recalcule le montant (tables `pricing` et `fx_rates`), crée la transaction FedaPay,
+  envoie la demande sur le téléphone (ou renvoie la page FedaPay pour la carte), redemande le statut à FedaPay,
+  puis accorde l'achat une seule fois avec `fulfill_payment()`. Clé d'idempotence + index uniques : pas de double paiement.
+- **Secrets** (Supabase → Edge Functions → Secrets) : `FEDAPAY_SECRET_KEY` (sk_sandbox_… pour tester, sk_live_… pour encaisser),
+  `FEDAPAY_WEBHOOK_SECRET`. Sandbox ou live se déduit de la clé. Facultatif : `APP_URL` (retour après paiement carte).
+- **Webhook FedaPay** : `https://ucxeopgigfzmuqzuzynr.supabase.co/functions/v1/paiement/webhooks/fedapay`.
+- **Vérifier l'état** : ouvrir l'adresse de la fonction → `{"ok":true,"fedapay":"sandbox"}` (ou `live`, ou `non configuré`).
+- **Avant le lancement** : passer à la clé `sk_live_…` et couper les achats de test :
+  `update app_settings set value = 'false' where key = 'test_payments';`
+- Les « modes » opérateurs (`MODES` dans la fonction) sont à confirmer avec FedaPay. Un mode faux ne bloque rien :
+  le client paie sur la page FedaPay.

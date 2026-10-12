@@ -835,12 +835,12 @@ window.addEventListener('tm-prix', () => { try{ refreshPrices(); }catch(e){} });
    CinetPay. Il appelle TMPay.createPayment() puis
    TMPay.verifyPayment() ; c'est le serveur TakaMatch (dossier
    « paiements ») qui choisit le prestataire selon le pays et qui
-   reçoit les webhooks. Tant que TM_PAY.apiBase est vide, tout est
-   simulé ici, comme avant.
+   reçoit les webhooks. Depuis le 11/10/2026, ce serveur est la
+   fonction Supabase « paiement » (FedaPay). apiBase vide = simulation.
    ⚠ PAY_COUNTRIES doit rester identique à paiements/src/countries.js.
    ============================================================ */
 const TM_PAY = {
-  apiBase: '',          /* ex. 'https://api.takamatch.bj/api' — vide = simulation */
+  apiBase: 'https://ucxeopgigfzmuqzuzynr.supabase.co/functions/v1/paiement',   /* fonction serveur FedaPay — '' = simulation */
   pollEvery: 3000,      /* vérification du statut pendant l'attente (ms) */
   pollFor: 180000,      /* abandon de l'attente au bout de 3 minutes */
 };
@@ -940,6 +940,12 @@ function paySetMethod(k){
 /* ---------- Client : même interface quel que soit le prestataire ---------- */
 const TMPay = {
   simulated(){ return !TM_PAY.apiBase; },
+  /* Jeton de la personne connectée : le serveur sait ainsi à qui accorder l'achat. */
+  async auth(){
+    const s = window.TMDB ? await TMDB.ensure().catch(() => null) : null;
+    if(!s || !s.access_token){ const e = new Error('Connecte-toi pour payer.'); e.status = 401; throw e; }
+    return {Authorization:'Bearer '+s.access_token, apikey:TMDB.key};
+  },
   /* idem est renvoyé tel quel à chaque essai : si une première requête est
      arrivée mais que sa réponse s'est perdue (réseau coupé), le serveur
      renvoie le même paiement au lieu d'en créer un second. C'est ce qui
@@ -949,14 +955,14 @@ const TMPay = {
       await new Promise(r => setTimeout(r, 1100));
       return {id:'SIM-'+Date.now().toString(36).toUpperCase(), status:'approved', provider:payCountry(req.country).provider, simulated:true};
     }
-    return TMGuard.fetch(TM_PAY.apiBase+'/payments', {method:'POST', credentials:'include',
-      headers:{'Content-Type':'application/json', 'Idempotency-Key':idem}, body:JSON.stringify(Object.assign({idem}, req))},
+    return TMGuard.fetch(TM_PAY.apiBase+'/payments', {method:'POST',
+      headers:Object.assign({'Content-Type':'application/json', 'Idempotency-Key':idem}, await this.auth()), body:JSON.stringify(Object.assign({idem}, req))},
       {timeout:20000, retries:2});
     /* {id, status:'pending'|'redirect'|'approved', url?, provider, reused?} */
   },
   async verifyPayment(id){
     if(this.simulated() || String(id).startsWith('SIM-')) return {id, status:'approved'};
-    return TMGuard.fetch(TM_PAY.apiBase+'/payments/'+encodeURIComponent(id), {credentials:'include', cache:'no-store'}, {timeout:10000, retries:1});
+    return TMGuard.fetch(TM_PAY.apiBase+'/payments/'+encodeURIComponent(id), {cache:'no-store', headers:await this.auth()}, {timeout:10000, retries:1});
     /* {id, status:'pending'|'approved'|'declined'|'canceled'|'refunded', stale?} */
   },
 };
