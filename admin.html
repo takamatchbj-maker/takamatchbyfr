@@ -233,8 +233,8 @@ select.inp{padding-right:28px}
 .gres{position:absolute;top:42px;left:0;right:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:6px;z-index:30;max-height:360px;overflow:auto}
 .gres button{display:flex;width:100%;gap:10px;align-items:center;padding:8px;border-radius:var(--r-md);text-align:left}
 .gres button:hover,.gres button.on{background:var(--surface-2)}
-.live{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-3);font-weight:600}
-.live i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(75,127,82,.5)}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-3);font-weight:600;white-space:nowrap;flex:none}
+.live i{flex:none;width:8px;height:8px;min-width:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(75,127,82,.5)}
 .live.pulse i{animation:pulse 1.2s 2}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(75,127,82,.6)}100%{box-shadow:0 0 0 10px rgba(75,127,82,0)}}
 .me-btn{display:flex;align-items:center;gap:9px;padding:4px 8px 4px 4px;border-radius:var(--r-pill);border:1px solid var(--line)}
@@ -361,6 +361,7 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
   .kv{grid-template-columns:120px minmax(0,1fr)}
   .hbar{grid-template-columns:100px minmax(0,1fr) 80px}
 }
+@media (max-width:900px){.live span{display:none}}
 @media (max-width:560px){.g4{grid-template-columns:minmax(0,1fr)}.live span{display:none}.staff-chip{display:none}.me-btn > span:last-child{display:none}.me-btn{padding:3px;border:0}.top{gap:8px;padding:0 10px}}
 </style>
 <!-- ============================================================
