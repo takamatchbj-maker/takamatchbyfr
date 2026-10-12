@@ -112,3 +112,26 @@ Le bouton « Préparer le pacte d'associés » de l'Atelier ouvre un éditeur pl
   `update app_settings set value = 'false' where key = 'test_payments';`
 - Les « modes » opérateurs (`MODES` dans la fonction) sont à confirmer avec FedaPay. Un mode faux ne bloque rien :
   le client paie sur la page FedaPay.
+
+## Partenaires de l'Atelier
+
+L'Atelier a deux onglets : **Notre équipe** (l'Atelier habituel) et **Partenaires**.
+
+- **Ce qu'on y trouve** : les centres de coworking et les organismes d'appui à l'entrepreneuriat
+  (incubateurs, accélérateurs, agences publiques, guichets de création d'entreprise, financements, réseaux).
+- **Qui voit quoi** : chaque membre voit les structures de **son pays** (celui de sa ville dans Paramètres › Compte),
+  rangées ainsi : « À {sa ville} », « Partout au {pays} » (organismes nationaux), « Ailleurs au {pays} ».
+  Filtres : Tout / Coworking / Appui, recherche, choix d'une ville. Ouvert à tous, même sans équipe.
+- **Fiche rapide** (carte) → **fiche détaillée** (fenêtre) : présentation, services, stades accompagnés,
+  comment y accéder, ce que la structure apporte à l'équipe, site officiel (ou recherche web), carte,
+  « Signaler une erreur » (e-mail prérempli vers contact@takamatch.com).
+- **Fichiers** : `js/partenaires-data.js` (catalogue de départ, 147 fiches dans 32 pays),
+  `js/pages/app-partenaires.js` (l'onglet), `css/partenaires.css`, `js/admin-partenaires.js` (admin).
+- **Base** (à installer une fois) : exécuter `supabase/18_partenaires.sql` dans Supabase → SQL Editor.
+  Le fichier crée la table `partenaires` et y range les 147 fiches. Tant que la table n'existe pas ou est vide,
+  l'outil affiche le catalogue de `js/partenaires-data.js`.
+- **Admin** : module « Partenaires » (super admin et modérateurs) : ajouter, modifier, masquer, supprimer,
+  marquer « partenaire officiel » (badge doré dans l'outil). Chaque changement est inscrit au journal d'audit.
+- **À vérifier avant le lancement** : les fiches sont indicatives. Les sites web ne sont renseignés que
+  quand ils sont sûrs ; sinon la fiche propose une recherche web. Aucune structure n'est encore marquée
+  « partenaire officiel » : à cocher une fois l'accord signé.

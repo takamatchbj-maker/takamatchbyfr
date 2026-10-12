@@ -4074,6 +4074,13 @@ function tourPaint(el){
   }
   const f = card.querySelector('[data-act="tour-next"]'); if(f) try{ f.focus({preventScroll:true}); }catch(e){}
 }
+/* Visites déjà vues : gardées sur l'appareil, par compte, pour ne pas les rouvrir à chaque connexion. */
+function tourKey(){ return 'tm-tours:' + String(S.me.email || S.me.handle || 'demo').toLowerCase(); }
+function toursSeen(){
+  let saved = {}; try{ saved = JSON.parse(localStorage.getItem(tourKey()) || '{}') || {}; }catch(e){}
+  S.me.tours = Object.assign({}, saved, S.me.tours || {});
+  return S.me.tours;
+}
 function tourClose(silent, finished){
   const el = $('#tour'); if(el) el.remove();
   if(!TOUR.on) return;
@@ -4081,6 +4088,7 @@ function tourClose(silent, finished){
   const kind = TOUR.kind, done = TOUR.done;
   S.me.tours = S.me.tours || {};
   S.me.tours[kind === 'match' ? 'match-'+S.me.role : 'welcome'] = true;
+  try{ localStorage.setItem(tourKey(), JSON.stringify(Object.assign(toursSeen(), S.me.tours))); }catch(e){}
   if(done) done(finished);
   if(!silent && !finished) toast('Tu peux revoir la visite à tout moment depuis Aide et support.');
 }
@@ -4203,15 +4211,19 @@ function tourWhenFree(fn){
   setTimeout(tick, 700);
 }
 function tourWelcomeMaybe(){
-  if((S.me.tours || {}).welcome) return;
-  tourWhenFree(() => startWelcomeTour());
+  if(toursSeen().welcome) return;
+  tourWhenFree(() => {
+    /* Montrée une seule fois par compte et par appareil, même si on la ferme en rechargeant la page. */
+    S.me.tours.welcome = true; try{ localStorage.setItem(tourKey(), JSON.stringify(S.me.tours)); }catch(e){}
+    startWelcomeTour();
+  });
 }
 /* Après un match : une fois par profil. */
 const _createMatch = createMatch;
 createMatch = function(id, celebrate){
   const had = S.matches.some(m => m.id === id);
   _createMatch(id, celebrate);
-  if(!had && !(S.me.tours || {})['match-'+S.me.role]) tourWhenFree(() => startMatchTour(id));
+  if(!had && !toursSeen()['match-'+S.me.role]) tourWhenFree(() => startMatchTour(id));
 };
 
 /* « Revoir la visite guidée » dans Aide et support. */
