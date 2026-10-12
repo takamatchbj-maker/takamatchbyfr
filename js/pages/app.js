@@ -1010,7 +1010,10 @@ async function payThen(item, btn, done){
     let st = res.status;
     if(res.reused) toast('Ce paiement était déjà lancé : on reprend le même, tu ne seras débité qu\'une fois.');
     if(st === 'redirect' && res.url){
-      if(win && !win.closed) win.location = res.url; else window.open(res.url, '_blank');
+      /* Onglet bloqué par le navigateur : on ouvre la page FedaPay ici même.
+         Le retour se fait sur app.html et l'achat est accordé par le webhook. */
+      if(win && !win.closed) win.location = res.url;
+      else if(!window.open(res.url, '_blank')){ location.href = res.url; return; }
       btn.innerHTML = 'Termine le paiement dans l\'onglet FedaPay…';
       st = 'pending';
     } else if(win){ win.close(); }
