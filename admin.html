@@ -128,7 +128,6 @@ h1,h2,h3{font-family:var(--disp);font-weight:600;margin:0;letter-spacing:-.005em
 .ic{width:18px;height:18px;flex:0 0 auto}
 .mono{font-family:var(--mono)}
 .tnum{font-variant-numeric:tabular-nums}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 :focus-visible{outline:2px solid var(--tal-500);outline-offset:2px}
 
 /* Boutons */
@@ -213,6 +212,10 @@ select.inp{padding-right:28px}
 .login::before{width:520px;height:520px;background:var(--vis-500);opacity:.35;left:-160px;top:-120px}
 .login::after{width:560px;height:560px;background:var(--tal-500);opacity:.25;right:-180px;bottom:-160px}
 .login-c{position:relative;z-index:1;width:min(420px,100%);padding:30px 28px}
+.splash{position:relative;z-index:1;display:grid;justify-items:center;gap:18px}
+.splash .logo{height:40px}
+.splash .spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--ink-2);animation:tmgSpin .8s linear infinite}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .login-c .logo{height:38px;margin:0 auto 22px;display:block}
 .login-c{text-align:center}
 .login-c .field{align-items:center}
@@ -970,7 +973,9 @@ async function enter(){
   const em = TMDB.email(); let name = em.split('@')[0];
   try{ const rows = await TMDB.rpc('staff_members'); A.staffRows = rows; const me = (rows || []).find(r => r.is_me); if(me && me.name) name = me.name; }catch(e){}
   A.me = {id:TMDB.uid(), name, email:em, role, status:'active'};
-  A.view = 'overview'; L = {step:'mail', email:'', busy:false, err:''};
+  { const h = decodeURIComponent((location.hash || '').slice(1)); A.view = (VIEWS[h] && ROLES[role].can.includes(h)) ? h : 'overview'; }
+  try{ history.replaceState({tmv:A.view}, '', '#' + A.view); }catch(e){}
+  L = {step:'mail', email:'', busy:false, err:''};
   TMDB.rpc('admin_note', {p_action:'Connexion', p_detail:'Espace équipe'}).catch(() => {});
   render(); toast('Bonjour '+name.split(' ')[0]+'.');
 }
@@ -1694,7 +1699,8 @@ document.addEventListener('click', e => {
     case 'lg-back': L = {step:'mail', email:L.email, busy:false, err:''}; renderLogin(); break;
     case 'lg-resend': TMDB.sendCode(L.email, true).then(() => { L.code = ''; L.err = ''; renderLogin(); toast('Nouveau code envoyé. Utilise le plus récent.'); }).catch(err => toast(err.message, 'bad')); break;
     case 'save-prix': savePrix(); break;
-    case 'go': A.view = t.dataset.v; A.sideOpen = false; A.drawer = null; render(); window.scrollTo(0, 0); break;
+    case 'go': { const v = t.dataset.v; if(v !== A.view){ try{ history.pushState({tmv:v}, '', '#' + v); }catch(err){} }
+      A.view = v; A.sideOpen = false; A.drawer = null; render(); window.scrollTo(0, 0); break; }
     case 'side': A.sideOpen = !A.sideOpen; $('.side').classList.toggle('open', A.sideOpen); break;
     case 'theme': THEME = THEME === 'dark' ? 'light' : 'dark'; try{ localStorage.setItem('tm-theme', THEME); }catch(err){} render(); break;
     case 'me-menu': { const ex = $('.pop'); if(ex){ ex.remove(); break; } const p = document.createElement('div'); p.className = 'pop';
@@ -1874,9 +1880,26 @@ addEventListener('storage', e => { if(e.key === 'tm-bus' && e.newValue){ try{ JS
 try{ JSON.parse(localStorage.getItem('tm-bus') || '[]').forEach(onPlatform); }catch(e){}
 
 /* ---------- Démarrage ---------- */
-render();
-/* Session déjà ouverte sur cet appareil : on revérifie le rôle dans la base. */
-(async () => { try{ if(await TMDB.ensure()) await enter(); }catch(e){} })();
+/* Session déjà ouverte sur cet appareil : écran d'attente (pas de formulaire de connexion
+   qui clignote), puis on revérifie le rôle dans la base. */
+function renderSplash(){
+  document.documentElement.setAttribute('data-theme', THEME);
+  $('#root').innerHTML = '<div class="login" aria-busy="true"><div class="splash" role="status"><img class="logo" src="'+LOGO_SRC+'" alt="TakaMatch"><span class="spin" aria-hidden="true"></span><span class="sr">Ouverture de l\'espace équipe…</span></div></div>';
+}
+if(TMDB.session()) renderSplash(); else render();
+(async () => {
+  let ok = false;
+  try{ if(await TMDB.ensure()){ await enter(); ok = !!A.me; } }catch(e){}
+  if(!ok && !A.me && L.step === 'mail' && !$('#loginF')) render();
+})();
+/* Retour / suivant du navigateur : on passe d'un module à l'autre sans quitter l'espace équipe. */
+const VIEW_OF_HASH = () => decodeURIComponent((location.hash || '').slice(1));
+addEventListener('popstate', () => {
+  if(!A.me) return;
+  const v = VIEW_OF_HASH() || 'overview';
+  if(!VIEWS[v] || !canSee(v)) return;
+  A.view = v; A.drawer = null; A.modal = null; A.sideOpen = false; render(); window.scrollTo(0, 0);
+});
 </script>
 <script src="js/admin-live.js?v=20261012a"></script>
 </body>

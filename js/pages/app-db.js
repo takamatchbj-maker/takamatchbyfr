@@ -345,6 +345,7 @@
       if(st === 'banned' || (st === 'suspended' && (!pf.suspended_until || Date.parse(pf.suspended_until) > Date.now()))){
         const until = st === 'suspended' && pf.suspended_until ? '&jusqu=' + String(pf.suspended_until).slice(0, 10) : '';
         try{ await DB.signOut(); }catch(e){}
+        window.TM_LEAVING = true;
         location.replace('/erreur.html?type=' + (st === 'banned' ? 'banni' : 'suspendu') + until); return;
       }
       D.on = true;
@@ -359,7 +360,7 @@
     }catch(e){
       if(window.TMGuard) TMGuard.log(e, 'chargement des données');
       toast('Les données n\'ont pas pu être chargées. Recharge la page.', 'bad');
-    }finally{ if(top) top.classList.remove('busy'); }
+    }finally{ if(top) top.classList.remove('busy'); if(window.TMGuard && !window.TM_LEAVING) TMGuard.ready(); }
   }
   /* Lien public (profil.html) ouvert par un membre déjà connecté : la fiche s'ouvre ici. */
   function openShared(){

@@ -3908,6 +3908,8 @@ function tmSecondTalHTML(){
     if(acc.kind === 'fresh' && !acc.tool) tmBus('signup', {user:tmUserCard()});
     tourWelcomeMaybe();
     if(acc.welcome) setTimeout(() => toast(acc.welcome, 'ok'), 350);
+    /* Compte réel : app-db retire l'écran de chargement une fois ses données chargées. */
+    if(!(acc.kind === 'fresh' && window.TMDB && TMDB.uid()) && window.TMGuard) TMGuard.ready();
   }
 
   addEventListener('message', e => {
