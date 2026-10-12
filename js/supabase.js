@@ -41,7 +41,8 @@
     '23505':'Cette valeur est déjà utilisée.',
     '23514':'Une des informations ne respecte pas le format attendu.',
     '42501':'Tu n\'as pas le droit de faire cette action.',
-    PGRST301:'Ta session a expiré. Reconnecte-toi.'
+    PGRST301:'Ta session a expiré. Reconnecte-toi.',
+    user_banned:'Ce compte est suspendu ou fermé par l\'équipe TakaMatch. Si tu penses que c\'est une erreur, écris à takamatchbj@gmail.com.'
   };
   function readable(data, status){
     var code = data && (data.error_code || data.code);
@@ -50,6 +51,7 @@
     /* Messages écrits en français dans la base (fonctions métier) : on les garde. */
     if(raw && /[éèàçêù]|^(Tu |Ta |Ce |Cette |Il |Une |Vous |Action |Connecte)/.test(raw)) return raw;
     if(/Signups not allowed/i.test(raw || '')) return MSG.otp_disabled;
+    if(/banned/i.test(raw || '')) return MSG.user_banned;
     /* Fichiers (photos, couvertures) */
     if(status === 413 || /too large|exceeded the maximum/i.test(raw || '')) return 'Cette image est trop lourde. Choisis-en une plus légère (2 Mo maximum pour la photo, 3 Mo pour la couverture).';
     if(/mime type|invalid_mime/i.test(raw || '')) return 'Ce format d\'image n\'est pas accepté. Utilise une image JPG, PNG ou WebP.';

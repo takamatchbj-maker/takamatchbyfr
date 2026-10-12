@@ -1192,7 +1192,7 @@ document.addEventListener('click', e => {
           + '<input type="file" accept="image/*" id="'+l[1]+'" class="sr"></label>').join('')+'</div>',
         '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-a" data-act="verify-id-go">Envoyer</button>'); break;
     case 'verify-id-go': S.me.verifiedId = true; closeLayer(); confetti(); render(); toast('Identité vérifiée. Badge obtenu.', 'ok'); pushNotif('verif','Profil vérifié','Le badge de confiance est actif.'); break;
-    case 'ask-ref': modal('Demander une référence',
+    case 'ask-ref': if(window.TMData && TMData.on){ toast('Les références arrivent bientôt sur TakaMatch.'); break; } modal('Demander une référence',
         '<p>Une personne avec qui tu as réellement travaillé confirme en trois clics ce que vous avez fait ensemble. C\'est le signal le plus difficile à falsifier.</p>'
         + field('refMail','Son adresse email','<input class="inp" id="refMail" type="email" placeholder="collegue@exemple.com">')
         + field('refCtx','Ce que vous avez fait ensemble','<input class="inp" id="refCtx" placeholder="Ex. : refonte de l\'app Tchèko, 2024">'),
@@ -1215,17 +1215,17 @@ document.addEventListener('click', e => {
       S.me.first = $('#e1').value.trim() || S.me.first; S.me.city = $('#e3').value.trim() || S.me.city; if(sx) S.me.sex = sx.dataset.v;
       closeLayer(); render(); toast('Compte mis à jour.', 'ok'); break; }
     case 'pref': { const k = t.dataset.k; S.prefs[k] = !S.prefs[k]; t.setAttribute('aria-pressed', S.prefs[k]); if(k === 'takam' && window.TMTakam) TMTakam.savePref(S.prefs[k]); toast('Préférence enregistrée.'); break; }
-    case 'legal': toast('Document juridique en cours de rédaction avec le cabinet.'); break;
-    case 'export': toast('Export préparé. Tu recevras un lien par email.', 'ok'); break;
+    case 'legal': window.open('/' + (t.dataset.v || 'cgu') + '.html', '_blank', 'noopener'); break;
+    case 'export': if(window.TMData && TMData.on && TMData.exportMine) TMData.exportMine(); else toast('Connecte-toi pour télécharger tes données.'); break;
     case 'logout': closeLayer(); modal('Se déconnecter', '<p>Tu seras déconnecté de cet appareil. Tes conversations et ton Atelier restent intacts.</p>',
         '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-a" data-act="logout-go">Se déconnecter</button>'); break;
-    case 'logout-go': closeLayer(); toast('Prototype : la déconnexion ramène au compte de démonstration.'); break;
+    case 'logout-go': closeLayer(); break;   /* traité par main.js */
     case 'delete-account': modal('Supprimer définitivement mon compte',
         '<p>Ta fiche, tes messages et tes matchs seront effacés. Les personnes avec qui tu as matché gardent l\'historique de vos échanges et le journal de l\'Atelier.</p>'
         + note('bad','alert','<b>Cette action est irréversible.</b>')
         + field('delC','Écris SUPPRIMER pour confirmer','<input class="inp mono" id="delC" autocomplete="off">'),
         '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-danger" data-act="delete-go" id="delGo" disabled>Supprimer mon compte</button>'); break;
-    case 'delete-go': closeLayer(); toast('Prototype : aucune donnée n\'a été supprimée.'); break;
+    case 'delete-go': closeLayer(); break;   /* traité par main.js (demande transmise à l'équipe) */
   }
 });
 
@@ -2779,7 +2779,7 @@ function vParams(){
     +     '<div class="row"><div style="flex:1"><div style="font-weight:600;font-size:14px">Thème sombre</div><div class="hint">Suit ton système tant que tu n\'as rien choisi.</div></div>'
     +     '<button class="toggle" data-act="theme" aria-pressed="'+themeIsDark()+'" aria-label="Thème sombre"></button></div></section>'
     +   '<section class="card card-pad"><div class="lbl" style="margin-bottom:4px">Centre juridique</div>'
-    +     ["Conditions générales d'utilisation",'Politique de confidentialité','Mentions légales'].map(l => linkRow('file', l, 'legal')).join('') + linkRow('dl', "Modèle de pacte d'associés (OHADA) · PDF", 'pacte-model')+'</section>'
+    +     [["Conditions générales d'utilisation",'cgu'],['Politique de confidentialité','confidentialite'],['Mentions légales','mentions-legales']].map(l => linkRow('file', l[0], 'legal').replace('data-act="legal"', 'data-act="legal" data-v="'+l[1]+'"')).join('') + linkRow('dl', "Modèle de pacte d'associés (OHADA) · PDF", 'pacte-model')+'</section>'
     +   '<section class="card card-pad" style="border-color:var(--bad-bg)"><div class="lbl" style="margin-bottom:4px;color:var(--bad-ink)">Données et compte</div>'
     +     linkRow('dl','Télécharger mes données','export')+linkRow('out','Se déconnecter','logout')+linkRow('trash','Supprimer définitivement mon compte','delete-account',true)+'</section>'
     + '</div><div class="col" style="gap:14px">'
@@ -4226,6 +4226,8 @@ supportRail = function(){
 const TM_BC = (() => { try{ return new BroadcastChannel('takamatch-staff'); }catch(e){ return null; } })();
 const TM_SEEN = new Set();
 function tmBus(type, data){
+  /* Canal de la démo hors ligne : coupé dès que les vraies données sont chargées (rien de privé dans le navigateur). */
+  if(window.TMData && TMData.on) return;
   const m = {id:uid()+Date.now().toString(36), type, data, at:Date.now(), from:'app'};
   TM_SEEN.add(m.id);
   try{ if(TM_BC) TM_BC.postMessage(m); }catch(e){}

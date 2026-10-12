@@ -340,6 +340,13 @@
     try{
       try{ await DB.rpc('demo_welcome'); }catch(e){}
       await loadAll();
+      /* Compte suspendu ou banni par l'équipe : on ferme la session et on explique. */
+      const pf = (D.me && D.me.profile) || {}, st = pf.account_status || 'active';
+      if(st === 'banned' || (st === 'suspended' && (!pf.suspended_until || Date.parse(pf.suspended_until) > Date.now()))){
+        const until = st === 'suspended' && pf.suspended_until ? '&jusqu=' + String(pf.suspended_until).slice(0, 10) : '';
+        try{ await DB.signOut(); }catch(e){}
+        location.replace('/erreur.html?type=' + (st === 'banned' ? 'banni' : 'suspendu') + until); return;
+      }
       D.on = true;
       applyMe(); fillDirectory();
       S.ctxs = {}; S.prof = {};
@@ -575,6 +582,23 @@
       .catch(err => toast(err.message, 'bad'));
   }, true);
 
+  /* Mes données : téléchargement immédiat d'un fichier JSON (droit d'accès et de portabilité). */
+  D.exportMine = function(){
+    const me = D.uid, mine = id => id === me;
+    const myProj = new Set(((D.me || {}).projects || []).map(p => p.id));
+    const myConvs = new Set(D.cmem.filter(m => m.user_id === me).map(m => m.conversation_id));
+    const out = {exporte_le:new Date().toISOString(), plateforme:'TakaMatch (takamatch.com)',
+      compte:D.me, invitations:D.inv.filter(i => mine(i.talent_id) || mine(i.sender_id) || myProj.has(i.project_id)),
+      matchs:D.matches.filter(m => mine(m.talent_id) || myProj.has(m.project_id)),
+      equipes:D.team.filter(m => mine(m.user_id)), messages_envoyes:D.msgs.filter(m => mine(m.sender_id)),
+      conversations:D.convs.filter(c => myConvs.has(c.id)).map(c => c.id), favoris:D.favs.filter(f => mine(f.user_id)),
+      notifications:D.notifs, paiements:D.pays, verification:D.verif ? {statut:D.verif.status, envoyee_le:D.verif.created_at} : null};
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], {type:'application/json'}));
+    a.download = 'takamatch-mes-donnees-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('Tes données sont téléchargées.', 'ok');
+  };
   /* Vérification d'identité : pièce + selfie dans l'espace privé « identity ». */
   D.verify = async function(doc, selfie){
     try{

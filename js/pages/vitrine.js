@@ -495,14 +495,14 @@ function siteFooter(){
     +   '<a href="#profils" data-act="anchor" data-to="profils">Les deux profils</a>'
     +   '<a href="#tarifs" data-act="anchor" data-to="tarifs">Tarifs</a></div>'
     + '<div class="lnks"><div class="lbl" style="margin-bottom:4px">Légal</div>'
-    +   '<a href="#" data-act="noop">Conditions générales</a>'
-    +   '<a href="#" data-act="noop">Confidentialité</a>'
-    +   '<a href="#" data-act="noop">Mentions légales</a></div>'
+    +   '<a href="/cgu.html">Conditions générales</a>'
+    +   '<a href="/confidentialite.html">Confidentialité</a>'
+    +   '<a href="/mentions-legales.html">Mentions légales</a></div>'
     + '<div class="lnks"><div class="lbl" style="margin-bottom:4px">Suis-nous</div>'
     +   '<div class="ft-soc">' + FT_SOC.map(n => '<a class="fs fs-'+n[0]+'" href="'+SOCIAL_LINKS[n[0]]+'" target="_blank" rel="noopener" aria-label="TakaMatch sur '+n[1]+'" title="'+n[1]+'">'
     +     '<svg viewBox="'+SOCIAL_IC[n[0]].vb+'" aria-hidden="true">'+SOCIAL_IC[n[0]].p+'</svg></a>').join('') + '</div></div>'
     + '</div>'
-    + '<p style="font-size:12.5px;color:var(--ink-3);margin-top:30px">Prototype de démonstration — les projets et les talents affichés sont fictifs.</p>'
+    + '<p style="font-size:12.5px;color:var(--ink-3);margin-top:30px">© 2026 TakaMatch. Certains projets et talents affichés sont des exemples de démonstration.</p>'
     + '</div></footer>';
 }
 
@@ -525,8 +525,8 @@ function siteHero(){
     + '<div class="trust-l"><span class="stack" aria-hidden="true"><i class="sv">V</i><i class="st">T</i><i class="sp">+</i></span>'
     +   '<span>Inscription en 4 minutes · Paiement '+sitePayList('carte')+'</span></div>'
     + '<div class="figs">'
-    +   fig('216','projets en ligne') + fig('1 480','talents inscrits')
-    +   fig('94','équipes formées') + fig('65 %','de réponse aux invitations')
+    +   fig('0 FCFA','pour s\'inscrire et explorer') + fig('3','invitations offertes à l\'inscription')
+    +   fig('100 %','des identités vérifiables') + fig('OHADA','pacte d\'associés prêt à signer')
     + '</div>'
     + '</div></div></section>';
 }

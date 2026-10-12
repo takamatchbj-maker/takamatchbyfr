@@ -172,8 +172,10 @@
     email:{l:'Continuer avec mon e-mail', h:onb, i:'mail', main:true},
     login:{l:'Me reconnecter', h:'/inscription.html?mode=login', i:'key', main:true},
     retry:{l:'Réessayer', h:back || null, i:'retry', main:true, retry:true},
-    prev:{l:'Page précédente', h:null, i:'back', prev:true}
+    prev:{l:'Page précédente', h:null, i:'back', prev:true},
+    contact:{l:'Écrire à l\'équipe', h:'mailto:takamatchbj@gmail.com', i:'mail', main:true}
   };
+  var until = /^\d{4}-\d{2}-\d{2}$/.test(q.get('jusqu') || '') ? q.get('jusqu').split('-').reverse().join('/') : '';
 
   /* ---------- Les erreurs connues ---------- */
   var ERRORS = {
@@ -209,7 +211,15 @@
     acces:{code:'Accès refusé',
       t:'Cette page t\'est fermée',
       p:'Elle est réservée à un autre compte ou à l\'équipe TakaMatch. Si tu penses que c\'est une erreur, écris-nous.',
-      acts:['home', 'prev'], tech:'403 FORBIDDEN'}
+      acts:['home', 'prev'], tech:'403 FORBIDDEN'},
+    suspendu:{code:'Compte suspendu',
+      t:'Ton compte est <em>suspendu</em> pour le moment',
+      p:'L\'équipe TakaMatch a mis ton compte en pause' + (until ? ' jusqu\'au ' + until : '') + ', suite au non-respect des règles de la communauté. Le motif t\'a été envoyé dans tes notifications. Tu pourras te reconnecter automatiquement à la fin de la suspension. Si tu penses que c\'est une erreur, écris-nous.',
+      acts:['contact', 'home'], tech:'ACCOUNT_SUSPENDED'},
+    banni:{code:'Compte fermé',
+      t:'Ce compte a été fermé',
+      p:'L\'équipe TakaMatch a fermé ce compte, suite à un manquement grave aux règles de la communauté. Si tu souhaites contester cette décision, écris-nous en indiquant ton adresse e-mail.',
+      acts:['contact', 'home'], tech:'ACCOUNT_BANNED'}
   };
   ERRORS.generic = {code:'Erreur', t:'Un petit détour', p:'Quelque chose ne s\'est pas passé comme prévu. Réessaie, ou repars de l\'accueil.', acts:['retry', 'home'], tech:'UNKNOWN'};
 

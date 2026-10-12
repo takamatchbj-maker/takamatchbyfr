@@ -542,13 +542,13 @@ const ART = {
     + '<path d="m209 56 5 5 10-11" stroke="#4B7F52" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 const SIDE = {
-  1:{k:'En ce moment sur TakaMatch', figs:[['216','projets en quête'],['1 480','talents disponibles']],
+  1:{k:'Bienvenue sur TakaMatch', figs:[['0 FCFA','pour t\'inscrire et explorer'],['3','invitations offertes']],
      p:"Ton compte sécurise ce que tu publies. Personne ne te contacte hors plateforme sans ton accord."},
   2:{k:'Pourquoi un pacte', p:"Une communauté de cofondation ne tient pas par sa technologie. Elle tient parce que chacun répond, même pour dire non."},
   3:{k:'La règle du jeu', p:"Jobs avait l'idée. Wozniak l'a construite. Aucun des deux n'aurait suffi — c'est tout le produit."},
   4:{k:'Ce qui reste privé', p:"Ton nom légal, ton sexe, ta photo et tes coordonnées ne sont dévoilés qu'après un match accepté des deux côtés."},
   5:{k:'Ton nom public', p:"Avant le match, les autres ne voient que ton pseudo : sur ta fiche, dans la recherche, sur ton code QR."},
-  ready:{k:'Et maintenant', figs:[['100 %','des sections * remplies pour être en ligne'],['3×','plus de vues avec le facultatif']],
+  ready:{k:'Et maintenant', figs:[['100 %','des sections * remplies pour être en ligne']],
      p:"Ton tableau de bord t'attend, avec des profils déjà classés par compatibilité réelle.",
      sc:[['Compétences recherchées','54'],['Secteur','19'],['Rythme','18'],['Proximité','9']]},
 };
@@ -664,7 +664,7 @@ function renderOnb(){
 
   /* --- 1. Compte --- */
   if(O.step === 1){
-    legal = '<div class="onb-legal">En continuant, tu acceptes les <a href="#" data-act="noop">conditions générales</a> et la <a href="#" data-act="noop">politique de confidentialité</a>.</div>';
+    legal = '<div class="onb-legal">En continuant, tu acceptes les <a href="/cgu.html" target="_blank" rel="noopener">conditions générales</a> et la <a href="/confidentialite.html" target="_blank" rel="noopener">politique de confidentialité</a>.</div>';
     if(O.sub === 'choose'){
       body = '<div class="onb-h"><h2>'+(O.login ? 'Content de te revoir' : 'Crée ton compte gratuitement')+'</h2>'
         + '<p>'+(O.login ? 'Retrouve tes invitations, tes matchs et ton Atelier.' : 'Publier ta fiche et explorer restera toujours gratuit.')+'</p></div>'
