@@ -480,6 +480,9 @@ function sitePricing(){
     + '</div></section>';
 }
 
+/* Communauté WhatsApp TakaMatch. */
+const WA_COMMUNAUTE = 'https://chat.whatsapp.com/IsCXiO0V7AF27BI5eqgvR4';
+
 /* Réseaux sociaux (logos fournis par la marque, dossier « Icon media social »). */
 const SOCIAL_LINKS = {"facebook": "https://www.facebook.com/takamatch", "tiktok": "https://www.tiktok.com/@takamatch", "instagram": "https://www.instagram.com/takaamatch", "linkedin": "https://www.linkedin.com/company/takamatch", "youtube": "https://www.youtube.com/channel/UCNpx3ccM4wzZuVc7AMehRKQ"};
 const SOCIAL_IC = {"facebook": {"vb": "0 0 32 32", "p": "<path fill=\"currentColor\" d=\"M32 16c0-8.839-7.167-16-16-16C7.161 0 0 7.161 0 16c0 7.984 5.849 14.604 13.5 15.803V20.626H9.437v-4.625H13.5v-3.527c0-4.009 2.385-6.223 6.041-6.223c1.751 0 3.584.312 3.584.312V10.5h-2.021c-1.984 0-2.604 1.235-2.604 2.5v3h4.437l-.713 4.625H18.5v11.177C26.145 30.603 32 23.983 32 15.999z\" />"}, "instagram": {"vb": "0 0 56 56", "p": "<path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M39.006 3C46.735 3 53 9.27 53 16.994v22.012C53 46.735 46.73 53 39.006 53H16.994C9.265 53 3 46.73 3 39.006V16.994C3 9.265 9.27 3 16.994 3zM28 15c-7.18 0-13 5.82-13 13s5.82 13 13 13s13-5.82 13-13s-5.82-13-13-13m0 4a9 9 0 1 1 0 18a9 9 0 0 1 0-18m14.5-9a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7\" />"}, "linkedin": {"vb": "0 0 20 20", "p": "<path fill=\"currentColor\" d=\"M10 .4C4.698.4.4 4.698.4 10s4.298 9.6 9.6 9.6s9.6-4.298 9.6-9.6S15.302.4 10 .4M7.65 13.979H5.706V7.723H7.65zm-.984-7.024c-.614 0-1.011-.435-1.011-.973c0-.549.409-.971 1.036-.971s1.011.422 1.023.971c0 .538-.396.973-1.048.973m8.084 7.024h-1.944v-3.467c0-.807-.282-1.355-.985-1.355c-.537 0-.856.371-.997.728c-.052.127-.065.307-.065.486v3.607H8.814v-4.26c0-.781-.025-1.434-.051-1.996h1.689l.089.869h.039c.256-.408.883-1.01 1.932-1.01c1.279 0 2.238.857 2.238 2.699z\" />"}, "tiktok": {"vb": "0 0 24 24", "p": "<path fill=\"currentColor\" d=\"M12 2a10 10 0 1 0 10 10A10.01 10.01 0 0 0 12 2m5.939 7.713v.646a.37.37 0 0 1-.38.37a5.36 5.36 0 0 1-2.903-1.108v4.728a3.94 3.94 0 0 1-1.18 2.81a4 4 0 0 1-2.87 1.17a4.1 4.1 0 0 1-2.862-1.17a3.98 3.98 0 0 1-1.026-3.805c.159-.642.48-1.232.933-1.713a3.58 3.58 0 0 1 2.79-1.313h.82v1.703a.348.348 0 0 1-.39.348a1.918 1.918 0 0 0-1.23 3.631c.27.155.572.246.882.267c.24.01.48-.02.708-.092a1.93 1.93 0 0 0 1.313-1.816V5.754a.36.36 0 0 1 .359-.36h1.415a.36.36 0 0 1 .359.34a3.3 3.3 0 0 0 1.282 2.245a3.25 3.25 0 0 0 1.641.636a.37.37 0 0 1 .338.35z\" />"}, "youtube": {"vb": "0 0 24 24", "p": "<path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6z\"/>"}};
@@ -687,7 +690,7 @@ function siteFaq(){
     + '<div class="sec-h">'
     +   '<span class="eyebrow">Questions fréquentes</span>'
     +   '<h2>Tout ce qu\'il faut savoir.</h2>'
-    +   '<p>Une autre question ? L\'équipe répond aussi sur le groupe WhatsApp communautaire.</p></div>'
+    +   '<p>Une autre question ? L\'équipe répond aussi sur la <a href="'+WA_COMMUNAUTE+'" target="_blank" rel="noopener">communauté WhatsApp</a>.</p></div>'
     + '<div>' + faq.map((f,i)=>'<details class="fq"'+(i===0?' open':'')+'><summary>'+esc(f[0])+'<span class="pm" aria-hidden="true"></span></summary><p>'+esc(f[1])+'</p></details>').join('') + '</div>'
     + '</div></div></section>';
 }

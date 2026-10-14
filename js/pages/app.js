@@ -3690,7 +3690,7 @@ function missingHTML(c){
 /* ---------- Aide et support : logo secondaire, WhatsApp, réseaux ---------- */
 /* Liens à renseigner côté back-end. */
 const TM_LINKS = {
-  whatsapp:'https://chat.whatsapp.com/LIEN-DU-GROUPE',
+  whatsapp:'https://chat.whatsapp.com/IsCXiO0V7AF27BI5eqgvR4',
   facebook:'https://www.facebook.com/takamatch',
   tiktok:'https://www.tiktok.com/@takamatch',
   instagram:'https://www.instagram.com/takaamatch',

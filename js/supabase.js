@@ -42,7 +42,7 @@
     '23514':'Une des informations ne respecte pas le format attendu.',
     '42501':'Tu n\'as pas le droit de faire cette action.',
     PGRST301:'Ta session a expiré. Reconnecte-toi.',
-    user_banned:'Ce compte est suspendu ou fermé par l\'équipe TakaMatch. Si tu penses que c\'est une erreur, écris à takamatchbj@gmail.com.'
+    user_banned:'Ce compte est suspendu ou fermé par l\'équipe TakaMatch. Si tu penses que c\'est une erreur, écris à contact@takamatch.com.'
   };
   function readable(data, status){
     var code = data && (data.error_code || data.code);
