@@ -773,7 +773,7 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 
 .feat-i p{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
 
-.price{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:16px;align-items:start}
+.price{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:16px;align-items:stretch}
 
 .price-c{
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2xl);padding:28px;
