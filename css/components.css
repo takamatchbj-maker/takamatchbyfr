@@ -176,3 +176,14 @@ h1 svg.ic, h2 svg.ic, h3 svg.ic{width:18px;height:18px}
 @keyframes tmgIn{to{opacity:1}}
 @keyframes tmgSpin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.tmg-boot{animation:none;opacity:1}.tmg-spin{animation-duration:2.4s}}
+
+/* ---------- Icônes des moyens de paiement (js/pay-icons.js) ---------- */
+.pay-icons{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px 12px;vertical-align:middle}
+.pay-grp,.pay-pair{display:inline-flex;align-items:center}
+.pay-ico{display:block;flex:0 0 auto;border-radius:50%}
+.pay-grp > .pay-ico + .pay-ico,.pay-grp > .pay-ico + .pay-pair,.pay-pair > .pay-ico + .pay-ico{margin-left:-5px}
+.pay-txt{display:inline-flex;align-items:center;padding:2px 7px;border-radius:var(--r-xs);font-size:11px;font-weight:700;background:var(--surface-3);color:var(--ink-2)}
+.pay-txt.airtel{background:#ED1C24;color:#fff}
+.momo .pay-icons{margin-left:2px}
+.ops .opt .pay-ico{width:26px;height:26px}
+.ops .opt .pay-pair .pay-ico{width:24px;height:24px}

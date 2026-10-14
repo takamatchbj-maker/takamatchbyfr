@@ -349,6 +349,8 @@
         location.replace('/erreur.html?type=' + (st === 'banned' ? 'banni' : 'suspendu') + until); return;
       }
       D.on = true;
+      /* Réglages de paiement (carte acceptée ou non) : décidés dans la base, appliqués aussi par le serveur. */
+      try{ const ps = await DB.one('app_settings', 'key=eq.payments&select=value'); TM_PAY.card = !(ps && ps.value && ps.value.card === false); }catch(e){}
       applyMe(); fillDirectory();
       S.ctxs = {}; S.prof = {};
       loadCtx(); saveBaseline(true);

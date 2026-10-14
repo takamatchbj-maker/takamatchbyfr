@@ -3,8 +3,8 @@
    ------------------------------------------------------------
    Un seul calcul pour l'inscription ET l'outil :
    · fiche Talent, fiche projet (Visionnaire), fiche perso.
-   · Toutes les sections comptent et sont obligatoires : 100 % = tout
-     est rempli correctement.
+   · Toutes les sections comptent : 100 % = tout est rempli correctement.
+     Certaines sont facultatives (opt) : elles ne bloquent pas la publication.
    · Un texte ne compte qu'à partir de son minimum de caractères
      (affiché sous la case). Un lien compte s'il ressemble à une
      adresse web, ou si « Pas encore de lien » est coché.
@@ -41,10 +41,15 @@
       add('level', "Niveau d'expérience", "ton niveau d'expérience", 6, d.level, 'Choisis ton niveau.', 'level');
       add('diploma', 'Diplôme le plus élevé', 'ton diplôme', 6, d.diploma, 'Choisis ton diplôme.', 'diploma');
       add('status', 'Statut professionnel', 'ton statut professionnel', 6, d.status, 'Choisis ton statut.', 'status');
-      add('sectors', "Secteurs qui t'attirent", 'au moins un secteur', 10, se.length >= 1, 'Choisis au moins un secteur.', 'sectors');
+      /* Facultatifs pour le talent : secteurs et portfolio comptent pour les 100 % mais ne bloquent pas la mise en ligne.
+         Un lien portfolio commencé doit toutefois être valide (sinon il bloque, pour ne pas publier une adresse cassée). */
+      add('sectors', "Secteurs qui t'attirent", 'au moins un secteur (facultatif)', 10, se.length >= 1,
+        'Facultatif, mais ça compte pour atteindre 100 % de remplissage.', 'sectors', true, false);
       add('pace', 'Rythme', 'ton rythme', 10, d.pace, 'Choisis ton rythme.', 'pace');
       add('bio', 'Signature personnelle', 'ta signature (' + MIN.bio + ' caractères min.)', 18, len(d.bio) >= MIN.bio, textMsg(d.bio, MIN.bio), 'bio');
-      add('portfolio', 'Lien portfolio', 'ton lien portfolio', 12, d.noPortfolio || linkOk(d.portfolio), linkMsg(d.portfolio, d.noPortfolio, 'ton lien'), 'portfolio');
+      var pfStarted = !d.noPortfolio && len(d.portfolio) > 0;
+      add('portfolio', 'Lien portfolio', 'ton lien portfolio (facultatif)', 12, d.noPortfolio || linkOk(d.portfolio),
+        pfStarted ? linkMsg(d.portfolio, false, 'ton lien') : 'Facultatif : ajoute un lien ou coche « Pas encore » pour atteindre 100 %.', 'portfolio', !pfStarted, pfStarted);
     } else if(kind === 'perso'){
       add('skills', 'Compétences clés', 'au moins 2 compétences clés', 30, sk.length >= 2, sk.length ? 'Choisis-en encore ' + (2 - sk.length) + ' (2 au moins).' : 'Choisis au moins 2 compétences.', 'x.skills');
       add('level', "Niveau d'expérience", "ton niveau d'expérience", 15, d.level, 'Choisis ton niveau.', 'x.level');

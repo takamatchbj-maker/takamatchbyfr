@@ -24,7 +24,7 @@ function sitePayList(card){
   return l.length > 1 ? l.slice(0, -1).join(', ')+' ou '+l[l.length - 1] : l[0];
 }
 function sitePayBadges(){
-  return '<div class="momo" style="margin-top:auto">via '+sitePayOps().map(x => '<b class="'+x[1]+'">'+x[0]+'</b>').join('')+'<b class="card">Carte</b></div>';
+  return '<div class="momo" style="margin-top:auto">via '+TMPayIcons.row(sitePayOps().map(x => x[1]).concat('card'), 30)+'</div>';
 }
 /* ============================================================
    TakaMatch — page vitrine

@@ -843,6 +843,7 @@ const TM_PAY = {
   apiBase: 'https://ucxeopgigfzmuqzuzynr.supabase.co/functions/v1/paiement',   /* fonction serveur FedaPay — '' = simulation */
   pollEvery: 3000,      /* vérification du statut pendant l'attente (ms) */
   pollFor: 180000,      /* abandon de l'attente au bout de 3 minutes */
+  card: true,           /* carte bancaire proposée — mis à jour depuis app_settings « payments » (js/pages/app-db.js) */
 };
 const PAY_METHODS = {
   mtn:     {l:'MTN MoMo',       cls:'mtn'},
@@ -877,7 +878,7 @@ const PAY_TZ = {'Africa/Porto-Novo':'BJ','Africa/Lome':'TG','Africa/Abidjan':'CI
   'Africa/Bamako':'ML','Africa/Niamey':'NE','Africa/Accra':'GH','Africa/Lagos':'NG','Africa/Douala':'CM','Europe/Paris':'FR'};
 
 function payCountry(cc){ return PAY_COUNTRIES[cc] || PAY_COUNTRIES[PAY_DEFAULT_CC]; }
-function payMethodsOf(cc){ return payCountry(cc).methods.concat('card'); }
+function payMethodsOf(cc){ return payCountry(cc).methods.concat(TM_PAY.card === false ? [] : ['card']); }
 function payDial(cc){ return payCountry(cc).dial; }
 /* Pays de paiement : choix manuel > pays du compte > indicatif du numéro > fuseau > langue > Bénin. */
 function payDetectCountry(){
@@ -895,22 +896,28 @@ function payDetectCountry(){
 }
 function payInit(pack){
   const cc = payDetectCountry();
-  const method = payMethodsOf(cc)[0];
+  const method = payMethodsOf(cc)[0] || null;
   /* idem : identifiant de CET achat. Renvoyé à chaque nouvel essai, il empêche le serveur d'en créer un second. */
-  return {pack:pack == null ? 1 : pack, cc, method, op:PAY_METHODS[method].l, idem:null};
+  return {pack:pack == null ? 1 : pack, cc, method, op:method ? PAY_METHODS[method].l : '', idem:null};
 }
 function payBadges(cc){
   return '<div class="momo" style="margin-top:10px;justify-content:center;flex-wrap:wrap">via '
-    + payMethodsOf(cc || payDetectCountry()).map(k => '<b class="'+PAY_METHODS[k].cls+'">'+esc(PAY_METHODS[k].l)+'</b>').join('')+'</div>';
+    + TMPayIcons.row(payMethodsOf(cc || payDetectCountry()), 28)+'</div>';
 }
 function payOpsHtml(){
+  /* Moyen devenu indisponible (ex. carte coupée après le chargement) : on prend le premier disponible. */
+  if(!payMethodsOf(S.pay.cc).includes(S.pay.method)){ S.pay.method = payMethodsOf(S.pay.cc)[0] || null; S.pay.op = S.pay.method ? PAY_METHODS[S.pay.method].l : ''; }
   const P = S.pay, c = payCountry(P.cc), card = P.method === 'card';
   const local = String(S.me.phone || '').replace(/\s/g, '').startsWith(c.dial) ? phoneLocal() : '';
+  const ccSel = '<div class="field"><label for="payCc">Pays de paiement</label>'
+    +   '<select class="inp" id="payCc" data-pay="cc">'+Object.keys(PAY_COUNTRIES).sort((a, b) => PAY_COUNTRIES[a].n.localeCompare(PAY_COUNTRIES[b].n, 'fr')).map(k => '<option value="'+k+'"'+(k === P.cc ? ' selected' : '')+'>'+esc(PAY_COUNTRIES[k].n)+'</option>').join('')+'</select></div>';
+  /* Aucun moyen dans ce pays (carte coupée et pas de mobile money) */
+  if(!P.method) return ccSel + '<p class="hint">Le paiement en ligne n\'est pas encore disponible pour ce pays. Si tu as un compte mobile money au Bénin, au Togo, en Côte d\'Ivoire, au Sénégal, au Burkina Faso, au Mali ou au Niger, choisis ce pays. Sinon, écris-nous à contact@takamatch.com.</p>';
   return '<div class="field"><label for="payCc">Pays de paiement</label>'
     +   '<select class="inp" id="payCc" data-pay="cc">'+Object.keys(PAY_COUNTRIES).sort((a, b) => PAY_COUNTRIES[a].n.localeCompare(PAY_COUNTRIES[b].n, 'fr')).map(k => '<option value="'+k+'"'+(k === P.cc ? ' selected' : '')+'>'+esc(PAY_COUNTRIES[k].n)+'</option>').join('')+'</select></div>'
     + '<div class="field"><label>Moyen de paiement</label><div class="ops" role="radiogroup">'+payMethodsOf(P.cc).map(k => { const x = PAY_METHODS[k];
         return '<button type="button" class="opt radio" data-act="op" data-v="'+k+'" aria-pressed="'+(P.method === k)+'"><span class="box">'+tick()+'</span>'
-          + '<i class="op-dot '+x.cls+'" aria-hidden="true"></i><span>'+esc(x.l)+(x.aka ? ' <small class="hint">'+esc(x.aka)+'</small>' : '')+'</span></button>'; }).join('')+'</div></div>'
+          + '<span aria-hidden="true">'+TMPayIcons.icon(k, 26)+'</span><span>'+esc(x.l)+(x.aka ? ' <small class="hint">'+esc(x.aka)+'</small>' : '')+'</span></button>'; }).join('')+'</div></div>'
     + (card ? '' : field('payTel', 'Numéro '+PAY_METHODS[P.method].l, '<div class="row" style="gap:8px"><span class="inp mono" style="width:86px;display:grid;place-items:center;flex:0 0 auto">'+c.dial+'</span><input class="inp mono" id="payTel" inputmode="tel" autocomplete="tel-national" value="'+esc(local)+'"></div>'))
     + '<p class="hint">'+(card
         ? 'Tu saisis ta carte Visa ou Mastercard sur la page sécurisée de FedaPay. TakaMatch ne voit jamais ton numéro de carte.'
@@ -924,8 +931,8 @@ function payRefresh(){ const el = $('#payOps'); if(el) el.innerHTML = payOpsHtml
 function paySetCountry(cc){
   if(!PAY_COUNTRIES[cc]) return;
   S.pay.cc = cc; S.me.payCountry = cc;
-  if(!payMethodsOf(cc).includes(S.pay.method)) S.pay.method = payMethodsOf(cc)[0];
-  S.pay.op = PAY_METHODS[S.pay.method].l;
+  if(!payMethodsOf(cc).includes(S.pay.method)) S.pay.method = payMethodsOf(cc)[0] || null;
+  S.pay.op = S.pay.method ? PAY_METHODS[S.pay.method].l : '';
   TMPrix.setCc(cc, true);
   payRefresh(); refreshPrices();
 }
@@ -979,6 +986,7 @@ let PAY_BUSY = false;
 async function payThen(item, btn, done){
   if(PAY_BUSY){ toast('Un paiement est déjà en cours. Attends sa confirmation avant d\'en lancer un autre.', 'bad'); return; }
   const P = S.pay, c = payCountry(P.cc), card = P.method === 'card';
+  if(!P.method || !payMethodsOf(P.cc).includes(P.method)){ toast('Choisis un moyen de paiement disponible dans ton pays.', 'bad'); return; }
   let phone = '';
   if(!card){
     const tel = $('#payTel'), digits = (tel ? tel.value : '').replace(/\D/g, '');
@@ -1728,7 +1736,7 @@ function matchesPanel(){
     const done = t ? t.milestones.filter(k=>k.done).length : 0;
     const cv = tal ? projCover(x) : {cls:tintCls('tal', x.hue), style:tintAng(x.hue)};
     return '<article class="pcard'+(tal?'':' person')+'"><div class="cover '+cv.cls+'" style="'+(tal?'height:96px;':'')+cv.style+'">'
-      + (tal ? (cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+x.glyph+'</span>') : '<span class="portrait">'+avatarOf(x,72)+'</span>')
+      + (tal ? (cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+esc(x.glyph)+'</span>') : '<span class="portrait">'+avatarOf(x,72)+'</span>')
       + '<span class="chip chip-onart" style="position:absolute;top:9px;left:9px">'+ic('spark')+'Match · '+ago(m.min)+'</span></div>'
       + '<div class="body"><h3>'+esc(tal?x.title:x.name)+'</h3>'
       + '<div class="who">'+esc(tal?('Équipe de '+(t ? t.members.length : 2)):x.city)+'</div>'
@@ -2061,7 +2069,7 @@ function revealAv(x){
 function projThumb(x, size){
   const ph = photoOf(x);
   if(ph) return '<span class="av av-'+size+' photo" style="'+photoStyle(ph)+'" aria-hidden="true"></span>';
-  return '<span class="av av-'+size+' '+tintCls('vis', x.hue||1)+'" style="'+tintAng(x.hue||1)+'font-size:'+Math.round(size*.43)+'px" aria-hidden="true">'+(x.glyph||'💡')+'</span>';
+  return '<span class="av av-'+size+' '+tintCls('vis', x.hue||1)+'" style="'+tintAng(x.hue||1)+'font-size:'+Math.round(size*.43)+'px" aria-hidden="true">'+esc(x.glyph||'💡')+'</span>';
 }
 function thumb(x, size){ return isTalMode() ? projThumb(x, size) : avatarOf(x, size); }
 
@@ -2153,7 +2161,7 @@ function detailHTML(x, kind, o){
   const cv = proj ? projCover(x) : null;
   const heroCls = proj ? cv.cls : tintCls(o.perso ? 'vis' : 'tal', x.hue)+' portrait-hero';
   const heroStyle = proj ? cv.style : tintAng(x.hue);
-  const heroIn = proj ? (cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+(x.glyph||'💡')+'</span>')
+  const heroIn = proj ? (cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+esc(x.glyph||'💡')+'</span>')
                       : '<span class="portrait">'+avatarOf(x, 80, un, o.perso ? 'vis' : 'tal')+'</span>';
   const btns = (o.fav ? '<button class="iconbtn'+(S.favs.has(x.id)?' on':'')+'" data-act="fav" data-id="'+x.id+'" aria-pressed="'+S.favs.has(x.id)+'" aria-label="'+(S.favs.has(x.id)?'Retirer des favoris':'Ajouter aux favoris')+'">'+ic('star')+'</button>' : '')
     + (o.report ? '<button class="iconbtn" data-act="report" data-id="'+x.id+'" aria-label="Signaler cette fiche">'+ic('flag')+'</button>' : '');
@@ -2787,9 +2795,10 @@ function vParams(){
     +   (tal ? freeCard() : creditsCard())
     +   '<section class="card card-pad"><div class="lbl" style="margin-bottom:8px">Facturation</div>'
     +     '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.6">Aucun abonnement. Tu paies seulement ce que tu utilises, par mobile money ou carte bancaire.</p>'
+    +     (tal ? payBadges() : '')
     +     ((m.visUnlocked || tmPrimary() === 'vis') ? '<div class="row bill-slots"><span>Emplacements projet</span><b class="mono">'+m.slots+' sur 3 débloqués</b></div>'
             + (m.slots < MAX_PROJ ? '<p class="hint">Un emplacement de plus : <span class="mono">'+priceH('slot')+'</span>, une seule fois.</p>' : '') : '')
-    +     (S.payments.length ? '<div class="list" style="margin-top:8px">'+S.payments.map(p => '<div class="li" style="padding:10px 0;cursor:default"><span class="grow"><span class="t" style="font-size:13.5px">'+esc(p.l)+'</span><span class="s mono">'+esc(p.d)+' · '+esc(p.op)+'</span></span><span class="mono" style="font-size:13px;font-weight:600">'+fcfa(p.a)+'</span></div>').join('')+'</div>' : '')
+    +     (S.payments.length ? '<div class="list" style="margin-top:8px">'+S.payments.map(p => '<div class="li" style="padding:10px 0;cursor:default">'+(TMPayIcons.keyOf(p.op) ? '<span aria-hidden="true">'+TMPayIcons.icon(TMPayIcons.keyOf(p.op), 26)+'</span>' : '')+'<span class="grow"><span class="t" style="font-size:13.5px">'+esc(p.l)+'</span><span class="s mono">'+esc(p.d)+' · '+esc(p.op)+'</span></span><span class="mono" style="font-size:13px;font-weight:600">'+fcfa(p.a)+'</span></div>').join('')+'</div>' : '')
     +   '</section>'
     + '</div></div>';
 }
@@ -2899,7 +2908,7 @@ function card(x, s){
       +   '<p class="ex">'+esc(x.bio)+'</p>'+chips(x.skills||[], 'chip-tal')+foot+'</div></article>';
   }
   const cv = projCover(x), pay = PAY.find(p => p.id === x.pay);
-  return '<article class="pcard"><div class="cover '+cv.cls+'" style="'+cv.style+'">'+(cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+x.glyph+'</span>')
+  return '<article class="pcard"><div class="cover '+cv.cls+'" style="'+cv.style+'">'+(cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+esc(x.glyph)+'</span>')
     +   '<span class="tags">'+(x.sectors||[]).slice(0,2).map(id => '<span class="chip chip-onart">'+sector(id).g+' '+esc(sector(id).l)+'</span>').join('')+'</span>'
     +   favBtn+'<span class="chip chip-handle" style="position:absolute;bottom:8px;left:9px">'+esc(handleOf(x))+'</span></div>'
     + '<div class="body"><h3>'+esc(x.title)+'</h3>'
@@ -3037,13 +3046,13 @@ function rmModal(id){
   S.rmId = id;
   modal('Retirer '+m.first+' de l\'équipe ?',
     '<ul class="leave-l">'
-    + '<li>'+ic('lock')+m.first+' perd l\'accès à l\'Atelier de '+esc(t.title)+' et au groupe de l\'équipe.</li>'
+    + '<li>'+ic('lock')+esc(m.first)+' perd l\'accès à l\'Atelier de '+esc(t.title)+' et au groupe de l\'équipe.</li>'
     + '<li>'+ic('award')+'Sa part de capital proposée ('+share+' %) est annulée.</li>'
     + '<li>'+ic('users')+(roles.length ? 'Ses rôles repassent à « À décider » : '+esc(roles.join(', '))+'.' : 'Aucun rôle ne lui était attribué.')+'</li>'
     + '<li>'+ic('target')+(tasks.length ? tasks.length+' tâche'+(tasks.length>1?'s':'')+' en cours te revien'+(tasks.length>1?'nent':'t')+'.' : 'Aucune tâche en cours à réattribuer.')+'</li>'
     + '<li>'+ic('ticks')+'Ses validations en attente sont retirées des propositions.</li>'
     + '<li>'+ic('book')+'Le journal de décisions garde une trace datée, avec le motif.</li>'
-    + '<li>'+ic('bell')+m.first+' est '+g(m.sex,'prévenu','prévenue','prévenu·e')+' et une place se libère dans ses 3 projets.</li>'
+    + '<li>'+ic('bell')+esc(m.first)+' est '+g(m.sex,'prévenu','prévenue','prévenu·e')+' et une place se libère dans ses 3 projets.</li>'
     + '<li>'+ic('archive')+'Votre conversation privée est archivée des deux côtés, en lecture seule. Rien n\'est supprimé.</li>'
     + '<li>'+ic('clock')+'Tu ne pourras pas l\'inviter de nouveau avant '+REINVITE_DAYS+' jours.</li></ul>'
     + (pacte ? note('warn','alert', pacteStatus(t) === 'signe' ? 'Un pacte d\'associés est signé : sa sortie suit les règles de départ du pacte (rachat de ses actions). Demande l\'avis du juriste.' : 'Un pacte d\'associés est en cours : sa sortie devra y être actée avec le juriste.') : '')
@@ -3217,6 +3226,9 @@ function openTeamChat(t, prefill){
 /* ============================================================
    L'Atelier : sans onglet Groupe, nom du projet en or
    ============================================================ */
+/* Tête de Takam : bonnet et lunettes bleus pour les Talents, bonnet jaune pour les Visionnaires.
+   Images WebP transparentes ; les originaux haute définition sont dans marque/takam/. */
+const TAKAM_HEAD = {tal:'assets/images/takam/takam-talent.webp', vis:'assets/images/takam/takam-visionnaire.webp'};
 function takamPanel(t){
   const a = takam(t), tab = S.takTab || (a.me.length ? 'me' : 'team');
   const list = (tab === 'me' ? a.me : a.team);
@@ -3228,7 +3240,7 @@ function takamPanel(t){
     + (x.act === 'at-pacte' ? ' <button class="lnk" data-act="at-pacte">Ouvrir le pacte</button>' : '')
     + (x.act === 'at-plan' && isAdmin(t) && !t.objectives.length ? ' <button class="lnk" data-act="at-obj-new">Fixer un objectif</button>' : '')+'</span></li>';
   return '<section class="panel takam"><div class="tk-h">'
-    + '<div class="tk-mascot"><div class="tk-av" aria-hidden="true">T</div><span>Mascotte à venir</span></div>'
+    + '<div class="tk-mascot"><img class="tk-head" src="'+TAKAM_HEAD[isTalMode() ? 'tal' : 'vis']+'" alt="" width="84" height="84" decoding="async"></div>'
     + '<div><h3>Takam</h3><p class="hint">Veille sur l\'équipe, relance et encourage.</p></div></div>'
     + '<div class="seg-sm" role="group" aria-label="Alertes de Takam" style="margin:12px 0 10px">'
     +   '<button class="'+(tab==='team'?'on':'')+'" data-act="tk-tab" data-v="team" aria-pressed="'+(tab==='team')+'">Équipe<span class="n">'+a.team.length+'</span></button>'
@@ -3407,7 +3419,7 @@ function previewCard(){
   }
   const p = m.project, x = meAsProject(), cv = projCover(x);
   return '<article class="pcard" aria-label="Aperçu de ta fiche Projet">'
-    + '<div class="cover '+cv.cls+'" style="'+cv.style+'">'+(cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+(p.glyph||'💡')+'</span>')
+    + '<div class="cover '+cv.cls+'" style="'+cv.style+'">'+(cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+esc(p.glyph||'💡')+'</span>')
     +   '<span class="tags">'+p.sectors.slice(0,2).map(id => '<span class="chip chip-onart">'+sector(id).g+' '+esc(sector(id).l)+'</span>').join('')+'</span>'
     +   '<span class="chip chip-handle" style="position:absolute;bottom:8px;left:9px">'+esc(myHandle())+'</span></div>'
     + '<div class="body">'

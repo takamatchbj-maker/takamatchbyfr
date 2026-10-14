@@ -187,7 +187,7 @@ function doPactePay(btn){
       closeLayer();
       await ctx.reload();
       toast('Commande enregistrée : le juriste est prévenu.', 'ok');
-    }catch(e){ closeLayer(); toast('Paiement reçu, mais la commande n\'a pas pu être enregistrée : ' + e.message + ' Contacte le support avec la référence ' + res.id + '.', 'bad'); }
+    }catch(e){ closeLayer(); toast('Paiement reçu, mais la commande n\'a pas pu être enregistrée : ' + e.message + ' Écris à contact@takamatch.com avec la référence ' + res.id + '.', 'bad'); }
   });
 }
 

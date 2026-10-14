@@ -19,16 +19,32 @@ takamatch/
 │   ├── pacte.js          Pacte d'associés : modèle générique qui s'adapte à chaque équipe
 │   ├── pacte-pdf.js      Pacte d'associés : mise en page du PDF
 │   ├── pacte-editor.js   Pacte d'associés : éditeur plein écran (app + admin)
+│   ├── partenaires-data.js  Atelier › Partenaires : catalogue de départ (coworkings, organismes d'appui)
+│   ├── admin-partenaires.js Admin : module « Partenaires »
 │   ├── vendor/           pdfmake (création du PDF dans le navigateur)
 │   └── pages/            Code propre à chaque page
 └── assets/
     ├── images/           Logos, couverture, photos de démonstration
+    │   └── takam/        Tête de Takam (WebP transparent, 320 px) : takam-talent (bonnet bleu),
+    │                     takam-visionnaire (bonnet jaune). Originaux HD : ../marque/takam/
     ├── icons/            Favicon
+    │   └── paiement/     Logos des moyens de paiement (MTN, Moov, Celtiis, Wave, Orange, Free, Mixx, NITA, Mastercard, Visa) — affichés via js/pay-icons.js
     └── fonts/            Polices du PDF (Source Serif 4, Inter — licence OFL)
 ```
 
 Chaque page charge dans cet ordre : `variables.css` → `base.css` → `components.css` → `pages/<page>.css`,
 puis `main.js` → `pages/<page>.js`.
+
+## Adresse de contact
+
+L'adresse publique de TakaMatch est **contact@takamatch.com**. Elle apparaît :
+
+- dans le pied de page et la FAQ du site vitrine (`js/pages/vitrine.js`, constante `CONTACT_EMAIL`) ;
+- dans « Aide et support » de l'outil, l'avis de compte suspendu et l'erreur de paiement (`js/pages/app.js`, `TM_LINKS.email` ; `js/pages/app-pacte.js`) ;
+- dans le pied des pages `404.html` et `erreur.html` ;
+- dans les réglages de l'espace admin (`admin.html`, Réglages → Liens, champ « Email »).
+
+La boîte elle-même se crée chez o2switch (cPanel → Comptes de messagerie).
 
 ## Tester sur ton ordinateur
 
@@ -64,6 +80,11 @@ Le bouton « Préparer le pacte d'associés » de l'Atelier ouvre un éditeur pl
 - **Modèle vierge** : Paramètres → Légal → « Modèle de pacte d'associés (OHADA) · PDF ».
 
 ## Takam, l'assistant des équipes
+
+- **Son visage** : en haut du panneau Takam de l'Atelier. Un Talent voit la tête au bonnet et aux lunettes
+  bleus (`assets/images/takam/takam-talent.webp`), un Visionnaire celle au bonnet jaune
+  (`takam-visionnaire.webp`). Le choix se fait dans `js/pages/app.js` (constante `TAKAM_HEAD`).
+  Pour changer une tête : remplacer le fichier WebP en gardant le même nom (image carrée, fond transparent).
 
 - **Les règles** (`js/takam-rules.js`) : un seul fichier, utilisé par l'outil (alertes affichées tout de suite
   dans l'Atelier) et par le serveur (copie dans `supabase/functions/takam/`). Après une modification :
@@ -107,11 +128,37 @@ Le bouton « Préparer le pacte d'associés » de l'Atelier ouvre un éditeur pl
 - **Secrets** (Supabase → Edge Functions → Secrets) : `FEDAPAY_SECRET_KEY` (sk_sandbox_… pour tester, sk_live_… pour encaisser),
   `FEDAPAY_WEBHOOK_SECRET`. Sandbox ou live se déduit de la clé. Facultatif : `APP_URL` (retour après paiement carte).
 - **Webhook FedaPay** : `https://ucxeopgigfzmuqzuzynr.supabase.co/functions/v1/paiement/webhooks/fedapay`.
-- **Vérifier l'état** : ouvrir l'adresse de la fonction → `{"ok":true,"fedapay":"sandbox"}` (ou `live`, ou `non configuré`).
-- **Avant le lancement** : passer à la clé `sk_live_…` et couper les achats de test :
-  `update app_settings set value = 'false' where key = 'test_payments';`
+- **Vérifier l'état** : ouvrir l'adresse de la fonction →
+  `{"ok":true,"fedapay":"sandbox","webhook":"signé","card":true,"weekly_limit":0}` (`fedapay` : `sandbox`, `live` ou `non configuré`).
+- **Réglages** (table `app_settings`, clé `payments`) : `{"card": true|false, "weekly_limit": N}`.
+  `card:false` retire la carte bancaire de l'écran **et** la refuse côté serveur ; `weekly_limit` plafonne le nombre
+  de transactions FedaPay sur 7 jours glissants (0 = pas de plafond). Au-delà, le membre voit
+  « Les paiements en ligne sont complets pour cette semaine ».
+- **Achats de test** : coupés depuis le 12/10/2026 (`test_payments = false`). Ne pas les rallumer en production :
+  tant qu'ils sont actifs, n'importe quel membre connecté peut s'accorder des crédits sans payer.
 - Les « modes » opérateurs (`MODES` dans la fonction) sont à confirmer avec FedaPay. Un mode faux ne bloque rien :
   le client paie sur la page FedaPay.
+
+### Passer en live (encaisser pour de vrai)
+
+Sans société, le compte FedaPay possible est **« Travailleur indépendant »** : pièce d'identité + numéro **IFU**
+personnel et son justificatif, déclaration sur l'honneur, CGU et contrat de service FedaPay.
+Limites : **mobile money uniquement, 10 transactions par semaine, 100 à 300 000 F par transaction.**
+
+1. FedaPay → passer le compte en live, choisir « Travailleur indépendant », envoyer les documents, attendre la validation.
+2. FedaPay (mode **Live**) → Paramètres → API : copier la clé secrète `sk_live_…`.
+   Supabase → Edge Functions → Secrets → remplacer `FEDAPAY_SECRET_KEY` par cette clé.
+3. FedaPay (mode **Live**) → Webhooks → créer un webhook vers
+   `https://ucxeopgigfzmuqzuzynr.supabase.co/functions/v1/paiement/webhooks/fedapay`
+   (événements `transaction.*`), copier son secret → Supabase → remplacer `FEDAPAY_WEBHOOK_SECRET`.
+4. Supabase → SQL Editor → exécuter `supabase/17_passage_live.sql` (efface les paiements de test,
+   coupe la carte, plafond 10/semaine, ferme `test_purchase`).
+5. Ouvrir l'adresse de la fonction : `"fedapay":"live","card":false,"weekly_limit":10`.
+6. Vrai test : acheter le Pack Essai avec ton propre numéro MTN, valider sur le téléphone,
+   vérifier les crédits dans l'app et la transaction dans FedaPay. Rembourser depuis FedaPay si besoin.
+
+Plus tard, avec un compte **Entreprise** (RCCM) : carte bancaire et plus de plafond →
+`update app_settings set value = '{"card": true, "weekly_limit": 0}' where key = 'payments';`
 
 ## Partenaires de l'Atelier
 

@@ -330,9 +330,18 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 .split .list button.on{background:var(--tal-50)}
 .split .pane{display:flex;flex-direction:column;min-width:0}
 .hbars{display:flex;flex-direction:column;gap:9px}
-.hbar{display:grid;grid-template-columns:140px minmax(0,1fr) 92px;gap:10px;align-items:center;font-size:13px}
+.hbar{display:grid;grid-template-columns:170px minmax(0,1fr) 92px;gap:10px;align-items:center;font-size:13px}
 .hbar .t{height:10px;border-radius:5px;background:var(--surface-3);overflow:hidden}
 .hbar .t i{display:block;height:100%;border-radius:5px}
+/* Icônes des moyens de paiement (js/pay-icons.js) */
+.pay-icons{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px 12px;vertical-align:middle}
+.pay-grp,.pay-pair{display:inline-flex;align-items:center}
+.pay-ico{display:block;flex:0 0 auto;border-radius:50%}
+.pay-grp > .pay-ico + .pay-ico,.pay-pair > .pay-ico + .pay-ico{margin-left:-5px}
+.pay-txt{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;background:#eee;color:#333}
+.pay-txt.airtel{background:#ED1C24;color:#fff}
+.pay-op{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.pay-op .pay-txt{display:none}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--ink-3)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .matrix td,.matrix th{text-align:center}
@@ -542,6 +551,7 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 <script src="js/supabase.js?v=20261012a"></script>
 <script src="js/geo.js?v=20261010a"></script>
 <script src="js/prix.js?v=20261010a"></script>
+<script src="js/pay-icons.js?v=20261014a"></script>
 <link rel="stylesheet" href="css/pacte.css?v=20261010a">
 <script src="js/pacte.js?v=20261010a"></script>
 <script src="js/pacte-pdf.js?v=20261010a"></script>
@@ -688,6 +698,8 @@ const PAY_CC = {BJ:{n:'Bénin', ops:['MTN MoMo','Moov Money','Celtiis Cash']}, T
   GH:{n:'Ghana', ops:[]}, NG:{n:'Nigeria', ops:[]}, CM:{n:'Cameroun', ops:[]}, FR:{n:'France', ops:[]}};
 const OP_COLOR = {'MTN MoMo':'#FFCC00', 'Moov':'#0077A8', 'Moov Money':'#0077A8', 'Celtiis':'#E4002B', 'Celtiis Cash':'#E4002B', 'Wave':'#1DC8FF',
   'Orange Money':'#FF7900', 'Free Money':'#CD0F14', 'Mixx by Yas':'#2B1C6E', 'Airtel Money':'#ED1C24', 'Carte bancaire':'#6B6459'};
+/* Moyen de paiement : logo(s) + libellé (js/pay-icons.js) */
+const payOp = (op, s) => { const k = window.TMPayIcons && TMPayIcons.keyOf(op); return k ? '<span class="pay-op">'+TMPayIcons.icon(k, s)+'<span>'+esc(op)+'</span></span>' : esc(op || '—'); };
 const ccOfCity = city => { const n = String(city || '').split(',').pop().trim(); return Object.keys(PAY_CC).find(k => PAY_CC[k].n === n) || 'BJ'; };
 
 function phoneOf(r){ return '+229 01 '+[0,0,0,0].map(() => String(10 + Math.floor(r()*89))).join(' '); }
@@ -1303,7 +1315,7 @@ VIEWS.payments = () => {
     +   kpi('undo', 'Remboursements', D.payments.filter(p => p.status === 'refunded').length, fcfa(D.payments.filter(p => p.status === 'refunded').reduce((a, p) => a + p.amount, 0)))
     + '</div>'
     + '<div class="grid g2" style="margin-bottom:14px">'
-    + '<section class="card card-pad"><div class="sec-t"><h3>Par moyen de paiement</h3></div><div class="hbars">'+byOp.map(o => '<div class="hbar"><span>'+esc(o[0])+'</span><span class="t"><i style="width:'+(o[1]/mx*100)+'%;background:'+(OPC[o[0]] || 'var(--ink-3)')+'"></i></span><span class="mono" style="text-align:right;font-size:12px">'+fcfa(o[1])+'</span></div>').join('')+'</div></section>'
+    + '<section class="card card-pad"><div class="sec-t"><h3>Par moyen de paiement</h3></div><div class="hbars">'+byOp.map(o => '<div class="hbar"><span>'+payOp(o[0], 22)+'</span><span class="t"><i style="width:'+(o[1]/mx*100)+'%;background:'+(OPC[o[0]] || 'var(--ink-3)')+'"></i></span><span class="mono" style="text-align:right;font-size:12px">'+fcfa(o[1])+'</span></div>').join('')+'</div></section>'
     + '<section class="card card-pad"><div class="sec-t"><h3>Par pays</h3></div><div class="hbars">'+byCc.map(o => '<div class="hbar"><span>'+esc(o[0])+'</span><span class="t"><i style="width:'+(o[1]/mxc*100)+'%;background:var(--ink-2)"></i></span><span class="mono" style="text-align:right;font-size:12px">'+fcfa(o[1])+'</span></div>').join('')+'</div></section>'
     + '</div>'
     + '<div class="bar"><input class="inp q" data-act="payq" placeholder="Réf., utilisateur, produit" value="'+esc(A.q.pay || '')+'">'
@@ -1313,7 +1325,7 @@ VIEWS.payments = () => {
     +   sel('st', [['','Tous les statuts'],['ok','Réussis'],['failed','Échoués'],['refunded','Remboursés']]) + '</div>'
     + table(['Date', 'Réf.', 'Utilisateur', 'Produit', 'Montant', 'Moyen', 'Pays', 'Statut', ''], list.slice(0, 80).map(p => { const u = userBy(p.uid);
       return '<tr><td style="white-space:nowrap">'+fmt(p.at)+'</td><td class="mono" style="font-size:12px">'+esc(p.ref)+'</td><td>'+whoCell(u)+'</td><td>'+esc(p.label)+'</td><td class="mono" style="white-space:nowrap">'+(p.amount ? fcfa(p.amount) : '—')+'</td>'
-        + '<td>'+esc(p.op)+'</td><td>'+(p.cc && PAY_CC[p.cc] ? esc(PAY_CC[p.cc].n) : '—')+'</td><td><span class="chip '+PST[p.status][1]+'">'+PST[p.status][0]+'</span>'+(p.refund ? '<br><small class="hint">'+esc(p.refund.motif)+'</small>' : '')+'</td>'
+        + '<td>'+payOp(p.op, 22)+'</td><td>'+(p.cc && PAY_CC[p.cc] ? esc(PAY_CC[p.cc].n) : '—')+'</td><td><span class="chip '+PST[p.status][1]+'">'+PST[p.status][0]+'</span>'+(p.refund ? '<br><small class="hint">'+esc(p.refund.motif)+'</small>' : '')+'</td>'
         + '<td>'+(p.status === 'ok' && p.amount && canDo('refund') ? '<button class="btn btn-ghost btn-sm" data-act="refund" data-id="'+p.id+'">'+ic('undo')+'Rembourser</button>' : '')+'</td></tr>'; }), 'Aucune transaction');
 };
 
