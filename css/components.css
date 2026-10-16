@@ -187,3 +187,7 @@ h1 svg.ic, h2 svg.ic, h3 svg.ic{width:18px;height:18px}
 .momo .pay-icons{margin-left:2px}
 .ops .opt .pay-ico{width:26px;height:26px}
 .ops .opt .pay-pair .pay-ico{width:24px;height:24px}
+
+/* Lancement : option offerte, « Bientôt payant » / « Bientôt disponible » */
+.soon-tag{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;background:var(--surface-3, #eee);color:var(--ink-2, #555);
+  font-family:var(--sans, inherit);font-size:10.5px;font-weight:600;letter-spacing:.01em;line-height:1;vertical-align:middle;white-space:nowrap;margin-left:4px}

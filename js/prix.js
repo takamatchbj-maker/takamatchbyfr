@@ -52,6 +52,12 @@
     GN:'GNF', CD:'CDF', BI:'BIF', RW:'RWF', DJ:'DJF', KM:'KMF', MG:'MGA', MU:'MUR', SC:'SCR', GH:'GHS', NG:'NGN'
   };
   var FCFA = {XOF:1, XAF:1};
+  /* Lancement : aucun paiement demandé.
+     · second profil, emplacement projet et pacte : offerts (0), mention « Bientôt payant » ;
+     · packs de crédits : « Bientôt disponible », prix montrés en gris ;
+     · 5 crédits d'invitation par mois.
+     Réglé dans Supabase (app_settings « launch ») ; ces valeurs servent si la base ne répond pas. */
+  var LAUNCH = {free:true, monthly:5, keys:['second', 'slot', 'pacte'], tag:'Bientôt payant', soon:'Bientôt disponible'};
 
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
   var state = {prices:clone(DEFAULT_PRICES), fx:clone(DEFAULT_FX), at:0};
@@ -81,7 +87,12 @@
   }
 
   var api = {
-    DEFAULT_PRICES:DEFAULT_PRICES, DEFAULT_FX:DEFAULT_FX, CUR_OF:CUR_OF,
+    DEFAULT_PRICES:DEFAULT_PRICES, DEFAULT_FX:DEFAULT_FX, CUR_OF:CUR_OF, LAUNCH:LAUNCH,
+    /* true : l'option est offerte pendant le lancement (affichée 0, « Bientôt payant »). */
+    isFree:function(key){ return !!LAUNCH.free && LAUNCH.keys.indexOf(key) >= 0; },
+    /* true : l'achat de crédits n'est pas encore ouvert. */
+    creditsSoon:function(){ return !!LAUNCH.free; },
+    monthly:function(){ return LAUNCH.monthly; },
     calc:calc, curOf:curOf, fmt:fmt, num:num,
     /* Données brutes de la base → format interne (sert aussi au serveur). */
     fromRows:function(priceRows, fxRows){
@@ -96,7 +107,8 @@
 
   /* ---------------- Navigateur ---------------- */
   var KEY = 'tm-prix-v1', CCKEY = 'tm-pay-cc';
-  try{ var c = JSON.parse(localStorage.getItem(KEY)); if(c && c.prices && c.fx) state = c; }catch(e){}
+  function setLaunch(l){ if(l){ LAUNCH.free = l.free !== false; LAUNCH.monthly = Number(l.monthly) || 5; } }
+  try{ var c = JSON.parse(localStorage.getItem(KEY)); if(c && c.prices && c.fx){ state = c; setLaunch(c.launch); } }catch(e){}
   var TZ = {'Africa/Porto-Novo':'BJ','Africa/Lome':'TG','Africa/Abidjan':'CI','Africa/Dakar':'SN','Africa/Ouagadougou':'BF','Africa/Bamako':'ML',
     'Africa/Niamey':'NE','Africa/Conakry':'GN','Africa/Douala':'CM','Africa/Libreville':'GA','Africa/Brazzaville':'CG','Africa/Kinshasa':'CD',
     'Africa/Lubumbashi':'CD','Africa/Bangui':'CF','Africa/Ndjamena':'TD','Africa/Malabo':'GQ','Africa/Bujumbura':'BI','Africa/Kigali':'RW',
@@ -118,7 +130,17 @@
     cc = String(cc || '').toUpperCase(); if(!CUR_OF[cc]) return;
     forced = cc; if(remember){ try{ localStorage.setItem(CCKEY, cc); }catch(e){} }
   };
-  api.get = function(key, cc){ return calc(key, cc || api.cc()); };
+  api.get = function(key, cc){
+    var r = calc(key, cc || api.cc());
+    if(r && api.isFree(key)){
+      /* Prix réel gardé dans « later » (pour plus tard), affiché et encaissé : 0. */
+      r.later = r.text; r.free = true; r.local = 0; r.charged = 0;
+      r.text = fmt(0, r.cur); r.chargedText = '0 FCFA';
+    }
+    return r;
+  };
+  /* Prix normal, même pendant le lancement (packs de crédits en gris). */
+  api.full = function(key, cc){ var r = calc(key, cc || api.cc()); return r ? r.text : ''; };
   /* Prix affiché, prêt à insérer : « 5 € ». */
   api.text = function(key, cc){ var r = api.get(key, cc); return r ? r.text : ''; };
   /* « 0 € », « 0 FCFA » : la devise du pays, pour un montant libre en FCFA déjà local. */
@@ -126,7 +148,7 @@
   api.symbol = function(cc){ return fx(curOf(cc || api.cc())).symbol; };
   /* Mention sous un bouton « Payer », hors zone FCFA. */
   api.chargeNote = function(key, cc){
-    var r = api.get(key, cc); if(!r || r.inFcfa) return '';
+    var r = api.get(key, cc); if(!r || r.inFcfa || r.free) return '';
     return 'Tu seras débité de ' + r.chargedText + ' (environ ' + r.text + ') : ta banque fait la conversion.';
   };
   /* Rafraîchit depuis la base ; prévient les pages si quelque chose a changé. */
@@ -136,11 +158,14 @@
     var h = {apikey:key};
     return Promise.all([
       fetch(url + '/rest/v1/pricing?select=key,label,fcfa,credits&order=sort', {headers:h}).then(function(r){ return r.ok ? r.json() : null; }),
-      fetch(url + '/rest/v1/fx_rates?select=currency,name,symbol,fcfa_per_unit,step&order=sort', {headers:h}).then(function(r){ return r.ok ? r.json() : null; })
+      fetch(url + '/rest/v1/fx_rates?select=currency,name,symbol,fcfa_per_unit,step&order=sort', {headers:h}).then(function(r){ return r.ok ? r.json() : null; }),
+      fetch(url + '/rest/v1/app_settings?key=eq.launch&select=value', {headers:h}).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
     ]).then(function(res){
       if(!res[0] || !res[1]) return false;
       var next = api.fromRows(res[0], res[1]); next.at = Date.now();
-      var changed = JSON.stringify(next.prices) !== JSON.stringify(state.prices) || JSON.stringify(next.fx) !== JSON.stringify(state.fx);
+      var lv = res[2] && res[2][0] && res[2][0].value, l0 = LAUNCH.free + '/' + LAUNCH.monthly;
+      if(lv){ next.launch = {free:lv.free !== false, monthly:Number(lv.monthly_credits) || 5}; setLaunch(next.launch); }
+      var changed = l0 !== LAUNCH.free + '/' + LAUNCH.monthly || JSON.stringify(next.prices) !== JSON.stringify(state.prices) || JSON.stringify(next.fx) !== JSON.stringify(state.fx);
       state = next;
       try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
       if(changed){ try{ root.dispatchEvent(new CustomEvent('tm-prix')); }catch(e){} }

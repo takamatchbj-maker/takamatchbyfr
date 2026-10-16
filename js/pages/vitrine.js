@@ -17,14 +17,19 @@ const SITE_CC = (() => {
 /* Pays hors zone mobile money FedaPay : on montre les moyens du Bénin + carte. */
 function sitePayOps(){ return SITE_PAY[SITE_CC] || []; }
 /* Prix dans la devise du visiteur (js/prix.js). */
-const priceTxt = k => window.TMPrix ? TMPrix.text(k, SITE_CC) : '';
+/* Lancement : options offertes → « 0 FCFA (Bientôt payant) » ; packs de crédits « Bientôt disponible ». */
+const isFree = k => !!(window.TMPrix && TMPrix.isFree(k));
+const creditsSoon = () => !!(window.TMPrix && TMPrix.creditsSoon());
+const monthlyCredits = () => window.TMPrix ? TMPrix.monthly() : 5;
+const priceTxt = k => window.TMPrix ? TMPrix.text(k, SITE_CC) + (isFree(k) ? ' ('+TMPrix.LAUNCH.tag+')' : '') : '';
+const onceTxt = k => isFree(k) ? '' : ' une seule fois';
 const priceAmt = (k, small) => { const r = window.TMPrix && TMPrix.get(k, SITE_CC); return r ? TMPrix.num(r.local)+'<small>'+esc(TMPrix.symbol(SITE_CC))+(small ? ' '+small : '')+'</small>' : ''; };
 function sitePayList(card){
   const l = sitePayOps().map(x => x[0]).concat(card);
   return l.length > 1 ? l.slice(0, -1).join(', ')+' ou '+l[l.length - 1] : l[0];
 }
 function sitePayBadges(){
-  return '<div class="momo" style="margin-top:auto">via '+TMPayIcons.row(sitePayOps().map(x => x[1]).concat('card'), 30)+'</div>';
+  return '<div class="momo" style="margin-top:auto">'+(creditsSoon() ? 'Bientôt via ' : 'via ')+TMPayIcons.row(sitePayOps().map(x => x[1]).concat('card'), 30)+'</div>';
 }
 /* ============================================================
    TakaMatch — page vitrine
@@ -460,19 +465,21 @@ function sitePricing(){
   return '<section class="sec" id="tarifs"><div class="site-in">'
     + '<div class="sec-h mid">'
     +   '<h2>Pas d\'abonnement. Tu paies ce que tu consommes.</h2>'
-    +   '<p>Explorer et publier ne coûte rien. Seule l\'invitation se paie — en crédits prépayés, réglés par mobile money ou carte, qui n\'expirent jamais.</p></div>'
+    +   (creditsSoon()
+          ? '<p>Explorer et publier ne coûte rien. Pendant le lancement, aucun paiement n\'est demandé : les options payantes sont offertes et les packs de crédits arrivent bientôt.</p></div>'
+          : '<p>Explorer et publier ne coûte rien. Seule l\'invitation se paie — en crédits prépayés, réglés par mobile money ou carte, qui n\'expirent jamais.</p></div>')
     + '<div class="price">'
     +   '<div class="price-c pc-tal"><div class="lbl">Pour les Talents</div>'
     +     '<div class="amt">Gratuit<small>pour toujours</small></div>'
     +     '<p style="font-size:13.5px;line-height:1.6;color:var(--ink-2)">Explorer, publier ta fiche, postuler et discuter après un match. Sans limite, sans carte bancaire.</p>'
     +     '<button class="btn btn-tal btn-block" data-act="open-onb" data-role="tal" style="margin-top:auto">Créer ma fiche Talent</button></div>'
     +   '<div class="price-c pc-vis"><div class="lbl">Pour les Visionnaires</div>'
-    +     '<div class="amt">3<small>invitations offertes / mois</small></div>'
+    +     '<div class="amt">'+monthlyCredits()+'<small>invitations offertes / mois</small></div>'
     +     '<p style="font-size:13.5px;line-height:1.6;color:var(--ink-2)">Publier ta fiche projet et explorer restent gratuits. Seul l\'envoi d\'une invitation consomme un crédit.</p>'
     +     '<button class="btn btn-vis btn-block" data-act="open-onb" data-role="vis" style="margin-top:auto">Publier mon projet</button></div>'
-    +   '<div class="price-c"><div class="lbl">Packs de crédits (pour les <span class="gold">Visionnaires</span>)</div>'
+    +   '<div class="price-c'+(creditsSoon() ? ' pc-soon' : '')+'"><div class="lbl">Packs de crédits (pour les <span class="gold">Visionnaires</span>)'+(creditsSoon() ? ' <span class="soon-tag">'+esc(TMPrix.LAUNCH.soon)+'</span>' : '')+'</div>'
     +     '<div class="amt">'+priceAmt('credits_essai', 'pour 3 crédits d\'invitation')+'</div>'
-    +     '<p style="font-size:13.5px;line-height:1.6;color:var(--ink-2)">10 crédits pour '+priceTxt('credits_elan')+', 30 crédits pour '+priceTxt('credits_campagne')+'. Réglés par '+sitePayList('carte bancaire')+'.</p>'
+    +     '<p style="font-size:13.5px;line-height:1.6;color:var(--ink-2)">10 crédits pour '+priceTxt('credits_elan')+', 30 crédits pour '+priceTxt('credits_campagne')+'. '+(creditsSoon() ? 'L\'achat de crédits ouvre bientôt.' : 'Réglés par '+sitePayList('carte bancaire')+'.')+'</p>'
     +     sitePayBadges()+'</div>'
     + '</div>'
     + '<div class="panel" style="margin-top:16px;padding:22px;display:flex;gap:14px;align-items:flex-start">'
@@ -526,9 +533,9 @@ function siteHero(){
     +   '<button class="btn btn-lg btn-tal btn-fx magnet" data-act="open-onb" data-role="tal"><span class="emo" aria-hidden="true">🛠️</span>J\'ai un talent'+ARR+'</button>'
     + '</div>'
     + '<div class="trust-l"><span class="stack" aria-hidden="true"><i class="sv">V</i><i class="st">T</i><i class="sp">+</i></span>'
-    +   '<span>Inscription en 4 minutes · Paiement '+sitePayList('carte')+'</span></div>'
+    +   '<span>Inscription en 4 minutes · '+(creditsSoon() ? 'Aucun paiement demandé' : 'Paiement '+sitePayList('carte'))+'</span></div>'
     + '<div class="figs">'
-    +   fig('0 FCFA','pour s\'inscrire et explorer') + fig('3','invitations offertes à l\'inscription')
+    +   fig('0 FCFA','pour s\'inscrire et explorer') + fig(String(monthlyCredits()),'invitations offertes chaque mois')
     +   fig('100 %','des identités vérifiables') + fig('OHADA','pacte d\'associés prêt à signer')
     + '</div>'
     + '</div></div></section>';
@@ -605,9 +612,9 @@ function siteRoles(){
     +       '<small>Connecter, co-créer, impacter</small></div>'
     +     '<div class="rcred">'
     +       '<div data-show="vis"><div class="lbl">Crédits d\'invitation</div>'
-    +         '<div class="num tnum">3<small>offertes / mois</small></div>'
-    +         '<div class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i></div>'
-    +         '<p>Des invitations rares, donc sérieuses. Ensuite, des packs prépayés via '+sitePayList('carte bancaire')+'.</p></div>'
+    +         '<div class="num tnum">'+monthlyCredits()+'<small>offertes / mois</small></div>'
+    +         '<div class="gauge">'+'<i class="on"></i>'.repeat(monthlyCredits())+'</div>'
+    +         '<p>Des invitations rares, donc sérieuses. '+(creditsSoon() ? 'Packs prépayés : bientôt disponibles.' : 'Ensuite, des packs prépayés via '+sitePayList('carte bancaire')+'.')+'</p></div>'
     +       '<div data-show="tal"><div class="lbl">Pour les talents</div>'
     +         '<div class="num tnum">0<small>'+esc(window.TMPrix ? TMPrix.symbol(SITE_CC) : 'FCFA')+', pour toujours</small></div>'
     +         '<div class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>'
@@ -674,7 +681,7 @@ function siteCompare(){
 
 function siteFaq(){
   const faq = [
-    ["Puis-je être visionnaire et talent à la fois ?","Oui. Un seul compte, deux profils indépendants : matchs, invitations, conversations et Ateliers restent séparés ; ton nom, ton e-mail, ta ville, ton sexe et ton niveau de confiance sont communs. Le premier profil est gratuit, le second se débloque une fois pour "+priceTxt('second')+". Ensuite tu bascules sans limite depuis le menu de ton profil, et l'interface change de couleur pour que tu saches toujours où tu es."],
+    ["Puis-je être visionnaire et talent à la fois ?","Oui. Un seul compte, deux profils indépendants : matchs, invitations, conversations et Ateliers restent séparés ; ton nom, ton e-mail, ta ville, ton sexe et ton niveau de confiance sont communs. Le premier profil est gratuit, "+(isFree('second') ? "le second se débloque pour "+priceTxt('second')+". " : "le second se débloque une fois pour "+priceTxt('second')+". ")+"Ensuite tu bascules sans limite depuis le menu de ton profil, et l'interface change de couleur pour que tu saches toujours où tu es."],
     ["Que voit-on de moi avant un match ?","Ton pseudo, tes compétences, ta ville, ton rythme, ta signature personnelle et ta photo, floutée. Ni ton nom, ni tes coordonnées. Sans photo, ce sont tes initiales sur ta couleur. Ton sexe (Masculin, Féminin ou Ne pas préciser) ne s'affiche qu'après le match et ne compte ni dans le score ni dans les filtres."],
     ["Qui peut voir ma fiche ?","Les talents ne voient que des fiches projet, les visionnaires que des fiches talent : jamais une fiche de ton propre camp. Depuis une fiche projet, un talent peut aussi ouvrir la fiche perso du visionnaire (« Voir sa fiche perso ») : tes compétences, ton parcours, ta signature. Un autre visionnaire ne la voit jamais. Côté visionnaire, tout se gère dans « Mes fiches », en deux onglets : « Fiche Projet » et « Ma fiche perso ». Quelqu'un sans compte qui arrive par le lien ou le code QR de ta fiche peut la lire, mais pas t'inviter ; il apparaît dans tes statistiques comme « visiteur non identifié ». La fiche perso n'a pas de statistiques : c'est ta fiche projet qui est suivie."],
     ["Un projet peut-il me rémunérer ?","Chaque visionnaire indique sur sa fiche ce qu'il propose aux talents : parts uniquement (des parts au capital, sans rémunération au départ), parts + petite rémunération (un défraiement dès le début) ou rémunération prévue (un revenu est prévu pour le cofondateur). Le filtre « Avec rémunération » t'aide à les trouver."],
@@ -683,7 +690,7 @@ function siteFaq(){
     ["Comment faire vérifier mon profil ?","Depuis tes paramètres : une pièce d'identité et un selfie suffisent. Ils sont supprimés après 30 jours ; seul le palier « Identité vérifiée » reste affiché sur ta fiche."],
     ["Pourquoi mon nom est-il verrouillé après l'inscription ?","Parce qu'un engagement de cofondation doit être opposable. Ton nom légal reste privé, mais il ne change pas — c'est ce qui rend les documents signés dans l'Atelier valables."],
     ["Qu'est-ce qui se passe si personne ne répond ?","Une invitation sans réponse expire au bout de 10 jours, et le crédit est rendu au visionnaire. Chaque profil affiche son délai de réponse habituel, pour que tu saches à quoi t'attendre avant d'en dépenser une."],
-    ["Combien de projets puis-je porter ou rejoindre ?","Un visionnaire porte jusqu'à 3 projets : la première fiche projet est incluse, chaque emplacement de plus coûte "+priceTxt('slot')+" une seule fois et reste acquis même si tu supprimes la fiche. Un talent rejoint au plus 3 projets à la fois ; pour en rejoindre un autre, il doit d'abord « Quitter le projet » dans l'un des trois."],
+    ["Combien de projets puis-je porter ou rejoindre ?","Un visionnaire porte jusqu'à 3 projets : la première fiche projet est incluse, chaque emplacement de plus coûte "+priceTxt('slot')+onceTxt('slot')+" et reste acquis même si tu supprimes la fiche. Un talent rejoint au plus 3 projets à la fois ; pour en rejoindre un autre, il doit d'abord « Quitter le projet » dans l'un des trois."],
     ["Le pacte d'associés est-il un vrai document ?","Oui. C'est un modèle de droit OHADA prérempli depuis vos décisions, relu par un juriste avant de vous être remis. Il ne remplace pas un conseil personnalisé, mais il vaut infiniment mieux qu'un contrat copié sur Internet."],
   ];
   return '<section class="sec" id="faq"><div class="site-in"><div class="faqg">'
@@ -920,7 +927,7 @@ function signupHTML(role, mode){
     +   '<div class="field"><label for="ovc">E-mail ou téléphone</label><input class="inp" id="ovc" name="contact" autocomplete="email" placeholder="toi@exemple.com ou +229 …" required></div>'
     +   '<button class="btn btn-lg btn-block ov-go '+(r==='tal'?'btn-tal':'btn-vis')+'" type="submit">Continuer'+ARR+'</button>'
     + '</form>'
-    + '<p class="ov-n">Inscription en 4 minutes · Paiement '+sitePayList('carte')+'</p>'
+    + '<p class="ov-n">Inscription en 4 minutes · '+(creditsSoon() ? 'Aucun paiement demandé' : 'Paiement '+sitePayList('carte'))+'</p>'
     + '<p class="ov-sw">Déjà inscrit ? <a href="#" data-act="open-onb" data-mode="login">Se connecter</a></p>';
 }
 function openSignup(opts){

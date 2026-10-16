@@ -1625,3 +1625,8 @@ body.menu-open .site-hd{z-index:130}
 .okc{width:52px;height:52px;border-radius:50%;background:var(--ok-bg);color:var(--ok-ink);display:grid;place-items:center;animation:pop .4s var(--ease) both}
 
 .okc svg{width:24px;height:24px}
+
+/* Lancement : packs de crédits pas encore en vente (prix en gris) */
+.price-c.pc-soon .amt,.price-c.pc-soon p{color:var(--ink-3)}
+.price-c.pc-soon .amt small{color:var(--ink-4)}
+.price-c.pc-soon .momo{opacity:.55;filter:grayscale(1)}

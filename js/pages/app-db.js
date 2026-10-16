@@ -145,7 +145,7 @@
     m.perso = ps ? {skills:ps.skills || [], level:ps.level || '', bio:ps.bio || '', portfolio:ps.portfolio || '', portfolioTitle:ps.portfolioTitle || '', noPortfolio:!!ps.noPortfolio}
                  : {skills:(p.skills || []).slice(), level:p.level || '', bio:p.bio || '', portfolio:p.portfolio_url || '', portfolioTitle:p.portfolio_title || '', noPortfolio:!!p.no_portfolio};
     m.credits = a.credits != null ? a.credits : m.credits;
-    m.creditsMax = Math.max(3, m.credits);
+    m.creditsMax = Math.max(TMPrix.monthly(), m.credits);
     m.slots = a.project_slots || 1;
     m.visUnlocked = !!(a.has_talent && a.has_visionary);
     m.online = !!p.talent_online;
@@ -620,6 +620,15 @@
     const id = await DB.rpc('test_purchase', {p_key:req.product, p_country:req.country || null, p_method:req.method || null, p_amount:req.amount || null});
     setTimeout(() => refresh(true), 1500);
     return {id, status:'approved', provider:'test'};
+  };
+
+  /* ---------- Lancement : options offertes, sans paiement (supabase/20_lancement_gratuit.sql) ---------- */
+  const _claim = TMPay.claimFree.bind(TMPay);
+  TMPay.claimFree = async function(key){
+    if(!D.on) return _claim(key);
+    const id = await DB.rpc('claim_free', {p_key:key});
+    setTimeout(() => refresh(true), 1500);
+    return {id, status:'approved', provider:'lancement', free:true};
   };
 
   /* ---------- Fiche, profil et projets ---------- */

@@ -146,7 +146,7 @@ async function openPacte(t){
   const reload = async () => { const s = await PacteStore.load(t); if(PACTE_ED) PACTE_ED.ed.update(s, pacteCtx(t)); return s; };
   const ed = TMPacteEditor.open({
     ctx, state:st, me:{uid:PacteStore.me(t), staff:false, name:S.me.first || ''},
-    price:esc(priceT('pacte')), z:110, backLabel:'Atelier',
+    price:esc(priceT('pacte')), free:isFree('pacte'), z:110, backLabel:'Atelier',
     actions:{
       save:spec => PacteStore.save(t, spec),
       saveParty:async (uid, data) => { await PacteStore.saveParty(t, uid, data); await reload(); },
@@ -168,13 +168,13 @@ function pacteOrder(t, reload){
   S.pay = payInit(1); S.pay.key = 'pacte';
   S.pactePay = {t, reload};
   modal('Relecture juridique du pacte',
-    '<div class="price-hd"><span class="mono">'+priceH('pacte')+'</span><span>une seule fois pour l\'équipe, relecture et nouvelles versions comprises</span></div>'
+    '<div class="price-hd"><span class="mono">'+priceH('pacte')+'</span><span>'+(isFree('pacte') ? onceTxt('pacte') : 'une seule fois pour l\'équipe')+', relecture et nouvelles versions comprises</span></div>'
     + '<ul class="leave-l">'
     + '<li>'+ic('shield')+'Un juriste vérifie le pacte au regard du droit OHADA et le complète.</li>'
     + '<li>'+ic('clock')+'Retour sous 72 heures ouvrées, avec ses notes article par article.</li>'
     + '<li>'+ic('file')+'Chaque associé signe ensuite en ligne ; le PDF signé reste dans l\'Atelier.</li></ul>'
     + opsField(),
-    '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-a" data-act="pacte-pay">'+ic('card')+'Payer '+priceH('pacte')+'</button>', {lg:true});
+    '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-a" data-act="pacte-pay">'+payBtnH('pacte', 'Commander gratuitement')+'</button>', {lg:true});
 }
 function doPactePay(btn){
   const ctx = S.pactePay; if(!ctx) return;
@@ -187,7 +187,7 @@ function doPactePay(btn){
       closeLayer();
       await ctx.reload();
       toast('Commande enregistrée : le juriste est prévenu.', 'ok');
-    }catch(e){ closeLayer(); toast('Paiement reçu, mais la commande n\'a pas pu être enregistrée : ' + e.message + ' Écris à contact@takamatch.com avec la référence ' + res.id + '.', 'bad'); }
+    }catch(e){ closeLayer(); toast((isFree('pacte') ? 'Option débloquée' : 'Paiement reçu')+', mais la commande n\'a pas pu être enregistrée : ' + e.message + ' Écris à contact@takamatch.com avec la référence ' + res.id + '.', 'bad'); }
   });
 }
 

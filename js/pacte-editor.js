@@ -373,7 +373,7 @@
       b = '<p>Un juriste relit votre pacte, vérifie qu\'il tient au regard du droit OHADA, complète ce qui manque et vous le renvoie prêt à signer, en général sous <b>72 heures ouvrées</b>.</p>'
         + '<ul class="pe-ul"><li>Après la commande, le texte ne se modifie plus que par le juriste.</li><li>Chaque associé continue de compléter ses informations de signataire.</li><li>Si vous voulez encore changer quelque chose après relecture, vous pourrez demander une modification.</li></ul>'
         + (miss.length ? note('warn', 'alert', miss.length + ' point' + (miss.length > 1 ? 's restent' : ' reste') + ' ouvert' + (miss.length > 1 ? 's' : '') + ' : le juriste vous posera la question. Tu peux aussi les régler avant de commander.') : '');
-      f = '<button class="btn btn-quiet" data-pe="dlg-close">Annuler</button><button class="btn btn-a" data-pe="order-go">' + ic('card') + 'Payer ' + (E.o.price || '') + '</button>';
+      f = '<button class="btn btn-quiet" data-pe="dlg-close">Annuler</button><button class="btn btn-a" data-pe="order-go">' + (E.o.free ? ic('check') + 'Commander gratuitement' : ic('card') + 'Payer ' + (E.o.price || '')) + '</button>';
     } else if(d.kind === 'publish'){
       const miss = E.issues.filter(x => x.kind === 'field');
       t = 'Publier pour signature';

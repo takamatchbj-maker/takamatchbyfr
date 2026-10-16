@@ -152,7 +152,7 @@ const DEFAULT_ME = {
   talentOn:false, talentPromptSeen:false,
   project:{title:'', sectors:[], seeking:[], hook:'', vision:'', traction:'', assets:'', challenges:'', link:'', glyph:'💡'},
   online:true, verifiedEmail:true, verifiedPhone:false, verifiedId:false, refs:0,
-  credits:3, creditsMax:5,
+  credits:5, creditsMax:5,
 };
 const S = {
   booted:false, view:'accueil', tab:'decouvrir', mode:'mosaic', ficheTab:'projet',
@@ -561,8 +561,8 @@ function creditsCard(){
     + '<div class="row" style="align-items:baseline;gap:6px"><span style="font-family:var(--disp);font-size:36px;font-weight:600" class="tnum">'+m.credits+'</span>'
     +   '<span style="font-size:14px;color:var(--ink-3)">'+(extra ? 'restants' : 'restants sur '+m.creditsMax+' ce mois')+'</span></div>'
     + '<div class="gauge" aria-hidden="true">'+Array.from({length:Math.max(m.creditsMax, Math.min(m.credits, 10))},(_,i)=>'<i class="'+(i<m.credits?'on':'')+'"></i>').join('')+'</div>'
-    + '<p class="hint" style="margin-bottom:12px">'+(extra ? 'Tes crédits achetés n\'expirent pas.' : 'Se renouvelle le 1<sup>er</sup> '+tmNextMonth()+'. Packs à partir de <span class="mono">'+priceH('credits_essai')+'</span>.')+'</p>'
-    + '<button class="btn btn-ghost btn-sm btn-block" data-act="buy-credits">'+ic('plus')+'Recharger mes crédits</button>'
+    + '<p class="hint" style="margin-bottom:12px">'+(extra ? 'Tes crédits achetés n\'expirent pas.' : 'Se renouvelle le 1<sup>er</sup> '+tmNextMonth()+'. '+(TMPrix.creditsSoon() ? 'Achat de packs : '+esc(TMPrix.LAUNCH.soon).toLowerCase()+'.' : 'Packs à partir de <span class="mono">'+priceH('credits_essai')+'</span>.'))+'</p>'
+    + '<button class="btn btn-ghost btn-sm btn-block" data-act="buy-credits">'+ic('plus')+'Recharger mes crédits'+(TMPrix.creditsSoon() ? ' <span class="soon-tag">Bientôt</span>' : '')+'</button>'
     + payBadges()+'</section>';
 }
 /* Vérification du téléphone par SMS : pas encore proposée. Passer à true le jour où elle l'est. */
@@ -819,11 +819,21 @@ const PACKS = [{k:'credits_essai', n:'Essai', c:3, p:2000, h:'pour tester'}, {k:
    Les montants de référence (FCFA) se règlent dans l'admin. */
 function priceCc(){ return (S.pay && S.pay.cc) || payDetectCountry(); }
 function priceOf(key){ return TMPrix.get(key, priceCc()); }
-function priceT(key){ return TMPrix.text(key, priceCc()); }
-function priceH(key){ return '<span data-price="'+key+'">'+esc(priceT(key))+'</span>'; }
+function priceV(key){ return TMPrix.text(key, priceCc()); }
+/* Lancement : options offertes → « 0 FCFA (Bientôt payant) ». */
+function isFree(key){ return TMPrix.isFree(key); }
+function priceT(key){ return priceV(key) + (isFree(key) ? ' ('+TMPrix.LAUNCH.tag+')' : ''); }
+function priceH(key){ return '<span data-price="'+key+'">'+esc(priceV(key))+'</span>'+(isFree(key) ? ' <span class="soon-tag">'+esc(TMPrix.LAUNCH.tag)+'</span>' : ''); }
+/* Bouton de validation : « Payer 3 000 FCFA » ou, pendant le lancement, « Débloquer gratuitement ». */
+function payBtnH(key, freeLabel){ return isFree(key) ? ic('check')+(freeLabel || 'Débloquer gratuitement') : ic('card')+'Payer '+priceH(key); }
+/* « une seule fois » n'a pas de sens à 0 : pendant le lancement, on dit « offert ». */
+function onceTxt(key){ return isFree(key) ? 'offert pendant le lancement' : 'une seule fois'; }
+function onceH(key, sep){ return priceH(key) + (isFree(key) ? '' : (sep || ' ')+'une seule fois'); }
+/* Phrase de confirmation après l'achat. */
+function paidH(key){ return isFree(key) ? 'Offert pendant le lancement : rien à payer.' : 'Paiement de <span class="mono">'+priceH(key)+'</span> confirmé via '+esc(S.pay.op)+'.'; }
 function payKey(){ return (S.pay && S.pay.key) || ((PACKS[(S.pay || {}).pack] || {}).k) || ''; }
 function refreshPrices(){
-  $$('[data-price]').forEach(el => { el.textContent = priceT(el.dataset.price); });
+  $$('[data-price]').forEach(el => { el.textContent = priceV(el.dataset.price); });
   const n = $('#payNote'); if(n) n.textContent = TMPrix.chargeNote(payKey(), priceCc());
 }
 window.addEventListener('tm-prix', () => { try{ refreshPrices(); }catch(e){} });
@@ -901,6 +911,7 @@ function payInit(pack){
   return {pack:pack == null ? 1 : pack, cc, method, op:method ? PAY_METHODS[method].l : '', idem:null};
 }
 function payBadges(cc){
+  if(TMPrix.creditsSoon()) return '';
   return '<div class="momo" style="margin-top:10px;justify-content:center;flex-wrap:wrap">via '
     + TMPayIcons.row(payMethodsOf(cc || payDetectCountry()), 28)+'</div>';
 }
@@ -926,7 +937,10 @@ function payOpsHtml(){
     + (TM_PAY.apiBase ? '' : ' <b>Paiement simulé dans ce prototype.</b>')+'</p>'
     + '<p class="hint pay-note" id="payNote" aria-live="polite">'+esc(TMPrix.chargeNote(payKey(), P.cc))+'</p>';
 }
-function opsField(){ return '<div id="payOps">'+payOpsHtml()+'</div>'; }
+function opsField(){
+  if(S.pay && isFree(S.pay.key)) return '<p class="free-note">'+ic('check')+'<span><b>Offert pendant le lancement.</b> Aucune information de paiement n\'est demandée. Cette option deviendra payante plus tard.</span></p>';
+  return '<div id="payOps">'+payOpsHtml()+'</div>';
+}
 function payRefresh(){ const el = $('#payOps'); if(el) el.innerHTML = payOpsHtml(); }
 function paySetCountry(cc){
   if(!PAY_COUNTRIES[cc]) return;
@@ -967,6 +981,11 @@ const TMPay = {
       {timeout:20000, retries:2});
     /* {id, status:'pending'|'redirect'|'approved', url?, provider, reused?} */
   },
+  /* Lancement : option offerte, sans paiement (remplacée par l'appel à la base dans app-db.js). */
+  async claimFree(key){
+    await new Promise(r => setTimeout(r, 500));
+    return {id:'FREE-'+Date.now().toString(36).toUpperCase(), status:'approved', provider:'lancement', free:true};
+  },
   async verifyPayment(id){
     if(this.simulated() || String(id).startsWith('SIM-')) return {id, status:'approved'};
     return TMGuard.fetch(TM_PAY.apiBase+'/payments/'+encodeURIComponent(id), {cache:'no-store', headers:await this.auth()}, {timeout:10000, retries:1});
@@ -984,6 +1003,8 @@ const TMPay = {
        paiement au lieu d'en ouvrir un second. */
 let PAY_BUSY = false;
 async function payThen(item, btn, done){
+  if(isFree(item.key || item.kind)) return claimThen(item, btn, done);
+  if(TMPrix.creditsSoon() && item.kind === 'credits'){ toast('L\'achat de crédits sera bientôt disponible.', 'bad'); return; }
   if(PAY_BUSY){ toast('Un paiement est déjà en cours. Attends sa confirmation avant d\'en lancer un autre.', 'bad'); return; }
   const P = S.pay, c = payCountry(P.cc), card = P.method === 'card';
   if(!P.method || !payMethodsOf(P.cc).includes(P.method)){ toast('Choisis un moyen de paiement disponible dans ton pays.', 'bad'); return; }
@@ -1049,16 +1070,44 @@ async function payThen(item, btn, done){
     stop(err.message || 'Le paiement n\'a pas pu aboutir.', unsure);
   }
 }
+/* Lancement : l'option est accordée tout de suite, sans moyen de paiement. */
+async function claimThen(item, btn, done){
+  if(PAY_BUSY) return;
+  PAY_BUSY = true;
+  const label0 = btn.innerHTML;
+  btn.classList.add('loading'); btn.disabled = true; btn.setAttribute('aria-busy', 'true');
+  const stop = () => { PAY_BUSY = false; btn.classList.remove('loading'); btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = label0; };
+  try{
+    const res = await TMPay.claimFree(item.key || item.kind);
+    if(!S.pay) S.pay = payInit(1);
+    S.pay.op = 'Offert (lancement)'; S.pay.ref = res.id;
+    stop();
+    done(res);
+  }catch(err){ stop(); toast(err.message || 'L\'option n\'a pas pu être débloquée. Réessaie dans un instant.', 'bad'); }
+}
 document.addEventListener('change', e => { if(e.target && e.target.id === 'payCc') paySetCountry(e.target.value); });
 
 function buyCredits(blocked){
   S.pay = payInit(1);
+  if(TMPrix.creditsSoon()){
+    modal(blocked ? 'Plus de crédits ce mois-ci' : 'Acheter des crédits', soonBody(blocked),
+      '<button class="btn btn-a" data-act="close">Compris</button>', {lg:true});
+    return;
+  }
   modal(blocked ? 'Plus de crédits ce mois-ci' : 'Recharger tes crédits', payBody(blocked),
     '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-a" id="payBtn" data-act="pay">'+payLabel()+'</button>', {lg:true});
 }
 function payLabel(){ return ic('card')+'Payer '+priceH(PACKS[S.pay.pack].k); }
+/* Lancement : les packs sont montrés en gris, avec leur prix, mais pas encore en vente. */
+function soonBody(blocked){
+  return (blocked ? '<p>Tes '+TMPrix.monthly()+' crédits du mois sont utilisés. Ils se renouvellent le 1<sup>er</sup> '+tmNextMonth()+'.</p>' : '<p>Tu reçois <b>'+TMPrix.monthly()+' crédits offerts chaque mois</b>, renouvelés le 1<sup>er</sup> '+tmNextMonth()+'.</p>')
+    + '<div class="soon-banner">'+ic('clock')+'<span><b>'+esc(TMPrix.LAUNCH.soon)+'.</b> L\'achat de crédits supplémentaires ouvre bientôt. Voici les forfaits prévus, pour te faire une idée.</span></div>'
+    + '<div class="packs packs-soon" aria-disabled="true">'+PACKS.map(p => '<div class="pack" aria-disabled="true">'
+      + (p.best ? '<span class="chip" style="height:20px;font-size:11px;align-self:flex-start;margin-bottom:6px">Le plus choisi</span>' : '<span style="height:26px"></span>')
+      + '<span class="n">'+p.n+'</span><span class="c tnum">'+p.c+'</span><span class="h">invitations</span><span class="p">'+esc(TMPrix.full(p.k, priceCc()))+'</span><span class="h">'+esc(p.h)+'</span></div>').join('')+'</div>';
+}
 function payBody(blocked){
-  return (blocked ? '<p>Tes 3 crédits mensuels sont utilisés. Ils se renouvellent le 1<sup>er</sup> '+tmNextMonth()+', ou tu peux recharger maintenant.</p>' : '')
+  return (blocked ? '<p>Tes '+TMPrix.monthly()+' crédits mensuels sont utilisés. Ils se renouvellent le 1<sup>er</sup> '+tmNextMonth()+', ou tu peux recharger maintenant.</p>' : '')
     + '<p>Pas d\'abonnement : tu achètes des crédits et tu les gardes sans limite de temps.</p>'
     + '<div class="packs" role="radiogroup" aria-label="Choisir un pack">'+PACKS.map((p,i)=>'<button class="pack" role="radio" data-act="pack" data-i="'+i+'" aria-pressed="'+(S.pay.pack===i)+'" aria-checked="'+(S.pay.pack===i)+'">'
       + (p.best?'<span class="chip chip-a" style="height:20px;font-size:11px;align-self:flex-start;margin-bottom:6px">Le plus choisi</span>':'<span style="height:26px"></span>')
@@ -1174,6 +1223,7 @@ document.addEventListener('click', e => {
     case 'pack': S.pay.pack = +t.dataset.i; $$('.pack').forEach(b=>{ const on = +b.dataset.i === S.pay.pack; b.setAttribute('aria-pressed', on); b.setAttribute('aria-checked', on); }); $('#payBtn').innerHTML = payLabel(); refreshPrices(); break;
     case 'op': paySetMethod(t.dataset.v); break;
     case 'pay': {
+      if(TMPrix.creditsSoon()) break;
       const p = PACKS[S.pay.pack];
       payThen({kind:'credits', key:p.k, label:'Pack '+p.n+' · '+p.c+' crédits', amount:priceOf(p.k).charged}, t, () => {
         S.me.credits += p.c;
@@ -2286,7 +2336,7 @@ function slotsHTML(){
         + '<span class="grow"><b>'+esc(projName(p))+'</b><span class="hint"><span class="mono">'+c+' %</span> · <span class="st'+(p.online?' on':'')+'">'+(p.online?'En ligne':'Hors ligne')+'</span></span></span>'
         + (on ? '<span class="chip chip-a" style="height:22px">Active</span>' : '')+'</button>'; }
     if(i < m.slots) return '<button class="slot free" data-act="proj-new">'+ic('plus')+'<span class="grow"><b>Emplacement libre</b><span class="hint">Déjà débloqué · crée ta fiche</span></span></button>';
-    return '<button class="slot lockd" data-act="proj-new">'+ic('lock')+'<span class="grow"><b>Emplacement '+(i+1)+'</b><span class="hint">'+priceH('slot')+', une seule fois</span></span></button>';
+    return '<button class="slot lockd" data-act="proj-new">'+ic('lock')+'<span class="grow"><b>Emplacement '+(i+1)+'</b><span class="hint">'+onceH('slot', ', ')+'</span></span></button>';
   }).join('')+'</div>';
 }
 function prevLegend(){
@@ -2667,14 +2717,14 @@ function switchProject(id){
 function unlockModal(){
   S.pay = payInit(1); S.pay.key = 'second';
   modal('Deviens aussi Visionnaire',
-    '<div class="price-hd"><span class="mono">'+priceH('second')+'</span><span>une seule fois, puis tu passes d\'un profil à l\'autre sans limite</span></div>'
+    '<div class="price-hd"><span class="mono">'+priceH('second')+'</span><span>'+onceTxt('second')+', puis tu passes d\'un profil à l\'autre sans limite</span></div>'
     + '<ul class="leave-l">'
     + '<li>'+ic('rocket')+'Tu publies une fiche projet et tu invites des talents avec tes crédits.</li>'
-    + '<li>'+ic('layers')+'Jusqu\'à 3 projets : la première fiche est incluse, chaque emplacement de plus coûte '+priceH('slot')+'.</li>'
+    + '<li>'+ic('layers')+'<span>Jusqu\'à 3 projets : la première fiche est incluse, chaque emplacement de plus coûte '+priceH('slot')+'.</span></li>'
     + '<li>'+ic('users')+'Tes deux profils sont indépendants : matchs, invitations, conversations et Ateliers séparés.</li>'
     + '<li>'+ic('shield')+'Ton compte reste unique : nom, email, ville, sexe et échelle de confiance sont communs.</li></ul>'
     + opsField(),
-    '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-vis" data-act="unlock-pay">'+ic('card')+'Payer '+priceH('second')+'</button>', {lg:true});
+    '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-vis" data-act="unlock-pay">'+payBtnH('second')+'</button>', {lg:true});
 }
 function doUnlock(btn){
   payThen({kind:'second', key:'second', label:'Second profil · Visionnaire', amount:priceOf('second').charged}, btn, () => {
@@ -2689,7 +2739,7 @@ function doUnlock(btn){
     m.projects.forEach((p, i) => { m.projIdx = i; if(!S.ctxs['vis:'+p.id]){ loadCtx(); saveCtx(); } });
     m.projIdx = 0; loadCtx(); resetUi(); saveBaseline();
     S._painted = null; go('fiche');
-    success('Profil Visionnaire débloqué', 'Paiement de <span class="mono">'+priceH('second')+'</span> confirmé via '+esc(S.pay.op)+'. Voici tes fiches projet : complète-les et mets-les en ligne. Tu reviens au profil Talent quand tu veux, sans payer.');
+    success('Profil Visionnaire débloqué', paidH('second')+' Voici tes fiches projet : complète-les et mets-les en ligne. Tu reviens au profil Talent quand tu veux, sans payer.');
   });
 }
 function createProject(){
@@ -2699,11 +2749,11 @@ function createProject(){
   if(m.projects.length < m.slots) return newProject();
   S.pay = payInit(1); S.pay.key = 'slot';
   modal('Ajoute un projet',
-    '<div class="price-hd"><span class="mono">'+priceH('slot')+'</span><span>une seule fois pour cet emplacement</span></div>'
+    '<div class="price-hd"><span class="mono">'+priceH('slot')+'</span><span>'+(isFree('slot') ? onceTxt('slot') : 'une seule fois pour cet emplacement')+'</span></div>'
     + '<p>Ton '+(m.projects.length + 1 === 3 ? 'troisième' : 'deuxième')+' projet a sa propre fiche, ses invitations, ses matchs, ses conversations et son Atelier. Tes crédits d\'invitation restent communs.</p>'
     + '<p class="hint">Si tu supprimes un jour cette fiche, l\'emplacement reste acquis : tu pourras y créer un autre projet sans repayer.</p>'
     + opsField(),
-    '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-a" data-act="slot-pay">'+ic('card')+'Payer '+priceH('slot')+'</button>', {lg:true});
+    '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-a" data-act="slot-pay">'+payBtnH('slot')+'</button>', {lg:true});
 }
 function doSlotPay(btn){
   payThen({kind:'slot', key:'slot', label:'Emplacement projet n° '+Math.min(MAX_PROJ, S.me.slots + 1), amount:priceOf('slot').charged}, btn, () => {
@@ -2754,7 +2804,7 @@ function demoReset(){
 function vParams(){
   const m = S.me, n = trustRungs().filter(r => r[1]).length, tal = isTalMode();
   const second = (tmPrimary() === 'vis' && !m.visUnlocked) ? tmSecondTalHTML() : !m.visUnlocked
-    ? '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:12px">Porte aussi tes idées : publie jusqu\'à 3 projets et invite des talents. <b style="color:var(--ink)">'+priceH('second')+' une seule fois</b>, puis tu passes d\'un profil à l\'autre sans limite.</p>'
+    ? '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:12px">Porte aussi tes idées : publie jusqu\'à 3 projets et invite des talents. <b style="color:var(--ink)">'+onceH('second')+'</b>, puis tu passes d\'un profil à l\'autre sans limite.</p>'
       + '<button class="btn btn-vis btn-block btn-sm" data-act="switch-role">💡 Deviens aussi Visionnaire</button>'
     : '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:6px">'+(m.visSince ? 'Débloqué le <span class="mono">'+new Date(m.visSince).toLocaleDateString('fr-FR')+'</span>' : 'Débloqué')+'. Tu es '+roleLabel(m.role)+'.</p>'
       + '<p class="hint" style="margin-bottom:12px">Tes deux profils sont indépendants : chacun a ses matchs, ses invitations, ses conversations et ses Ateliers. Ce compte (nom, email, ville, sexe, confiance) leur est commun.</p>'
@@ -2797,7 +2847,7 @@ function vParams(){
     +     '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.6">Aucun abonnement. Tu paies seulement ce que tu utilises, par mobile money ou carte bancaire.</p>'
     +     (tal ? payBadges() : '')
     +     ((m.visUnlocked || tmPrimary() === 'vis') ? '<div class="row bill-slots"><span>Emplacements projet</span><b class="mono">'+m.slots+' sur 3 débloqués</b></div>'
-            + (m.slots < MAX_PROJ ? '<p class="hint">Un emplacement de plus : <span class="mono">'+priceH('slot')+'</span>, une seule fois.</p>' : '') : '')
+            + (m.slots < MAX_PROJ ? '<p class="hint">Un emplacement de plus : <span class="mono">'+priceH('slot')+'</span>'+(isFree('slot') ? '' : ', une seule fois')+'.</p>' : '') : '')
     +     (S.payments.length ? '<div class="list" style="margin-top:8px">'+S.payments.map(p => '<div class="li" style="padding:10px 0;cursor:default">'+(TMPayIcons.keyOf(p.op) ? '<span aria-hidden="true">'+TMPayIcons.icon(TMPayIcons.keyOf(p.op), 26)+'</span>' : '')+'<span class="grow"><span class="t" style="font-size:13.5px">'+esc(p.l)+'</span><span class="s mono">'+esc(p.d)+' · '+esc(p.op)+'</span></span><span class="mono" style="font-size:13px;font-weight:600">'+fcfa(p.a)+'</span></div>').join('')+'</div>' : '')
     +   '</section>'
     + '</div></div>';
@@ -2805,7 +2855,7 @@ function vParams(){
 function vSupport(){
   const faq = [
     ["Pourquoi mon nom est-il caché ?","Ton nom légal, ta photo et tes coordonnées ne sont dévoilés qu'après un match accepté. Avant, ta photo est floutée. Personne ne peut te contacter hors de la plateforme sans que tu l'aies voulu."],
-    ["Combien coûte TakaMatch ?","Le profil Talent est gratuit : explorer, publier sa fiche et postuler n'a pas de limite. Le profil Visionnaire se débloque une fois pour "+priceT('second')+" ; il inclut une fiche projet, et chaque emplacement de plus coûte "+priceT('slot')+", une seule fois (3 projets au maximum). Inviter un talent coûte un crédit : 3 offerts par mois, puis des packs à partir de "+fcfa(2000)+"."],
+    ["Combien coûte TakaMatch ?","Le profil Talent est gratuit : explorer, publier sa fiche et postuler n'a pas de limite. Le profil Visionnaire se débloque une fois pour "+priceT('second')+" ; il inclut une fiche projet, et chaque emplacement de plus coûte "+priceT('slot')+(isFree('slot') ? '' : ", une seule fois")+" (3 projets au maximum). Inviter un talent coûte un crédit : "+TMPrix.monthly()+" offerts par mois, puis des packs à partir de "+TMPrix.full('credits_essai', priceCc())+(TMPrix.creditsSoon() ? ' ('+TMPrix.LAUNCH.soon.toLowerCase()+')' : '')+"."],
     ["Qui voit ma fiche ?","Les talents voient les fiches projet, les visionnaires voient les fiches talent : jamais une fiche de ton propre côté. Les visiteurs sans compte arrivés par ton lien ou ton code QR peuvent la lire, pas t'inviter. Hors ligne, ta fiche n'apparaît nulle part."],
     ["Que se passe-t-il après un match ?","La messagerie s'ouvre et l'Atelier devient accessible : jalons partagés, plan d'action, qui décide quoi, répartition du capital, journal de décisions et génération du pacte d'associés. À partir de 3 membres, un groupe d'équipe s'ouvre dans les Messages."],
     ["Puis-je être visionnaire et talent ?","Oui. Un seul compte, deux profils indépendants : chacun a ses matchs, ses invitations, ses conversations et ses Ateliers. Tu bascules depuis le menu de ton profil, et l'interface change de couleur."],
@@ -3782,7 +3832,7 @@ function tmNextMonth(){
   return ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][d.getMonth()];
 }
 function tmSecondTalHTML(){
-  return '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:12px">Mets aussi tes compétences au service d\'autres projets : publie une fiche Talent et reçois des invitations. <b style="color:var(--ink)">'+priceH('second')+' une seule fois</b>, puis tu passes d\'un profil à l\'autre sans limite.</p>'
+  return '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:12px">Mets aussi tes compétences au service d\'autres projets : publie une fiche Talent et reçois des invitations. <b style="color:var(--ink)">'+onceH('second')+'</b>, puis tu passes d\'un profil à l\'autre sans limite.</p>'
     + '<button class="btn btn-tal btn-block btn-sm" data-act="switch-role">🛠️ Deviens aussi Talent</button>';
 }
 
@@ -3829,14 +3879,14 @@ function tmSecondTalHTML(){
     if(tmSecond() === 'vis') return _unlockModal();
     S.pay = payInit(1); S.pay.key = 'second';
     modal('Deviens aussi Talent',
-      '<div class="price-hd"><span class="mono">'+priceH('second')+'</span><span>une seule fois, puis tu passes d\'un profil à l\'autre sans limite</span></div>'
+      '<div class="price-hd"><span class="mono">'+priceH('second')+'</span><span>'+onceTxt('second')+', puis tu passes d\'un profil à l\'autre sans limite</span></div>'
       + '<ul class="leave-l">'
       + '<li>'+ic('tools')+'Tu publies une fiche Talent : les porteurs d\'autres projets peuvent t\'inviter, et c\'est gratuit pour toi.</li>'
       + '<li>'+ic('idcard')+'Ta fiche perso sert de base : compétences, niveau et signature sont déjà remplis.</li>'
       + '<li>'+ic('users')+'Tes deux profils sont indépendants : matchs, invitations, conversations et Ateliers séparés.</li>'
       + '<li>'+ic('shield')+'Ton compte reste unique : nom, email, ville, sexe et échelle de confiance sont communs.</li></ul>'
       + opsField(),
-      '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-tal" data-act="unlock-pay">'+ic('card')+'Payer '+priceH('second')+'</button>', {lg:true});
+      '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-tal" data-act="unlock-pay">'+payBtnH('second')+'</button>', {lg:true});
   };
   const _doUnlock = doUnlock;
   doUnlock = function(btn){
@@ -3852,7 +3902,7 @@ function tmSecondTalHTML(){
       m.online = missingReq('tal').length === 0;
       loadCtx(); resetUi(); saveBaseline();
       S._painted = null; go('fiche');
-      success('Profil Talent débloqué', 'Paiement de <span class="mono">'+priceH('second')+'</span> confirmé via '+esc(S.pay.op)+'. Ta fiche perso a servi de base : complète ta fiche Talent pour la mettre en ligne. Tu reviens à tes projets quand tu veux, sans payer.');
+      success('Profil Talent débloqué', paidH('second')+' Ta fiche perso a servi de base : complète ta fiche Talent pour la mettre en ligne. Tu reviens à tes projets quand tu veux, sans payer.');
     });
   };
 
@@ -3884,7 +3934,7 @@ function tmSecondTalHTML(){
       role:o.role, primary:o.role, fresh:true, avatarHue:hue(o.handle),
       talentOn:true, talentPromptSeen:true,
       online:true, verifiedEmail:true, verifiedPhone:false, verifiedId:false, refs:0,
-      credits:3, creditsMax:3,
+      credits:TMPrix.monthly(), creditsMax:TMPrix.monthly(),
     });
     if(o.role === 'tal'){
       Object.assign(m, {skills:o.skills || [], sectors:o.sectors || [], level:o.level || '', diploma:o.diploma || '', status:o.status || '',
@@ -4173,7 +4223,7 @@ function startWelcomeTour(again){
     {sel:['#bellBtn'], t:'Notifications', p:['Invitations, matchs, messages, alertes de Takam et réponses de l\'équipe TakaMatch arrivent ici.']},
     {sel:['#meBtn'], t:'Ton menu', p:['Paramètres, profil public, aide et déconnexion.',
        open ? 'Tu as les deux profils : <b>Passer en '+other+'</b> bascule de l\'un à l\'autre.'
-            : '<b>Deviens aussi '+other+'</b> pour '+(tal ? 'porter tes propres projets' : 'proposer aussi tes compétences à d\'autres projets')+' : '+priceH('second')+' une seule fois. Ton profil '+roleLabel(tal ? 'tal' : 'vis')+' reste intact.']},
+            : '<b>Deviens aussi '+other+'</b> pour '+(tal ? 'porter tes propres projets' : 'proposer aussi tes compétences à d\'autres projets')+' : '+onceH('second')+'. Ton profil '+roleLabel(tal ? 'tal' : 'vis')+' reste intact.']},
     {sel:['#side [data-nav="support"]', '#meBtn'], t:'Aide et support',
       p:['Une vraie personne te répond, à Cotonou. C\'est aussi ici que tu peux revoir cette visite.']},
     {center:true, ill:'🚀', kicker:'C\'est parti', t:'À toi de jouer !',

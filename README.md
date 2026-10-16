@@ -117,6 +117,15 @@ Le bouton « Préparer le pacte d'associés » de l'Atelier ouvre un éditeur pl
   sinon il envoie vers `erreur.html?type=google` au lieu de la page d'erreur brute de Supabase.
 
 
+## Lancement sans paiement (depuis le 16/10/2026)
+
+- **Ce que voient les membres** : second profil, emplacement projet et pacte d'associés affichés **0 FCFA « Bientôt payant »**,
+  débloqués d'un clic sans aucune information de paiement. Achat de crédits : **« Bientôt disponible »**, packs montrés en gris avec leurs prix.
+  **5 crédits d'invitation par mois** pour les Visionnaires.
+- **Base** : `supabase/20_lancement_gratuit.sql` (réglage `app_settings.launch`, fonction `claim_free()`, recharge à 5 le 1er du mois via pg_cron).
+- **Réactiver les paiements** : `update app_settings set value = '{"free": false, "monthly_credits": 5}' where key = 'launch';`
+  Le site relit ce réglage au chargement ; les prix de la table `pricing` n'ont pas changé.
+
 ## Paiements (FedaPay)
 
 - **Le serveur** : fonction Supabase `paiement` (code dans `supabase/functions/paiement/index.ts`, déjà déployée).

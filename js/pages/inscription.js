@@ -91,6 +91,8 @@ function ago(min){
   return d === 1 ? 'hier' : 'il y a '+d+' j';
 }
 function hhmm(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+/* Lancement : option offerte → mention « Bientôt payant » à la place de « une seule fois ». */
+function tmFreeTag(key, once){ return window.TMPrix && TMPrix.isFree(key) ? ' <span class="soon-tag">'+TMPrix.LAUNCH.tag+'</span>' : once; }
 function fcfa(n){ return n.toLocaleString('fr-FR').replace(/ |\s/g,' ')+' FCFA'; }
 
 P.camera = '<path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/>';
@@ -542,7 +544,7 @@ const ART = {
     + '<path d="m209 56 5 5 10-11" stroke="#4B7F52" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 const SIDE = {
-  1:{k:'Bienvenue sur TakaMatch', figs:[['0 FCFA','pour t\'inscrire et explorer'],['3','invitations offertes']],
+  1:{k:'Bienvenue sur TakaMatch', figs:[['0 FCFA','pour t\'inscrire et explorer'],[String(window.TMPrix ? TMPrix.monthly() : 5),'invitations offertes / mois']],
      p:"Ton compte sécurise ce que tu publies. Personne ne te contacte hors plateforme sans ton accord."},
   2:{k:'Pourquoi un pacte', p:"Une communauté de cofondation ne tient pas par sa technologie. Elle tient parce que chacun répond, même pour dire non."},
   3:{k:'La règle du jeu', p:"Jobs avait l'idée. Wozniak l'a construite. Aucun des deux n'aurait suffi — c'est tout le produit."},
@@ -767,7 +769,7 @@ function renderOnb(){
       +   rp('vis','💡','Visionnaire',"J'ai une idée ou un projet","Tu ne veux pas — ou ne peux pas — la porter seul. Bâtis ton équipe et deviens cofondateur·ice.")
       +   rp('tal','🛠️','Talent',"J'ai des compétences à faire valoir","Tu sais coder, designer, vendre, cadrer… mais tu attends le bon projet.")
       + '</div>'
-      + '<p class="hint" style="margin-top:14px">Tu pourras ajouter l\'autre profil plus tard : <span class="mono">'+esc(window.TMPrix ? TMPrix.text('second') : '3 000 FCFA')+'</span>, une seule fois. Tes deux profils restent indépendants.</p>';
+      + '<p class="hint" style="margin-top:14px">Tu pourras ajouter l\'autre profil plus tard : <span class="mono">'+esc(window.TMPrix ? TMPrix.text('second') : '3 000 FCFA')+'</span>'+tmFreeTag('second', ', une seule fois')+'. Tes deux profils restent indépendants.</p>';
     foot = onbFoot(a);
   }
 
@@ -921,7 +923,7 @@ function talentFields(){
 function projectFields(){
   const m = ME, p = m.project;
   return '<p class="fiche-note"><b>*</b> section obligatoire pour que ta fiche soit mise en ligne.</p>'
-  + '<p class="hint">'+ic('info')+' Ta première fiche projet est incluse. Tu peux porter jusqu\'à 3 projets : <span class="mono">'+esc(window.TMPrix ? TMPrix.text('slot') : '5 000 FCFA')+'</span> par emplacement supplémentaire, une seule fois.</p>'
+  + '<p class="hint">'+ic('info')+' Ta première fiche projet est incluse. Tu peux porter jusqu\'à 3 projets : <span class="mono">'+esc(window.TMPrix ? TMPrix.text('slot') : '5 000 FCFA')+'</span> par emplacement supplémentaire'+tmFreeTag('slot', ', une seule fois')+'.</p>'
   + fsec('file', 'Titre du projet', true, '<input class="inp" id="ptitle" data-k="p.title" maxlength="34" placeholder="Le nom de ton projet" value="'+esc(p.title)+'">')
   + fsec('compass', 'Les secteurs du projet', true,
       '<div class="opt-wrap">'+SECTORS.map(s=>optBtn('f-multi','p.sectors',s.id,s.g+' '+esc(s.l),p.sectors.includes(s.id))).join('')+'</div>',
@@ -1009,7 +1011,7 @@ function readyNote(){
     "Tu ne vois que des fiches talent ; seuls les talents voient tes fiches projet.",
     "Une personne arrivée par ton lien ou ton code QR peut lire ta fiche, pas t'inviter.",
     "Tes invitations expirent au bout de 10 jours sans réponse.",
-    "Ta première fiche projet est incluse. Tu peux porter jusqu'à 3 projets : "+(window.TMPrix ? TMPrix.text('slot') : '5 000 FCFA')+" par emplacement supplémentaire, une seule fois.",
+    "Ta première fiche projet est incluse. Tu peux porter jusqu'à 3 projets : "+(window.TMPrix ? TMPrix.text('slot') : '5 000 FCFA')+(window.TMPrix && TMPrix.isFree('slot') ? ' ('+TMPrix.LAUNCH.tag+')' : '')+" par emplacement supplémentaire"+(window.TMPrix && TMPrix.isFree('slot') ? '' : ', une seule fois')+".",
   ];
   return '<div class="note-card">'+ic('eye')+'<div><b>Qui voit quoi</b><ul>'+li.map(x => '<li>'+esc(x)+'</li>').join('')+'</ul></div></div>';
 }
