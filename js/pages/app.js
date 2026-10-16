@@ -3658,11 +3658,12 @@ const REQ_LABEL = {'Compétences clés':'Compétences clés (2 au moins)', 'Comp
   'La Vision':'La Vision ('+TMRules.MIN.vision+' caractères min.)', 'La Traction':'La Traction ('+TMRules.MIN.traction+' caractères min.)',
   'Les Défis':'Les Défis ('+TMRules.MIN.challenges+' caractères min.)', 'Lien portfolio':'Lien portfolio (ou « pas encore »)', 'Lien externe':'Lien externe (adresse à corriger)'};
 const OPT_ROWS = ['La Traction', 'Les Ressources', 'La couverture'];
+/* Obligatoire ou non : on suit js/fiche-rules.js (opt), comme l'inscription.
+   Ex. secteurs et portfolio du Talent, lien externe du projet : facultatifs, sauf un lien commencé et invalide. */
 function isReqRow(label, kind){ kind = kind || (isTalMode() ? 'tal' : 'vis');
   if(kind === 'perso' || OPT_ROWS.includes(label)) return 0;
-  /* Lien externe : facultatif, sauf s'il est commencé (une adresse invalide bloque). */
-  if(label === 'Lien externe'){ const r = completion(kind).rows.find(x => x[0] === label); return r && r[3].opt ? 0 : 1; }
-  return 1; }
+  const r = completion(kind).rows.find(x => x[0] === label);
+  return r && r[3].opt ? 0 : 1; }
 /* Le rythme et la proposition d'un projet ont toujours une valeur : ils ne peuvent pas manquer. */
 function missingReq(kind){
   kind = kind || (isTalMode() ? 'tal' : 'vis');
