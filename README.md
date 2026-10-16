@@ -7,6 +7,8 @@ Plateforme de cofondation pour l'Afrique de l'Ouest.
 ```
 takamatch/
 ├── index.html            Site vitrine (page d'accueil)
+├── manifest.webmanifest  Installation sur téléphone (nom, icônes, couleurs)
+├── robots.txt, sitemap.xml  Référencement Google
 ├── inscription.html      Onboarding : création de compte et connexion
 ├── app.html              L'outil : accueil, explorer, fiche (profil Talent), connexions, messages, atelier…
 ├── css/
@@ -57,10 +59,38 @@ Settings → Pages → Deploy from a branch → `main` / `(root)`.
 
 ## À savoir
 
-- Prototype : les comptes sont enregistrés dans le navigateur du visiteur (localStorage),
-  pas encore dans une base de données. Personne d'autre ne les voit.
-- Paiements : en simulation tant que `TM_PAY.apiBase` est vide dans `js/pages/app.js`.
-- Ne jamais mettre ici l'espace admin, le dossier `paiements` ni un fichier `.env`.
+- Les comptes, fiches, invitations, messages et l'Atelier vivent dans la base **Supabase** (projet `takamatch`).
+  Le navigateur ne garde que de petits réglages (thème, visites guidées déjà vues, pays pour les prix).
+- Connexion : **e-mail + code à usage unique** (pas de mot de passe) ou **Google**. Les codes partent par le SMTP **Brevo**.
+- L'espace équipe (`admin.html`) est en ligne mais protégé : connexion par code, réservée aux membres de la table `staff`.
+- Ne jamais mettre dans ce dépôt le dossier `supabase/`, le dossier `paiements` ni un fichier `.env`.
+
+## Notifications par e-mail
+
+- **Ce qui part** : invitation reçue (tout de suite), invitation acceptée (match), message non lu depuis 15 minutes
+  (au plus un e-mail toutes les 6 h par conversation). Rien pour les comptes de démonstration ni les comptes suspendus.
+- **Préférences** : chaque membre coupe ce qu'il veut dans Paramètres → Notifications (table `notif_prefs`).
+- **Fonctionnement** : la base remplit une file (`email_queue`) ; toutes les 5 minutes, pg_cron réveille la fonction
+  serveur `notif` (code : `supabase/functions/notif/index.ts`), qui envoie via l'API Brevo.
+- **Plafond** : `app_settings.emails` → `{"active": true, "daily_cap": 150}`. Au-delà de 150 e-mails par jour, la suite
+  part le lendemain : la place restante du quota Brevo gratuit (300/jour) est gardée pour les codes de connexion.
+- **À installer une fois** : exécuter `supabase/21_notifications.sql`, déployer la fonction `notif`, puis ranger la
+  **clé API Brevo** (Brevo → SMTP & API → API Keys, pas la clé SMTP) dans Supabase → Project Settings → Vault, nom `brevo_api_key`.
+- **Expéditeur** : `contact@takamatch.com`. Le domaine `takamatch.com` doit être authentifié dans Brevo
+  (Senders, Domains → ajouter le domaine, puis copier les enregistrements DKIM/SPF/DMARC dans la zone DNS chez o2switch).
+- **Vérifier** : `select kind, sent_at, skipped, error from email_queue order by id desc limit 20;`
+
+## Partage, référencement, audience
+
+- **Aperçu de partage** (WhatsApp, Facebook, LinkedIn) : `assets/images/og-takamatch.png` (1200 × 630), déclaré dans chaque page publique.
+- **Google** : `robots.txt` et `sitemap.xml` à la racine ; l'outil, l'inscription, l'admin et les pages d'erreur sont exclus.
+  À faire une fois : déclarer le site dans Google Search Console et y soumettre `https://takamatch.com/sitemap.xml`.
+- **Audience** : GoatCounter (gratuit, sans cookie). Le code est déjà en place sur les pages ; il suffit de créer le compte
+  sur goatcounter.com avec le code **takamatch**. Tableau de bord : https://takamatch.goatcounter.com
+- **Installation sur téléphone** : `manifest.webmanifest` + icônes `assets/icons/icon-*.png` et `apple-touch-icon.png`
+  (« Ajouter à l'écran d'accueil » ouvre directement l'outil).
+- **Après une modification d'un fichier JS ou CSS** : changer son `?v=AAAAMMJJx` dans les pages qui le chargent,
+  sinon les visiteurs gardent l'ancienne version en mémoire.
 
 ## Pacte d'associés
 

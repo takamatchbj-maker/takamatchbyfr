@@ -317,7 +317,7 @@ const DEMO_ME = structuredClone(DEFAULT_ME);
 S.me = structuredClone(DEMO_ME);
 Object.assign(S, {
   invFilter:'all', showArch:false, loading:false, atelierId:null, ateliers:{},
-  prefs:{inv:true, msg:true, match:true, weekly:false, sms:false, takam:true},
+  prefs:{inv:true, msg:true, match:true, takam:true},
   payments:[],
   reported:new Set(), likes:new Set(), fv:null,
 });
@@ -567,6 +567,8 @@ function creditsCard(){
 }
 /* Vérification du téléphone par SMS : pas encore proposée. Passer à true le jour où elle l'est. */
 const PHONE_VERIFY = false;
+/* Références d'anciens collaborateurs : pas encore proposées. Passer à true le jour où elles le sont. */
+const REFS_ON = false;
 function trustRungs(){
   const m = S.me;
   return [
@@ -574,7 +576,7 @@ function trustRungs(){
     ['Téléphone vérifié', m.verifiedPhone, 'Un SMS, trente secondes.', 'verify-phone'],
     ['Identité vérifiée', m.verifiedId, m.verifyPending ? 'Dossier en cours d\'examen par l\'équipe TakaMatch.' : 'Pièce et selfie, vérifiés par l\'équipe. Débloque le badge.', m.verifyPending ? null : 'verify-id'],
     ['Une référence reçue', m.refs > 0, 'Un ancien collaborateur confirme.', 'ask-ref'],
-  ].filter(r => PHONE_VERIFY || r[3] !== 'verify-phone');
+  ].filter(r => (PHONE_VERIFY || r[3] !== 'verify-phone') && (REFS_ON || r[3] !== 'ask-ref'));
 }
 function ladderHTML(withBtns){
   return '<div class="ladder">'+trustRungs().map(r=>
@@ -1272,7 +1274,7 @@ document.addEventListener('click', e => {
       const sx = $('#layer .opt[data-act="sex-pick"][aria-pressed="true"]');
       S.me.first = $('#e1').value.trim() || S.me.first; S.me.city = $('#e3').value.trim() || S.me.city; if(sx) S.me.sex = sx.dataset.v;
       closeLayer(); render(); toast('Compte mis à jour.', 'ok'); break; }
-    case 'pref': { const k = t.dataset.k; S.prefs[k] = !S.prefs[k]; t.setAttribute('aria-pressed', S.prefs[k]); if(k === 'takam' && window.TMTakam) TMTakam.savePref(S.prefs[k]); toast('Préférence enregistrée.'); break; }
+    case 'pref': { const k = t.dataset.k; S.prefs[k] = !S.prefs[k]; t.setAttribute('aria-pressed', S.prefs[k]); if(k === 'takam' && window.TMTakam) TMTakam.savePref(S.prefs[k]); else if(window.TMTakam && TMTakam.saveNotif) TMTakam.saveNotif(k, S.prefs[k]); toast('Préférence enregistrée.'); break; }
     case 'legal': window.open('/' + (t.dataset.v || 'cgu') + '.html', '_blank', 'noopener'); break;
     case 'export': if(window.TMData && TMData.on && TMData.exportMine) TMData.exportMine(); else toast('Connecte-toi pour télécharger tes données.'); break;
     case 'logout': closeLayer(); modal('Se déconnecter', '<p>Tu seras déconnecté de cet appareil. Tes conversations et ton Atelier restent intacts.</p>',
@@ -2824,14 +2826,13 @@ function vParams(){
     +       '<button class="btn btn-ghost btn-sm" data-act="edit-account">'+ic('edit')+'Modifier</button></div></section>'
     +   '<section class="card card-pad"><div class="row" style="margin-bottom:4px"><div class="lbl" style="flex:1">Vérification · échelle de confiance</div>'
     +     '<span class="chip '+(n>=trustRungs().length-1?'chip-ok':'chip-warn')+'"><span class="mono">'+n+' / '+trustRungs().length+'</span></span></div>'
-    +     '<p class="hint" style="margin-bottom:8px">Chaque palier franchi augmente ta visibilité. La référence est le signal le plus fort : il dit quelque chose de ta fiabilité, pas seulement de ton identité.</p>'
+    +     '<p class="hint" style="margin-bottom:8px">Chaque palier franchi augmente ta visibilité. '+(REFS_ON ? 'La référence est le signal le plus fort : il dit quelque chose de ta fiabilité, pas seulement de ton identité.' : 'L\'identité vérifiée est le signal le plus fort : elle débloque le badge.')+'</p>'
     +     ladderHTML(true)+'</section>'
     +   '<section class="card card-pad"><div class="lbl" style="margin-bottom:4px">Notifications</div>'
-    +     settingRow('inv','Invitations reçues','Push et email, dès réception')
-    +     settingRow('match','Nouveaux matchs','Push et email')
-    +     settingRow('msg','Nouveaux messages','Push, uniquement après un match')
-    +     settingRow('sms','Rappels par SMS','Invitation sur le point d\'expirer (2 jours avant)')
-    +     settingRow('weekly','Suggestions hebdomadaires','Un résumé le lundi matin')
+    +     '<p class="hint" style="margin-bottom:4px">Par e-mail, à '+esc(S.me.email || 'ton adresse')+'. Dans l\'outil, tu vois tout dans la cloche.</p>'
+    +     settingRow('inv','Invitations reçues','Un e-mail dès qu\'une invitation t\'attend')
+    +     settingRow('match','Nouveaux matchs','Un e-mail quand ton invitation est acceptée')
+    +     settingRow('msg','Nouveaux messages','Un e-mail si un message reste non lu 15 minutes (au plus un toutes les 6 h par conversation)')
     +     (S.takamEmails ? settingRow('takam','Récapitulatifs de Takam par e-mail','Quand une alerte de ton équipe attend depuis plus d\'un jour. Au plus un e-mail tous les 3 jours') : '')+'</section>'
     +   '<section class="card card-pad"><div class="lbl" style="margin-bottom:8px">Apparence</div>'
     +     '<div class="row"><div style="flex:1"><div style="font-weight:600;font-size:14px">Thème sombre</div><div class="hint">Suit ton système tant que tu n\'as rien choisi.</div></div>'
@@ -3788,7 +3789,7 @@ document.addEventListener('click', e => {
       + field('e4','Téléphone','<div class="row" style="gap:8px"><select class="inp" style="width:120px;flex:0 0 auto" id="e4c">'
           + ['BJ +229','TG +228','CI +225','SN +221'].map(o => '<option'+(String(m.phone).startsWith(o.slice(3)) ? ' selected' : '')+'>'+o+'</option>').join('')+'</select>'
           + '<input class="inp mono" id="e4" inputmode="tel" value="'+esc(phoneLocal())+'"></div>')
-      + '<p class="hint" style="margin-top:-6px">Privé. Si tu le changes, on te renverra un code par SMS pour le vérifier.</p>'
+      + '<p class="hint" style="margin-top:-6px">Privé : il n\'apparaît jamais sur ta fiche, même après un match.</p>'
       + '<div class="field"><label>Sexe</label><div class="opt-row" role="radiogroup" aria-label="Sexe">'+['m','f','n'].map(k =>
           '<button class="opt radio" data-act="sex-pick" data-v="'+k+'" aria-pressed="'+(m.sex===k)+'"><span class="box">'+tick()+'</span><span>'+SEX_L[k]+'</span></button>').join('')+'</div>'
       + '<p class="hint">Visible seulement après un match. Il ne compte ni dans le score ni dans les filtres.</p></div>'

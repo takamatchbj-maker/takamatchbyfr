@@ -356,6 +356,11 @@
       loadCtx(); saveBaseline(true);
       S._painted = null; render();
       openShared();
+      /* Liens des e-mails : app.html#invitations, app.html#messages. */
+      { const h = location.hash.slice(1);
+        if(h === 'invitations'){ S.tab = 'invitations'; S.invFilter = 'recv'; go('connexions'); }
+        else if(h === 'messages') go('messages');
+        if(h && history.replaceState) history.replaceState(null, '', location.pathname + location.search); }
       TMTakam.loadPref();
       setInterval(() => { if(document.visibilityState === 'visible' && navigator.onLine !== false) refresh(false); }, 15000);
       document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refresh(false); });
@@ -860,8 +865,20 @@
         else await DB.insert('takam_prefs', {user_id:D.uid, emails:!!on});
       }catch(e){ console.warn('[Takam] préférence', e); toast('La préférence n\'a pas pu être enregistrée. Réessaie.', 'bad'); }
     },
+    /* Notifications par e-mail (invitations, matchs, messages) : table notif_prefs. */
+    saveNotif: async (k, on) => {
+      if(!D.on || !D.uid || !['inv','match','msg'].includes(k)) return;
+      try{
+        const row = {user_id:D.uid, inv:S.prefs.inv !== false, match:S.prefs.match !== false, msg:S.prefs.msg !== false, updated_at:new Date().toISOString()};
+        row[k] = !!on;
+        const ex = await DB.one('notif_prefs', 'user_id=eq.' + D.uid + '&select=user_id');
+        if(ex) await DB.update('notif_prefs', 'user_id=eq.' + D.uid, row); else await DB.insert('notif_prefs', row);
+      }catch(e){ console.warn('[Notif] préférence', e); toast('La préférence n\'a pas pu être enregistrée. Réessaie.', 'bad'); }
+    },
     loadPref: async () => {
       if(!D.on || !D.uid) return;
+      try{ const n = await DB.one('notif_prefs', 'user_id=eq.' + D.uid + '&select=inv,match,msg');
+        if(n){ S.prefs.inv = n.inv !== false; S.prefs.match = n.match !== false; S.prefs.msg = n.msg !== false; } }catch(e){}
       try{ const r = await DB.one('takam_prefs', 'user_id=eq.' + D.uid + '&select=emails'); S.prefs.takam = r ? r.emails !== false : true; }catch(e){}
       /* Le réglage n'apparaît que si l'équipe TakaMatch a activé les e-mails de Takam. */
       try{ const s = await DB.one('app_settings', 'key=eq.takam&select=value'); S.takamEmails = !!(s && s.value && s.value.emails); }catch(e){}

@@ -1,0 +1,9 @@
+# TakaMatch — https://takamatch.com
+User-agent: *
+Allow: /
+Disallow: /app.html
+Disallow: /admin.html
+Disallow: /inscription.html
+Disallow: /erreur.html
+
+Sitemap: https://takamatch.com/sitemap.xml
