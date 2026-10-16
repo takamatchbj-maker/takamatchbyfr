@@ -467,7 +467,7 @@ function sitePricing(){
     +   '<h2>Pas d\'abonnement. Tu paies ce que tu consommes.</h2>'
     +   (creditsSoon()
           ? '<p>Explorer et publier ne coûte rien. Pendant le lancement, aucun paiement n\'est demandé : les options payantes sont offertes et les packs de crédits arrivent bientôt.</p></div>'
-          : '<p>Explorer et publier ne coûte rien. Seule l\'invitation se paie — en crédits prépayés, réglés par mobile money ou carte, qui n\'expirent jamais.</p></div>')
+          : '<p>Explorer et publier ne coûte rien. Seule l\'invitation se paie — en crédits prépayés, réglés par mobile money ou carte.</p></div>')
     + '<div class="price">'
     +   '<div class="price-c pc-tal"><div class="lbl">Pour les Talents</div>'
     +     '<div class="amt">Gratuit<small>pour toujours</small></div>'
@@ -689,7 +689,7 @@ function siteFaq(){
     ["À quoi sert le pseudo ?","C'est ton identité publique avant le match : il figure sur ta fiche, dans la recherche et sur ton code QR. Choisis-en un qui te ressemble sans te nommer — c'est exactement ce qu'il protège."],
     ["Comment faire vérifier mon profil ?","Depuis tes paramètres : une pièce d'identité et un selfie suffisent. Ils sont supprimés après 30 jours ; seul le palier « Identité vérifiée » reste affiché sur ta fiche."],
     ["Pourquoi mon nom est-il verrouillé après l'inscription ?","Parce qu'un engagement de cofondation doit être opposable. Ton nom légal reste privé, mais il ne change pas — c'est ce qui rend les documents signés dans l'Atelier valables."],
-    ["Qu'est-ce qui se passe si personne ne répond ?","Une invitation sans réponse expire au bout de 10 jours, et le crédit est rendu au visionnaire. Chaque profil affiche son délai de réponse habituel, pour que tu saches à quoi t'attendre avant d'en dépenser une."],
+    ["Qu'est-ce qui se passe si personne ne répond ?","Une invitation sans réponse expire au bout de 10 jours. Le crédit dépensé n'est pas rendu : chaque profil affiche donc son délai de réponse habituel, pour que tu saches à quoi t'attendre avant de dépenser un crédit."],
     ["Combien de projets puis-je porter ou rejoindre ?","Un visionnaire porte jusqu'à 3 projets : la première fiche projet est incluse, chaque emplacement de plus coûte "+priceTxt('slot')+onceTxt('slot')+" et reste acquis même si tu supprimes la fiche. Un talent rejoint au plus 3 projets à la fois ; pour en rejoindre un autre, il doit d'abord « Quitter le projet » dans l'un des trois."],
     ["Le pacte d'associés est-il un vrai document ?","Oui. C'est un modèle de droit OHADA prérempli depuis vos décisions, relu par un juriste avant de vous être remis. Il ne remplace pas un conseil personnalisé, mais il vaut infiniment mieux qu'un contrat copié sur Internet."],
   ];

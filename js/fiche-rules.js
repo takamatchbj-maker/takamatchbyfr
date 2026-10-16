@@ -75,7 +75,11 @@
       add('cover', 'La couverture', 'une image de couverture (facultative)', 4, !!p.cover,
         'Facultatif : sans image, l\'icône de ton secteur s\'affiche. Une photo compte pour les 100 %.', 'p.cover', true, false);
       add('challenges', 'Les Défis', 'les Défis (' + MIN.challenges + ' caractères min.)', 8, len(p.challenges) >= MIN.challenges, textMsg(p.challenges, MIN.challenges), 'p.challenges');
-      add('link', 'Lien externe', 'le lien externe', 8, p.noLink || linkOk(p.link), linkMsg(p.link, p.noLink, 'le lien de ton projet'), 'p.link');
+      /* Facultatif : le lien externe compte pour les 100 % mais ne bloque pas la mise en ligne.
+         Un lien commencé doit toutefois être valide (pour ne pas publier une adresse cassée). */
+      var lkStarted = len(p.link) > 0;
+      add('link', 'Lien externe', 'le lien externe (facultatif)', 8, linkOk(p.link),
+        lkStarted ? linkMsg(p.link, false, 'le lien de ton projet') : 'Facultatif : ajoute un lien pour atteindre 100 % de remplissage.', 'p.link', !lkStarted, lkStarted);
     }
     return R;
   }

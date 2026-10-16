@@ -645,7 +645,7 @@
   function projRow(p){
     return {title:p.title || '', glyph:p.glyph || '💡', cover_url:/^data:/.test(p.photo || '') ? '' : (p.photo || ''), sectors:p.sectors || [], seeking:p.seeking || [],
       hook:p.hook || '', vision:p.vision || '', traction:p.traction || '', assets:p.assets || '', challenges:p.challenges || '',
-      link:p.noLink ? '' : (p.link || ''), no_link:!!p.noLink, pace:p.pace || 'serieux', offer:p.pay || 'equity', online:!!p.online};
+      link:p.link || '', no_link:false, pace:p.pace || 'serieux', offer:p.pay || 'equity', online:!!p.online};
   }
   let saveT = null, saving = null;
   function schedulePersist(){ if(!D.on) return; clearTimeout(saveT); saveT = setTimeout(() => { saving = persist().finally(() => { saving = null; }); }, 700); }

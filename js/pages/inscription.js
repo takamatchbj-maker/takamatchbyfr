@@ -942,8 +942,8 @@ function projectFields(){
   + fsec('trend', 'La Traction', false, area('traction','p.traction',320,'Prototype, utilisateurs, premiers revenus, partenariats signés… ce qui prouve que ça avance déjà.',p.traction,MINS.traction), "Facultatif, mais compte pour atteindre 100 % de remplissage ("+MINS.traction+" caractères au moins pour compter). Impact : c'est la section qui fait la différence entre une idée et un projet.")
   + fsec('shield', 'Les Ressources sécurisées', false, area('assets','p.assets',320,'Financements, agréments, matériel, locaux, partenaires déjà acquis.',p.assets,MINS.assets), "Facultatif, mais compte pour atteindre 100 % de remplissage ("+MINS.assets+" caractères au moins pour compter). Impact : rassure le talent sur ce qu'il n'aura pas à construire.")
   + fsec('target', 'Les Défis', true, area('challenges','p.challenges',320,"Ce qui te bloque aujourd'hui et pour quoi tu cherches de l'aide.",p.challenges,MINS.challenges), "Impact : aide le talent à voir où il apporterait de la valeur. "+MINS.challenges+" caractères au moins.")
-  + fsec('link', 'Lien externe', true, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'"'+(p.noLink ? ' disabled' : '')+'>'
-      + noneBox('p.noLink', p.noLink, 'Mon projet n\'a pas encore de site ni de page'), 'Site, page Facebook, LinkedIn, vidéo de démonstration…');
+  + fsec('link', 'Lien externe', false, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'">',
+      'Facultatif. Site, page Facebook, LinkedIn, vidéo de démonstration…');
 }
 /* Fiche perso : mêmes briques que la fiche Talent (compétences, niveau,
    signature, portfolio), en plus court. Tout y est facultatif. */

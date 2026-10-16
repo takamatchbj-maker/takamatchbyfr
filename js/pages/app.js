@@ -561,7 +561,7 @@ function creditsCard(){
     + '<div class="row" style="align-items:baseline;gap:6px"><span style="font-family:var(--disp);font-size:36px;font-weight:600" class="tnum">'+m.credits+'</span>'
     +   '<span style="font-size:14px;color:var(--ink-3)">'+(extra ? 'restants' : 'restants sur '+m.creditsMax+' ce mois')+'</span></div>'
     + '<div class="gauge" aria-hidden="true">'+Array.from({length:Math.max(m.creditsMax, Math.min(m.credits, 10))},(_,i)=>'<i class="'+(i<m.credits?'on':'')+'"></i>').join('')+'</div>'
-    + '<p class="hint" style="margin-bottom:12px">'+(extra ? 'Tes crédits achetés n\'expirent pas.' : 'Se renouvelle le 1<sup>er</sup> '+tmNextMonth()+'. '+(TMPrix.creditsSoon() ? 'Achat de packs : '+esc(TMPrix.LAUNCH.soon).toLowerCase()+'.' : 'Packs à partir de <span class="mono">'+priceH('credits_essai')+'</span>.'))+'</p>'
+    + '<p class="hint" style="margin-bottom:12px">'+(extra ? 'Tes crédits achetés s\'ajoutent à ton quota du mois.' : 'Se renouvelle le 1<sup>er</sup> '+tmNextMonth()+'. '+(TMPrix.creditsSoon() ? 'Achat de packs : '+esc(TMPrix.LAUNCH.soon).toLowerCase()+'.' : 'Packs à partir de <span class="mono">'+priceH('credits_essai')+'</span>.'))+'</p>'
     + '<button class="btn btn-ghost btn-sm btn-block" data-act="buy-credits">'+ic('plus')+'Recharger mes crédits'+(TMPrix.creditsSoon() ? ' <span class="soon-tag">Bientôt</span>' : '')+'</button>'
     + payBadges()+'</section>';
 }
@@ -653,7 +653,7 @@ function invitationsPanel(){
   const seg = '<div class="seg-sm" role="group" aria-label="Filtrer les invitations">'
     + [['all','Toutes'],['recv','Reçues'],['sent','Envoyées']].map(([k,l]) => '<button class="'+(S.invFilter===k?'on':'')+'" data-act="inv-filter" data-v="'+k+'" aria-pressed="'+(S.invFilter===k)+'">'+l+'<span class="n">'+n(k)+'</span></button>').join('')+'</div>';
   const head = '<div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">'+seg
-    + '<span class="hint row" style="gap:6px">'+ic('clock')+'Une invitation sans réponse expire au bout de 10 jours. '+(isTalMode()?'':'Le crédit t\'est alors rendu.')+'</span></div>';
+    + '<span class="hint row" style="gap:6px">'+ic('clock')+'Une invitation sans réponse expire au bout de 10 jours. '+(isTalMode()?'':'Le crédit dépensé n\'est pas rendu.')+'</span></div>';
   if(!list.length){
     return head + '<div class="card">'+emptyBox('✉️','Aucune invitation ici',
       isTalMode() ? "Explore les projets et envoie ta première invitation, ou attends qu'un porteur te repère." : "Explore les talents et envoie ta première invitation. Il te reste "+S.me.credits+" crédits.",
@@ -1230,7 +1230,7 @@ document.addEventListener('click', e => {
         const d = new Date();
         S.payments.unshift({d:String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(), l:'Pack '+p.n+' · '+p.c+' crédits', a:priceOf(p.k).charged, op:S.pay.op, ref:S.pay.ref, cc:S.pay.cc});
         confetti(); render();
-        success(p.c+' crédits ajoutés', 'Paiement de <span class="mono">'+esc(priceT(p.k))+'</span> confirmé via '+esc(S.pay.op)+'. Il te reste <b>'+S.me.credits+' crédits</b>, qui n\'expirent pas.');
+        success(p.c+' crédits ajoutés', 'Paiement de <span class="mono">'+esc(priceT(p.k))+'</span> confirmé via '+esc(S.pay.op)+'. Il te reste <b>'+S.me.credits+' crédits</b>.');
       });
       break; }
     case 'why-credits': modal('Pourquoi des crédits ?',
@@ -2197,8 +2197,8 @@ function projectFields(){
   + fsec('trend', 'La Traction actuelle', false, area('traction','p.traction',320,"Prototype, utilisateurs, premiers revenus, partenariats signés…",p.traction), "Facultatif, mais compte pour atteindre 100 % de remplissage ("+TMRules.MIN.traction+" caractères au moins pour compter). Impact : c'est la section qui fait la différence entre une idée et un projet.")
   + fsec('shield', 'Les Ressources sécurisées', false, area('assets','p.assets',320,"Financements, agréments, matériel, locaux, partenaires déjà acquis.",p.assets), "Impact : rassure sur ce que le talent n'aura pas à construire.")
   + fsec('target', 'Les Défis', true, area('challenges','p.challenges',320,"Ce qui te bloque aujourd'hui et pour quoi tu cherches de l'aide.",p.challenges), "Impact : aide le talent à voir où il apporterait de la valeur. "+TMRules.MIN.challenges+" caractères au moins.")
-  + fsec('link', 'Lien externe', true, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'"'+(p.noLink ? ' disabled' : '')+'>'
-      + noneBox('p.noLink', p.noLink, 'Mon projet n\'a pas encore de site ni de page'), 'Site, page Facebook, LinkedIn, vidéo de démonstration…');
+  + fsec('link', 'Lien externe', false, '<input class="inp" id="plink" data-k="p.link" placeholder="monprojet.bj" value="'+esc(p.link)+'">',
+      'Facultatif. Site, page Facebook, LinkedIn, vidéo de démonstration…');
 }
 function ficheFields(){ return isTalMode() ? talentFields() : projectFields(); }
 
@@ -2860,7 +2860,7 @@ function vSupport(){
     ["Que se passe-t-il après un match ?","La messagerie s'ouvre et l'Atelier devient accessible : jalons partagés, plan d'action, qui décide quoi, répartition du capital, journal de décisions et génération du pacte d'associés. À partir de 3 membres, un groupe d'équipe s'ouvre dans les Messages."],
     ["Puis-je être visionnaire et talent ?","Oui. Un seul compte, deux profils indépendants : chacun a ses matchs, ses invitations, ses conversations et ses Ateliers. Tu bascules depuis le menu de ton profil, et l'interface change de couleur."],
     ["Puis-je quitter un projet ?","Oui, depuis l'Atelier : « Quitter le projet ». Ta part proposée est annulée, ta conversation avec le porteur est archivée des deux côtés, en lecture seule. Le porteur, lui, peut retirer un talent de l'équipe en donnant un motif. Les messages ne sont jamais supprimés."],
-    ["Que devient mon crédit si l'invitation expire ?","Une invitation sans réponse expire au bout de 10 jours et ton crédit t'est rendu."],
+    ["Que devient mon crédit si personne ne répond ?","Le crédit est dépensé à l'envoi de l'invitation et n'est pas rendu, même sans réponse : choisis bien les talents que tu invites."],
     ["Comment signaler un comportement ?","Chaque fiche et chaque conversation portent un bouton de signalement. Une personne de l'équipe le traite sous 48 h."],
   ];
   return '<div class="page-h"><div><h1>Aide et <span class="acc">support</span></h1><p class="sub">Une vraie personne répond, à Cotonou, du lundi au samedi.</p></div></div>'
@@ -2984,7 +2984,7 @@ function invite(id){
     + '<div class="cnt-r" data-cnt="invMsg" data-max="300">300 caractères restants</div>'
     + '<p class="hint">Ton nom légal ne sera révélé que si l\'invitation est acceptée. Sans réponse, elle expire au bout de '+INV_DAYS+' jours.</p></div>'
     + (tal ? note('ok','gift','Gratuit et illimité pour les talents. Tu es sur <span class="mono">'+engagedN()+'/3</span> projets.')
-           : note('a','zap','Pour <b>'+esc(projName(S.me.project))+'</b>. Coût : <b>1 crédit</b>, il t\'en restera <span class="mono">'+(S.me.credits-1)+'</span>. Rendu si l\'invitation expire sans réponse.'))
+           : note('a','zap','Pour <b>'+esc(projName(S.me.project))+'</b>. Coût : <b>1 crédit</b>, il t\'en restera <span class="mono">'+(S.me.credits-1)+'</span>. Un crédit dépensé n\'est pas rendu, même sans réponse.'))
     + '<div id="invErr"></div>',
     '<button class="btn btn-ghost" data-act="'+(S.layer === 'fiche' ? 'back-fiche' : 'close')+'">Annuler</button><button class="btn btn-a" data-act="invite-send" data-id="'+id+'">'+ic('send')+'Envoyer l\'invitation</button>');
 }
@@ -3656,9 +3656,13 @@ function phoneLocal(){ return String(S.me.phone || '').replace(/^\+\d{1,3}\s*/, 
 const REQ_LABEL = {'Compétences clés':'Compétences clés (2 au moins)', 'Compétences recherchées':'Compétences recherchées (1 au moins)',
   'Signature personnelle':'Signature personnelle ('+TMRules.MIN.bio+' caractères min.)', 'Le Hook':'Le Hook ('+TMRules.MIN.hook+' caractères min.)',
   'La Vision':'La Vision ('+TMRules.MIN.vision+' caractères min.)', 'La Traction':'La Traction ('+TMRules.MIN.traction+' caractères min.)',
-  'Les Défis':'Les Défis ('+TMRules.MIN.challenges+' caractères min.)', 'Lien portfolio':'Lien portfolio (ou « pas encore »)', 'Lien externe':'Lien externe (ou « pas encore »)'};
+  'Les Défis':'Les Défis ('+TMRules.MIN.challenges+' caractères min.)', 'Lien portfolio':'Lien portfolio (ou « pas encore »)', 'Lien externe':'Lien externe (adresse à corriger)'};
 const OPT_ROWS = ['La Traction', 'Les Ressources', 'La couverture'];
-function isReqRow(label, kind){ kind = kind || (isTalMode() ? 'tal' : 'vis'); return kind === 'perso' || OPT_ROWS.includes(label) ? 0 : 1; }
+function isReqRow(label, kind){ kind = kind || (isTalMode() ? 'tal' : 'vis');
+  if(kind === 'perso' || OPT_ROWS.includes(label)) return 0;
+  /* Lien externe : facultatif, sauf s'il est commencé (une adresse invalide bloque). */
+  if(label === 'Lien externe'){ const r = completion(kind).rows.find(x => x[0] === label); return r && r[3].opt ? 0 : 1; }
+  return 1; }
 /* Le rythme et la proposition d'un projet ont toujours une valeur : ils ne peuvent pas manquer. */
 function missingReq(kind){
   kind = kind || (isTalMode() ? 'tal' : 'vis');
@@ -4205,7 +4209,7 @@ function startWelcomeTour(again){
             : ['Les talents classés par compatibilité avec <b>'+esc(projName(S.me.project))+'</b>. Leur nom et leur photo restent masqués jusqu\'au match.',
                '<b>Inviter</b> coûte 1 crédit : il t\'en reste <b>'+S.me.credits+'</b> sur '+S.me.creditsMax+' ce mois.']},
     {sel:navSel('connexions'), t:'Connexions',
-      p:['Tes invitations envoyées et reçues. Sans réponse, une invitation expire au bout de <b>10 jours</b>'+(tal ? '.' : ' et ton crédit t\'est rendu.'),
+      p:['Tes invitations envoyées et reçues. Sans réponse, une invitation expire au bout de <b>10 jours</b>'+(tal ? '.' : ', et le crédit dépensé n\'est pas rendu.'),
          'Quand une invitation est acceptée, c\'est un <b>match</b> : il se range dans l\'onglet Matchs.']},
     {sel:navSel('messages'), t:'Messages',
       p:['La messagerie s\'ouvre avec ton premier match : d\'abord en privé, puis en groupe dès que l\'équipe compte 3 membres.',
