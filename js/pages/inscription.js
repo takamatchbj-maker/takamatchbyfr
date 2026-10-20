@@ -863,9 +863,12 @@ function renderOnb(){
     root.dataset.built = '1';
   }
   root.querySelector('.onb-card').classList.toggle('pre', preRole());
-  root.querySelector('.onb-head').innerHTML = onbNav(a);
-  root.querySelector('.onb-body').innerHTML = '<div class="onb-inner">'+body+'</div>';
-  root.querySelector('.onb-tail').innerHTML = foot + legal;
+  /* Mise à jour sur place : seul ce qui change bouge (pas de clignotement, focus gardé).
+     Changement d'étape : le contenu repart du haut. */
+  const stepKey = 's' + O.step + '-' + (O.sub || 0);
+  TMMorph(root.querySelector('.onb-head'), onbNav(a));
+  TMMorph(root.querySelector('.onb-body'), '<div class="onb-inner" data-key="'+stepKey+'">'+body+'</div>');
+  TMMorph(root.querySelector('.onb-tail'), foot + legal);
   const h2 = root.querySelector('.onb-body h2'); if(h2) h2.id = 'onbTitle';
 
   /* L'illustration ne change qu'au changement d'étape — c'est le seul
@@ -878,7 +881,8 @@ function renderOnb(){
     O._art = O.step;
   }
   const mark = O.step + ':' + O.sub;
-  if(O._painted !== mark){ root.querySelector('.onb-body').scrollTop = 0; O._painted = mark; }
+  const fresh = O._painted !== mark;
+  if(fresh){ root.querySelector('.onb-body').scrollTop = 0; O._painted = mark; }
 
   if(O.step === 1 && O.sub === 'choose') syncIdent();
   if(O.step === 1 && O.sub === 'code') syncCode();
@@ -892,7 +896,8 @@ function renderOnb(){
   if(O.step === READY) requestAnimationFrame(() => requestAnimationFrame(animateRings));
   syncWb();
   const f = root.querySelector('.onb-body .otp .inp, .onb-body input:not([type="hidden"]):not([type="file"])');
-  if(f && window.innerWidth > 900){ try{ f.focus({preventScroll:true}); }catch(e){} }
+  /* Le premier champ ne prend le focus qu'à l'arrivée sur l'étape, pas à chaque clic. */
+  if(fresh && f && window.innerWidth > 900){ try{ f.focus({preventScroll:true}); }catch(e){} }
 }
 
 /* ---------- La fiche express ---------- */
@@ -1162,9 +1167,9 @@ function syncFiche(){
     el.classList.toggle('bad', bad);
   });
   markSections('#ficheForm', ruleRows(), O.tried);
-  const box = $('#prevBox'); if(box) box.innerHTML = previewCard();
+  const box = $('#prevBox'); if(box) TMMorph(box, previewCard());
   const pct = completion();
-  const pr = $('#prevRing'); if(pr) pr.innerHTML = ringHTML(pct, 62);
+  const pr = $('#prevRing'); if(pr) TMMorph(pr, ringHTML(pct, 62));
   const note = $('#pubNote');
   const req = requiredMissing(), nr = req.length;
   if(note) note.innerHTML = !nr
@@ -1191,8 +1196,8 @@ function syncPerso(){
     t.classList.toggle('err', bad); t.setAttribute('aria-invalid', bad); c.classList.toggle('bad', bad);
   }
   markSections('#persoForm', ruleRows('perso'), false);
-  const box = $('#prevBox'); if(box) box.innerHTML = persoCard();
-  const pr = $('#prevRing'); if(pr) pr.innerHTML = ringHTML(persoPct(), 62);
+  const box = $('#prevBox'); if(box) TMMorph(box, persoCard());
+  const pr = $('#prevRing'); if(pr) TMMorph(pr, ringHTML(persoPct(), 62));
   if(!O.sending) onbEnable(true);
 }
 /* Contour et petit texte rouges sur chaque section incomplète.
@@ -1288,7 +1293,7 @@ function takeFile(kind, file){
 function setPhoto(kind, url){
   if(kind === 'cover') ME.project.cover = url; else ME.photo = url;
   if(D.on){ renderDash(); if($('#remind')) renderRemind(); return; }
-  if(O.step === FICHE && kind === 'cover'){ const b = $('#coverBox'); if(b) b.innerHTML = coverBlock(); syncFiche(); return; }
+  if(O.step === FICHE && kind === 'cover'){ const b = $('#coverBox'); if(b) TMMorph(b, coverBlock()); syncFiche(); return; }
   if(O.step === PHOTOS){ renderOnb(); }
 }
 /* Images d'exemple pour l'atelier : dessinées, jamais de vraie personne. */
@@ -1306,8 +1311,8 @@ function sampleImage(kind){
   return c.toDataURL('image/jpeg', .86);
 }
 function syncPreview(){
-  const box = $('#prevBox'); if(box) box.innerHTML = previewCard();
-  const pr = $('#prevRing'); if(pr) pr.innerHTML = ringHTML(completion(), 62);
+  const box = $('#prevBox'); if(box) TMMorph(box, previewCard());
+  const pr = $('#prevRing'); if(pr) TMMorph(pr, ringHTML(completion(), 62));
   if(O.step === PHOTOS && !O.sending) onbEnable(!photosMissing());
 }
 
@@ -1370,7 +1375,7 @@ function renderDash(){
   const miss = !ME.photo ? ['ta photo de profil'] : [];
   const av = ME.photo ? '<span class="dash-av" style="background-image:url('+ME.photo+')" role="img" aria-label="Ta photo"></span>'
                       : '<span class="dash-av" aria-hidden="true">'+esc(initials(myName()))+'</span>';
-  $('#dash').innerHTML = '<header class="dash-top">'
+  TMMorph($('#dash'), '<header class="dash-top">'
     + brandHTML()
     + '<span class="grow"></span><span class="chip">Aperçu simplifié</span>' + av + '</header>'
     + '<main class="dash-in">'
@@ -1386,7 +1391,7 @@ function renderDash(){
     +   '<div class="card card-pad fiche-c">'+ringHTML(pct, 72)+'<div><div class="lbl">'+(vis ? 'Mes fiches' : 'Ma fiche Talent')+'</div>'
     +     '<div style="font-family:var(--disp);font-size:20px;font-weight:600;margin-top:2px">'+(vis && ME.project.title ? esc(ME.project.title) : 'En ligne')+'</div>'
     +     '<div style="margin-top:4px"><span class="handle-chip">'+esc(myHandle())+'</span></div></div></div>'
-    + '</main>';
+    + '</main>');
 }
 function openRemind(){
   if(!D.on || !photosMissing() || $('#remind')) return;
@@ -1591,7 +1596,7 @@ document.addEventListener('click', e => {
       $('.onb-card').classList.remove('pre');
       const main = $('#onbMain'); if(main){ main.classList.remove('btn-go'); main.classList.add('btn-a'); }
       onbEnable(true); syncWb();
-      const hd = $('.onb-head'); if(hd) hd.innerHTML = onbNav(onbAction());
+      const hd = $('.onb-head'); if(hd) TMMorph(hd, onbNav(onbAction()));
       break;
     }
     case 'onb-finish': openDash(); break;

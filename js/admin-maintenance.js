@@ -182,15 +182,16 @@
       ? '<b>Maintenance programmée à ' + hhmm(ms(v.starts_at)) + '</b> · dans <span data-mt-left>' + clock(ms(v.starts_at) - Date.now()) + '</span> · ' + scopeL(v.scope) + ' · les membres voient un préavis.'
       : '<b>Site en maintenance</b> depuis ' + dur(Date.now() - (ms(v.started_at) || ms(v.starts_at) || Date.now())) + ' · ' + scopeL(v.scope)
         + (end ? ' · retour prévu ' + (end > Date.now() ? 'vers ' + when(end) : 'dépassé (' + hhmm(end) + ')') : '');
-    return '<div class="mt-ban' + (s === 'scheduled' ? ' sch' : '') + '" role="status"><span class="dot" aria-hidden="true"></span><span class="grow">' + txt + '</span>'
+    return '<div class="mt-ban' + (s === 'scheduled' ? ' sch' : '') + '" id="mtBan" role="status"><span class="dot" aria-hidden="true"></span><span class="grow">' + txt + '</span>'
       + (sup() && A.view !== 'maintenance' ? '<button class="btn" data-act="go" data-v="maintenance">Gérer</button>' : '') + '</div>';
   }
+  window.TMTopBanner = () => A.me ? bannerHTML() : '';
   function paintBanner(){
     const top = $('#root .top'); if(!top) return;
     const old = $('#root .mt-ban'), h = bannerHTML();
     if(!h){ if(old) old.remove(); return; }
-    const tmp = document.createElement('div'); tmp.innerHTML = h;
-    if(old) old.replaceWith(tmp.firstChild); else top.after(tmp.firstChild);
+    if(old){ TMMorph.node(old, h); return; }
+    const tmp = document.createElement('div'); tmp.innerHTML = h; top.after(tmp.firstChild);
   }
 
   /* ---------- La vue ---------- */
@@ -219,7 +220,7 @@
       + (tools ? '<div class="tools">' + tools + '</div>' : '')
       + '</section>';
   }
-  function paintHero(){ const h = $('#mtHero'); if(!h) return; const t = document.createElement('div'); t.innerHTML = heroHTML(); h.replaceWith(t.firstChild); }
+  function paintHero(){ const h = $('#mtHero'); if(h) TMMorph.node(h, heroHTML()); }
 
   function previewUrl(d){
     const v = d || M.v || DEF, p = new URLSearchParams({apercu:'1', titre:v.title || '', msg:v.message || '', portee:v.scope || 'all'});

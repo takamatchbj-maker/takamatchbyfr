@@ -277,9 +277,12 @@ function toast(msg, kind){
 function renderSite(){
   const el = $('#site');
   el.hidden = false;
-  el.innerHTML = siteHeader() + siteHero() + siteMarquee() + siteConviction() + siteHow() + siteRoles() + siteScore()
-    + siteAtelier() + siteTrust() + siteCompare() + siteProjects() + sitePricing() + siteFaq() + siteCta() + siteFooter();
-  el.scrollTop = 0;
+  /* Première fois : la page se pose en haut. Ensuite (prix chargés…), mise à jour
+     sur place : rien ne clignote et la lecture n'est pas ramenée en haut. */
+  const first = !el.firstChild;
+  TMMorph(el, siteHeader() + siteHero() + siteMarquee() + siteConviction() + siteHow() + siteRoles() + siteScore()
+    + siteAtelier() + siteTrust() + siteCompare() + siteProjects() + sitePricing() + siteFaq() + siteCta() + siteFooter());
+  if(first) el.scrollTop = 0;
   el.onscroll = () => {
     const hd = $('.site-hd');
     if(hd) hd.classList.toggle('stuck', el.scrollTop > 8);
@@ -851,7 +854,7 @@ function ovEl(){ return $('#ov'); }
 
 function ovOpen(html, kind){
   const ov = ovEl(), win = $('.ov-win', ov);
-  if(!ov.hidden && ov.dataset.kind === kind){ win.innerHTML = html; return ovFocus(); }
+  if(!ov.hidden && ov.dataset.kind === kind){ TMMorph(win, html); return; }
   OV_LAST = OV_LAST || document.activeElement;
   win.innerHTML = html;
   win.className = 'ov-win ov-' + kind;

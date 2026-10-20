@@ -215,7 +215,7 @@
   }
 
   /* ---------- Actions ---------- */
-  function repaintBody(){ const b = $('#ptBody'); if(b) b.innerHTML = partnersBody(); }
+  function repaintBody(){ const b = $('#ptBody'); if(b) TMMorph(b, partnersBody()); }
   document.addEventListener('click', e => {
     const el = e.target.closest('[data-act]'); if(!el) return;
     switch(el.dataset.act){

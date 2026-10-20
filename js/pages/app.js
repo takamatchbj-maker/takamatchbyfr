@@ -461,7 +461,9 @@ function renderView(){
                  atelier:vAtelier, fiche:vFiche, parametres:vParams, support:vSupport};
   const moved = S._painted !== S.view;
   const keep = moved ? 0 : m.scrollTop;
-  m.innerHTML = '<div class="wrap' + (moved ? ' rise' : '') + '">' + (views[S.view] || vAccueil)() + '</div>';
+  /* Même écran : mise à jour sur place (rien ne clignote, focus et défilement gardés).
+     Autre écran : nouveau contenu, avec une entrée discrète. */
+  TMMorph(m, '<div class="wrap' + (moved ? ' rise' : '') + '" data-key="v-' + S.view + '">' + (views[S.view] || vAccueil)() + '</div>');
   m.scrollTop = keep;
   S._painted = S.view;
   if(S.view === 'messages') scrollChat();
@@ -729,10 +731,14 @@ let layerSeq = 0;
 function openLayer(html, name){
   layerSeq++;
   if(!S.layer) S.lastFocus = document.activeElement;
+  const l = $('#layer');
+  /* Le même calque déjà ouvert : on le met à jour sur place, sans rejouer son entrée. */
+  const same = S.layer === (name || 'x') && !!l.querySelector('.ov.on, .pop, .drawer');
   S.layer = name || 'x';
-  const l = $('#layer'); l.innerHTML = html;
+  if(same) TMMorph(l, html); else l.innerHTML = html;
   const ov = l.querySelector('.ov');
-  if(ov) requestAnimationFrame(() => requestAnimationFrame(() => ov.classList.add('on')));
+  if(ov){ if(same) ov.classList.add('on'); else requestAnimationFrame(() => requestAnimationFrame(() => ov.classList.add('on'))); }
+  if(same) return;
   const f = l.querySelector('[autofocus]') || l.querySelector('.ov-win input, .ov-win textarea, #cmdIn') || l.querySelector('.ov-win .btn, .pop button, .drawer button');
   if(f) try{ f.focus({preventScroll:true}); }catch(e){}
 }
@@ -1502,7 +1508,7 @@ function openFiche(id, sub){
 function refreshFiche(){
   if(S.layer !== 'fiche' || !S.fv) return;
   const w = $('#ficheWin'); if(!w) return;
-  const top = w.scrollTop; w.innerHTML = ficheWinInner(); w.scrollTop = top;
+  TMMorph(w, ficheWinInner());
 }
 /* Depuis le mode Cartes (hors fenêtre), le profil du porteur s'ouvre directement. */
 function openOwner(id){ if(S.layer === 'fiche') { S.fv.sub = 'owner'; refreshFiche(); $('#ficheWin').scrollTop = 0; } else openFiche(id, 'owner'); }
@@ -2321,7 +2327,7 @@ function emptyState(){
 function repaintExplorer(){
   const box = $('#expBody'); if(!box) return;
   const list = filtered();
-  box.innerHTML = S.loading ? skelDeck() : (S.mode === 'mosaic' ? mosaic(list) : focusView(list));
+  TMMorph(box, S.loading ? skelDeck() : (S.mode === 'mosaic' ? mosaic(list) : focusView(list)));
   const h = $('#resCount'); if(h) h.textContent = resultsLine(list.length);
   const cf = $('#clearF'); if(cf) cf.hidden = !anyFilter();
 }
@@ -2399,8 +2405,8 @@ function paintOnline(){
   const on = ficheOnline(), c = $('#onlineCard');
   if(c){ c.classList.toggle('on', on); c.querySelector('.toggle').setAttribute('aria-pressed', on);
     setText($('#ocL'), on ? 'En ligne' : 'Hors ligne'); setText($('#ocS'), on ? 'Visible dans l\'annuaire et les recherches' : 'Masquée de l\'annuaire et des recherches'); }
-  const pb = $('#prevBox'); if(pb){ pb.className = on ? '' : 'pv-off'; pb.innerHTML = prevInner(); }
-  const pl = $('#prevL'); if(pl){ pl.className = 'preview-l'+(on ? '' : ' off'); pl.innerHTML = prevLegend(); }
+  const pb = $('#prevBox'); if(pb){ pb.className = on ? '' : 'pv-off'; TMMorph(pb, prevInner()); }
+  const pl = $('#prevL'); if(pl){ pl.className = 'preview-l'+(on ? '' : ' off'); TMMorph(pl, prevLegend()); }
   $$('.slot.on .st').forEach(s => { s.classList.toggle('on', on); s.textContent = on ? 'En ligne' : 'Hors ligne'; });
   syncSide();
 }
@@ -2419,9 +2425,9 @@ function syncFiche(){
     b.title = ok ? sector(b.dataset.s).l : 'Coche '+sector(b.dataset.s).l+' dans les secteurs pour utiliser cette icône';
   });
   const kind = ficheKind(), c = completion(kind);
-  const box = $('#prevBox'); if(box) box.innerHTML = prevInner();
-  const rg = $('#ficheRing'); if(rg) rg.innerHTML = ringHTML(c.pct, 72, kind);
-  const ms = $('#missBox'); if(ms) ms.innerHTML = missingHTML(c);
+  const box = $('#prevBox'); if(box) TMMorph(box, prevInner());
+  const rg = $('#ficheRing'); if(rg) TMMorph(rg, ringHTML(c.pct, 72, kind));
+  const ms = $('#missBox'); if(ms) TMMorph(ms, missingHTML(c));
   const sl = $('.slot.on'); if(sl){ const b = sl.querySelector('b'), mo = sl.querySelector('.mono'); if(b) setText(b, projName(S.me.project)); if(mo) setText(mo, c.pct+' %'); }
   syncCounters(); markRequired();
   const sb = $('#saveBar');
@@ -2507,7 +2513,7 @@ function openPublic(){
     + (vis ? '<div class="card card-pad visitor-cta"><div><b>Tu veux '+(kind === 'tal' ? 'proposer ton projet à ce talent' : 'rejoindre ce projet')+' ?</b><p class="hint">Crée ton compte en 2 minutes : c\'est gratuit pour les talents.</p></div>'
           + '<button class="btn btn-a" disabled title="Aperçu : bouton inactif">'+ic('arrow')+'Rejoindre TakaMatch pour inviter</button></div>' : '')+'</div>'
     + '<div class="ov-foot"><button class="btn btn-ghost" data-act="close">Fermer</button><button class="btn btn-a" data-act="public-edit">'+ic('edit')+'Modifier ma fiche</button></div></div>';
-  if(S.layer === 'public' && $('#publicWin')){ $('#publicWin').innerHTML = html; return; }
+  if(S.layer === 'public' && $('#publicWin')){ TMMorph($('#publicWin'), html); return; }
   openLayer('<div class="ov" role="dialog" aria-modal="true" aria-label="Ta fiche vue par les autres"><div class="ov-bg" data-act="close"></div>'
     + '<div class="ov-win xl" id="publicWin">'+html+'</div></div>', 'public');
 }

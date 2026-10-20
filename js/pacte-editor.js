@@ -125,7 +125,7 @@
     E.issues = issues;
     const y = E.root.querySelector('.pe-main') ? E.root.querySelector('.pe-main').scrollTop : 0;
     const ry = E.root.querySelector('.pe-panel') ? E.root.querySelector('.pe-panel').scrollTop : 0;
-    E.root.innerHTML = top(E, P, doc) + '<div class="pe-body">' + rail(E, P, doc, issues) + '<main class="pe-main" tabindex="-1">' + banner(E, P, doc, issues) + paper(E, P, doc) + '</main></div><div class="pe-dlg-w"></div><div class="pe-toasts" aria-live="polite"></div>';
+    TMMorph(E.root, top(E, P, doc) + '<div class="pe-body">' + rail(E, P, doc, issues) + '<main class="pe-main" tabindex="-1">' + banner(E, P, doc, issues) + paper(E, P, doc) + '</main></div><div class="pe-dlg-w"></div><div class="pe-toasts" aria-live="polite"></div>');
     const m = E.root.querySelector('.pe-main'); if(m) m.scrollTop = y;
     const pn = E.root.querySelector('.pe-panel'); if(pn) pn.scrollTop = ry;
     if(E.scrollTo){ const t = E.root.querySelector('#pe-a-' + E.scrollTo); if(t) t.scrollIntoView({block:'start', behavior:'smooth'}); E.scrollTo = null; }
@@ -401,8 +401,8 @@
       b = '<p>« ' + esc(a.title || '') + ' » sera retiré du pacte. ' + (a.added ? 'Le texte écrit sera perdu.' : 'Tu pourras le remettre depuis « Ajouter une clause ».') + '</p>';
       f = '<button class="btn btn-quiet" data-pe="dlg-close">Annuler</button><button class="btn btn-danger" data-pe="remove-go" data-id="' + esc(d.data.id) + '">' + ic('trash') + 'Retirer</button>';
     }
-    w.innerHTML = '<div class="pe-dlg-bg" data-pe="dlg-close"></div><div class="pe-dlg" role="dialog" aria-modal="true" aria-labelledby="peDlgT"><button class="pe-dlg-x" data-pe="dlg-close" aria-label="Fermer">' + ic('x') + '</button><h2 id="peDlgT">' + esc(t) + '</h2><div class="pe-dlg-b">' + b + '</div><div class="pe-dlg-f">' + f + '</div></div>';
-    const fi = w.querySelector('textarea, input'); if(fi) setTimeout(() => fi.focus(), 30);
+    const had = !!w.firstChild; TMMorph(w, '<div class="pe-dlg-bg" data-pe="dlg-close"></div><div class="pe-dlg" role="dialog" aria-modal="true" aria-labelledby="peDlgT"><button class="pe-dlg-x" data-pe="dlg-close" aria-label="Fermer">' + ic('x') + '</button><h2 id="peDlgT">' + esc(t) + '</h2><div class="pe-dlg-b">' + b + '</div><div class="pe-dlg-f">' + f + '</div></div>');
+    const fi = !had && w.querySelector('textarea, input'); if(fi) setTimeout(() => fi.focus(), 30);
   }
 
   function toastE(E, msg, kind){

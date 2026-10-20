@@ -547,6 +547,7 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 })();
 </script>
 <!-- Espace équipe en ligne : comptes, rôles, prix et journal dans Supabase. -->
+<script src="js/morph.js?v=20261020a"></script>
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
 <script src="js/supabase.js?v=20261014c"></script>
 <script src="js/geo.js?v=20261010a"></script>
@@ -555,7 +556,7 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 <link rel="stylesheet" href="css/pacte.css?v=20261020b">
 <script src="js/pacte.js?v=20261010a"></script>
 <script src="js/pacte-pdf.js?v=20261010a"></script>
-<script src="js/pacte-editor.js?v=20261016a"></script>
+<script src="js/pacte-editor.js?v=20261020c"></script>
 </head>
 <body>
 <div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
@@ -907,7 +908,7 @@ function renderView(){
   const nav = MODULES.filter(m => canSee(m.id)).map(m => { const g = m.grp !== grp ? '<div class="grp">'+m.grp+'</div>' : ''; grp = m.grp;
     return g + '<button class="nav'+(A.view === m.id ? ' on' : '')+'" data-act="go" data-v="'+m.id+'"'+(A.view === m.id ? ' aria-current="page"' : '')+'>'+ic(m.i)+'<span>'+m.l+'</span>'
       + (counts[m.id] ? '<span class="cnt">'+counts[m.id]+'</span>' : '')+'</button>'; }).join('');
-  $('#root').innerHTML = '<header class="top">'
+  TMMorph($('#root'), '<header class="top">'
     + '<button class="iconbtn menu-btn" data-act="side" aria-label="Menu">'+ic('menu')+'</button>'
     + '<img class="logo" src="'+LOGO_SRC+'" alt="TakaMatch"><span class="staff-chip">Espace équipe</span>'
     + '<div class="gsearch"><span>'+ic('search')+'</span><input class="inp" id="gq" placeholder="Rechercher un utilisateur : nom, @pseudo, e-mail, téléphone" autocomplete="off"><div class="gres" id="gres" hidden></div></div>'
@@ -916,10 +917,11 @@ function renderView(){
     + '<button class="iconbtn" data-act="theme" aria-label="Changer de thème">'+ic(THEME === 'dark' ? 'sun' : 'moon')+'</button>'
     + '<button class="me-btn" data-act="me-menu"><span class="av staff">'+esc(initials(A.me.name))+'</span><span style="text-align:left;line-height:1.2"><b style="display:block;font-size:13px">'+esc(A.me.name)+'</b><small style="color:var(--ink-3);font-size:11.5px">'+ROLES[A.me.role].l+'</small></span></button>'
     + '</header>'
+    + (window.TMTopBanner ? TMTopBanner() : '')
     + '<div class="shell"><nav class="side'+(A.sideOpen ? ' open' : '')+'" aria-label="Modules">'+nav
     + '<div class="foot">Connecté en tant que <b>'+ROLES[A.me.role].l+'</b>. Chaque action est inscrite au journal d\'audit.</div></nav>'
     + '<main class="main"><div class="wrap" id="view">'+(LIVE_VIEWS.includes(A.view) ? '' : DEMO_NOTE)+(VIEWS[A.view] || VIEWS.overview)()+'</div></main></div>'
-    + '<div id="ovl"></div>';
+    + '<div id="ovl" data-morph-skip></div>');
   paintOverlay();
   if(A.view === 'settings') prixPreview();
 }
@@ -944,7 +946,7 @@ function table(head, rows, empty){ if(!rows.length) return '<div class="card emp
 let L = {step:'mail', email:'', busy:false, err:''};
 function renderLogin(){
   const mail = L.step === 'mail';
-  $('#root').innerHTML = '<div class="login"><form class="card login-c" id="loginF" autocomplete="off" novalidate>'
+  TMMorph($('#root'), '<div class="login"><form class="card login-c" id="loginF" autocomplete="off" novalidate>'
     + '<img class="logo" src="'+LOGO_SRC+'" alt="TakaMatch">'
     + '<h1 style="font-size:26px;margin-bottom:4px">Espace équipe</h1>'
     + '<p style="color:var(--ink-2);margin:0 0 18px">'+(mail ? 'Accès réservé à l\'équipe TakaMatch. Chaque connexion est inscrite au journal.' : 'Code envoyé à <b>'+esc(L.email)+'</b>. Il est valable 10 minutes. Regarde aussi dans les indésirables.')+'</p>'
@@ -955,7 +957,7 @@ function renderLogin(){
     + '<div id="lgErr">'+(L.err ? '<div class="err">'+esc(L.err)+'</div>' : '')+'</div>'
     + '<button class="btn btn-a btn-block" type="submit" style="height:42px"'+(L.busy ? ' disabled' : '')+'>'+ic('lock')+(L.busy ? 'Un instant…' : mail ? 'Recevoir un code' : 'Se connecter')+'</button>'
     + (mail ? '' : '<div class="row" style="justify-content:center;gap:14px;margin-top:4px"><button type="button" class="btn btn-quiet btn-sm" data-act="lg-back">Changer d\'adresse</button><button type="button" class="btn btn-quiet btn-sm" data-act="lg-resend">Renvoyer le code</button></div>')
-    + '</div><p class="hint" style="margin-top:14px">Pas de mot de passe : un code à usage unique t\'est envoyé à chaque connexion. Tu peux te connecter depuis n\'importe quel ordinateur ou téléphone.</p></form></div>';
+    + '</div><p class="hint" style="margin-top:14px">Pas de mot de passe : un code à usage unique t\'est envoyé à chaque connexion. Tu peux te connecter depuis n\'importe quel ordinateur ou téléphone.</p></form></div>');
   const f = $(mail ? '#lgE' : '#lgC'); if(f) setTimeout(() => f.focus(), 30);
 }
 function lgFail(e){ L.busy = false; L.err = (e && e.message) || 'La demande n\'a pas abouti.'; renderLogin(); }
@@ -1466,8 +1468,11 @@ function paintOverlay(){
     + '<div class="dr-h"><h2>'+d.title+'</h2><span class="row" style="gap:6px">'+(d.chips || '')+'</span><span class="grow"></span><button class="iconbtn" data-act="close-drawer" aria-label="Fermer">'+ic('x')+'</button></div>'
     + '<div class="dr-b">'+d.body+'</div>'+(d.foot ? '<div class="dr-f">'+d.foot+'</div>' : '')+'</aside>'; } }
   if(A.modal) h += '<div class="modal-bg" data-act="close-modal"></div><div class="modal" role="dialog" aria-modal="true">'+A.modal+'</div>';
-  o.innerHTML = h;
-  const f = o.querySelector('.modal .inp, .modal select, .modal textarea'); if(f) setTimeout(() => f.focus(), 30);
+  /* Mise à jour sur place : la fenêtre ouverte ne rejoue pas son entrée. Le focus
+     ne va au premier champ qu'à l'ouverture. */
+  const had = !!o.querySelector('.modal');
+  TMMorph(o, h);
+  const f = !had && o.querySelector('.modal .inp, .modal select, .modal textarea'); if(f) setTimeout(() => f.focus(), 30);
 }
 function modal(html){ A.modal = html; paintOverlay(); }
 function closeModal(){ A.modal = null; paintOverlay(); }

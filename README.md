@@ -239,3 +239,15 @@ L'Atelier a deux onglets : **Notre équipe** (l'Atelier habituel) et **Partenair
 - **Base** : `supabase/23_maintenance.sql` (réglage `app_settings.maintenance`, installé le 20/10/2026 ; le journal d'audit est rempli par l'espace équipe).
 - **Secours** (espace équipe inaccessible) : Supabase → SQL Editor →
   `update app_settings set value = jsonb_set(value, '{active}', 'false') where key = 'maintenance';`
+
+## Affichage sans rechargement (TMMorph)
+
+- **Principe** : quand on clique, l'écran n'est plus redessiné en entier. `js/morph.js` (`TMMorph(el, html)`) compare le
+  nouveau contenu à ce qui est affiché et ne modifie que ce qui a changé : pas de clignotement, les fenêtres ne rejouent
+  pas leur animation, le défilement et le champ en cours de saisie sont gardés, les images ne se rechargent pas.
+- **Où** : espace équipe (page et fenêtres), outil (écran principal, fenêtres, fiche, Explorer, aperçus, Partenaires),
+  inscription (étapes, aperçus, tableau de bord), vitrine (page et fenêtre), éditeur du pacte.
+- **Chargement** : `js/morph.js` est chargé juste après `main.js` (avant les scripts de page) ; dans `admin.html`, en tête.
+- **Règles** : les éléments sont appariés par `id` ou `data-key`, sinon par position. Un changement d'écran (autre rubrique,
+  autre étape) change la clé du conteneur : le contenu repart alors à neuf, avec son entrée discrète.
+  `data-morph-skip` sur un élément : son contenu n'est jamais touché par la mise à jour de son parent.
