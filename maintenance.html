@@ -263,6 +263,8 @@
   /* C'est reparti : on le dit, puis on ramène le visiteur. */
   function reopened(){
     if(done) return; done = true; clearTimeout(timer);
+    /* Le site ne doit pas se fier à un ancien « fermé » gardé en mémoire. */
+    try{ var c = JSON.parse(sessionStorage.getItem('tm-maint') || 'null'); if(!c || (c.v && c.v.active)) sessionStorage.setItem('tm-maint', JSON.stringify({v:null, at:Date.now()})); }catch(e){}
     document.body.classList.add('done');
     $('tag').textContent = 'C\'est reparti';
     $('t').textContent = 'TakaMatch est de retour';
@@ -282,6 +284,7 @@
       if(r.ok){
         var rows = await r.json(), v = rows && rows[0] && rows[0].value;
         var on = v && v.active && (!v.starts_at || ms(v.starts_at) <= Date.now());
+        try{ sessionStorage.setItem('tm-maint', JSON.stringify({v:v, at:Date.now()})); }catch(e){}
         if(!on) return reopened();
         S = v; paint();
         try{ sessionStorage.setItem('tm-maint', JSON.stringify({v:v, at:Date.now()})); }catch(e){}
@@ -300,7 +303,7 @@
     paint();
   } else {
     /* Affichage immédiat avec le dernier réglage connu, puis vérification. */
-    try{ var c = JSON.parse(sessionStorage.getItem('tm-maint') || 'null'); if(c && c.v && c.v.active){ S = c.v; paint(); } }catch(e){}
+    try{ var c = JSON.parse(sessionStorage.getItem('tm-maint') || 'null'); if(c && c.v && c.v.active && ms(c.v.starts_at) <= Date.now()){ S = c.v; paint(); } }catch(e){}
     if(!S){ S = {}; paint(); }
     check();
     $('now').addEventListener('click', function(){ check(true); });

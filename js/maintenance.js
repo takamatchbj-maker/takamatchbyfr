@@ -117,7 +117,8 @@
   }
 
   /* Dernier réglage connu (moins de 90 s) : décision immédiate, sans attendre le réseau. */
-  var first = cached();
+  var fromWait = /maintenance\.html/.test(document.referrer || '');
+  var first = fromWait ? undefined : cached();
   if(first !== undefined && closes(first) && !pass() && !(ms(first.starts_at) > Date.now())){ go(); return; }
   check(true);
   setInterval(function(){ if(!document.hidden) check(true); }, EVERY);
