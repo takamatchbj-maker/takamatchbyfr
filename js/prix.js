@@ -53,11 +53,11 @@
   };
   var FCFA = {XOF:1, XAF:1};
   /* Lancement : aucun paiement demandé.
-     · second profil, emplacement projet et pacte : offerts (0), mention « Bientôt payant » ;
+     · second profil, emplacement projet et pacte : offerts (affichés 0) ;
      · packs de crédits : « Bientôt disponible », prix montrés en gris ;
      · 5 crédits d'invitation par mois.
      Réglé dans Supabase (app_settings « launch ») ; ces valeurs servent si la base ne répond pas. */
-  var LAUNCH = {free:true, monthly:5, keys:['second', 'slot', 'pacte'], tag:'Bientôt payant', soon:'Bientôt disponible'};
+  var LAUNCH = {free:true, monthly:5, keys:['second', 'slot', 'pacte'], soon:'Bientôt disponible'};
 
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
   var state = {prices:clone(DEFAULT_PRICES), fx:clone(DEFAULT_FX), at:0};
@@ -88,7 +88,7 @@
 
   var api = {
     DEFAULT_PRICES:DEFAULT_PRICES, DEFAULT_FX:DEFAULT_FX, CUR_OF:CUR_OF, LAUNCH:LAUNCH,
-    /* true : l'option est offerte pendant le lancement (affichée 0, « Bientôt payant »). */
+    /* true : l'option est offerte pendant le lancement (affichée 0). */
     isFree:function(key){ return !!LAUNCH.free && LAUNCH.keys.indexOf(key) >= 0; },
     /* true : l'achat de crédits n'est pas encore ouvert. */
     creditsSoon:function(){ return !!LAUNCH.free; },

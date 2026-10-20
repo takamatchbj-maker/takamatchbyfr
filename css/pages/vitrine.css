@@ -230,7 +230,7 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 
 .nav:hover{background:var(--surface-3);color:var(--ink)}
 
-.nav.on{background:var(--a-50);color:var(--a-700);font-weight:600;box-shadow:inset 2px 0 0 var(--a-600)}
+.nav.on{background:var(--a-50);color:var(--a-700);font-weight:600}
 
 .nav .ic{width:18px;height:18px;flex:0 0 auto}
 
@@ -1446,7 +1446,7 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 
 .conv-t .conv-b{font-weight:600;color:var(--ink)}
 
-.conv-t .conv-end{font-family:var(--disp);font-style:italic;font-size:19px;color:var(--ink);padding-left:16px;border-left:2px solid var(--vis-500)}
+.conv-t .conv-end{font-family:var(--disp);font-style:italic;font-size:19px;color:var(--ink)}
 
 .conv-w{
   position:sticky;top:104px;min-height:320px;border-radius:var(--r-2xl);border:1px solid var(--line);

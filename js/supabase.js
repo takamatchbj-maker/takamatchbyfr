@@ -82,6 +82,8 @@
     var txt = await r.text(), data = null;
     try{ data = txt ? JSON.parse(txt) : null; }catch(e){ data = txt; }
     if(!r.ok){
+      /* Message technique d'origine, visible dans la console (F12) pour diagnostiquer. */
+      try{ console.warn('[TakaMatch] ' + (opts.method || 'GET') + ' ' + path.split('?')[0] + ' → ' + r.status, data); }catch(e){}
       var err = new Error(readable(data, r.status)); err.status = r.status; err.data = data;
       err.code = data && (data.error_code || data.code); throw err;
     }

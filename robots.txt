@@ -5,5 +5,6 @@ Disallow: /app.html
 Disallow: /admin.html
 Disallow: /inscription.html
 Disallow: /erreur.html
+Disallow: /maintenance.html
 
 Sitemap: https://takamatch.com/sitemap.xml

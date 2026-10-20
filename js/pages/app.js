@@ -822,10 +822,10 @@ const PACKS = [{k:'credits_essai', n:'Essai', c:3, p:2000, h:'pour tester'}, {k:
 function priceCc(){ return (S.pay && S.pay.cc) || payDetectCountry(); }
 function priceOf(key){ return TMPrix.get(key, priceCc()); }
 function priceV(key){ return TMPrix.text(key, priceCc()); }
-/* Lancement : options offertes → « 0 FCFA (Bientôt payant) ». */
+/* Lancement : options offertes → affichées « 0 FCFA ». */
 function isFree(key){ return TMPrix.isFree(key); }
-function priceT(key){ return priceV(key) + (isFree(key) ? ' ('+TMPrix.LAUNCH.tag+')' : ''); }
-function priceH(key){ return '<span data-price="'+key+'">'+esc(priceV(key))+'</span>'+(isFree(key) ? ' <span class="soon-tag">'+esc(TMPrix.LAUNCH.tag)+'</span>' : ''); }
+function priceT(key){ return priceV(key); }
+function priceH(key){ return '<span data-price="'+key+'">'+esc(priceV(key))+'</span>'; }
 /* Bouton de validation : « Payer 3 000 FCFA » ou, pendant le lancement, « Débloquer gratuitement ». */
 function payBtnH(key, freeLabel){ return isFree(key) ? ic('check')+(freeLabel || 'Débloquer gratuitement') : ic('card')+'Payer '+priceH(key); }
 /* « une seule fois » n'a pas de sens à 0 : pendant le lancement, on dit « offert ». */

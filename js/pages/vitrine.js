@@ -17,11 +17,11 @@ const SITE_CC = (() => {
 /* Pays hors zone mobile money FedaPay : on montre les moyens du Bénin + carte. */
 function sitePayOps(){ return SITE_PAY[SITE_CC] || []; }
 /* Prix dans la devise du visiteur (js/prix.js). */
-/* Lancement : options offertes → « 0 FCFA (Bientôt payant) » ; packs de crédits « Bientôt disponible ». */
+/* Lancement : options offertes → « 0 FCFA » ; packs de crédits « Bientôt disponible ». */
 const isFree = k => !!(window.TMPrix && TMPrix.isFree(k));
 const creditsSoon = () => !!(window.TMPrix && TMPrix.creditsSoon());
 const monthlyCredits = () => window.TMPrix ? TMPrix.monthly() : 5;
-const priceTxt = k => window.TMPrix ? TMPrix.text(k, SITE_CC) + (isFree(k) ? ' ('+TMPrix.LAUNCH.tag+')' : '') : '';
+const priceTxt = k => window.TMPrix ? TMPrix.text(k, SITE_CC) : '';
 const onceTxt = k => isFree(k) ? '' : ' une seule fois';
 const priceAmt = (k, small) => { const r = window.TMPrix && TMPrix.get(k, SITE_CC); return r ? TMPrix.num(r.local)+'<small>'+esc(TMPrix.symbol(SITE_CC))+(small ? ' '+small : '')+'</small>' : ''; };
 function sitePayList(card){

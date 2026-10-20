@@ -91,8 +91,8 @@ function ago(min){
   return d === 1 ? 'hier' : 'il y a '+d+' j';
 }
 function hhmm(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
-/* Lancement : option offerte → mention « Bientôt payant » à la place de « une seule fois ». */
-function tmFreeTag(key, once){ return window.TMPrix && TMPrix.isFree(key) ? ' <span class="soon-tag">'+TMPrix.LAUNCH.tag+'</span>' : once; }
+/* Lancement : option offerte → pas de mention « une seule fois ». */
+function tmFreeTag(key, once){ return window.TMPrix && TMPrix.isFree(key) ? '' : once; }
 function fcfa(n){ return n.toLocaleString('fr-FR').replace(/ |\s/g,' ')+' FCFA'; }
 
 P.camera = '<path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/>';
@@ -1009,7 +1009,7 @@ function readyNote(){
     "Tu ne vois que des fiches talent ; seuls les talents voient tes fiches projet.",
     "Une personne arrivée par ton lien ou ton code QR peut lire ta fiche, pas t'inviter.",
     "Tes invitations expirent au bout de 10 jours sans réponse.",
-    "Ta première fiche projet est incluse. Tu peux porter jusqu'à 3 projets : "+(window.TMPrix ? TMPrix.text('slot') : '5 000 FCFA')+(window.TMPrix && TMPrix.isFree('slot') ? ' ('+TMPrix.LAUNCH.tag+')' : '')+" par emplacement supplémentaire"+(window.TMPrix && TMPrix.isFree('slot') ? '' : ', une seule fois')+".",
+    "Ta première fiche projet est incluse. Tu peux porter jusqu'à 3 projets : "+(window.TMPrix ? TMPrix.text('slot') : '5 000 FCFA')+" par emplacement supplémentaire"+(window.TMPrix && TMPrix.isFree('slot') ? '' : ', une seule fois')+".",
   ];
   return '<div class="note-card">'+ic('eye')+'<div><b>Qui voit quoi</b><ul>'+li.map(x => '<li>'+esc(x)+'</li>').join('')+'</ul></div></div>';
 }

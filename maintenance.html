@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>TakaMatch — Maintenance en cours</title>
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1815" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<!-- ============================================================
+     TakaMatch — page de maintenance
+     Affichée quand l'équipe active la maintenance (espace équipe →
+     module « Maintenance »). Le réglage vit dans Supabase :
+     app_settings, clé « maintenance » (supabase/23_maintenance.sql).
+     · Titre, message et retour prévu viennent du réglage.
+     · La page revérifie toute seule toutes les 30 s et renvoie le
+       visiteur là où il était dès que c'est reparti (?retour=/page).
+     · ?apercu=1 : aperçu pour l'équipe, sans redirection
+       (titre, msg, fin, debut, portee peuvent être passés dans l'adresse).
+     Autonome : styles et script dans ce fichier, pour s'afficher même
+     si le reste du site est en travaux.
+     ============================================================ -->
+<script>
+  (function(){ var t = null; try{ t = localStorage.getItem('tm-theme'); }catch(e){}
+    if(t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t); })();
+</script>
+<style>
+  :root{
+    --ground:#F4F1EA; --surface:#FAF9F5; --surface-2:#F2EFE7; --line:#E4E0D6; --line-strong:#D2CCBC;
+    --ink:#1F1E1B; --ink-2:#5D5A52; --ink-3:#706C5E;
+    --tal:#007CD8; --tal-soft:#DAE6F1; --tal-ink:#0A5C99;
+    --vis:#FFD741; --vis-soft:#F2E6BE; --vis-ink:#8A6008;
+    --ok:#4B7F52; --ok-bg:#E8EFE5; --ok-ink:#3A6640;
+    --warn:#B07D2E; --warn-bg:#F5EDDC; --warn-ink:#7D5715;
+    --glow-1:rgba(255,215,65,.30); --glow-2:rgba(0,124,216,.16);
+    --btn:#1F1E1B; --btn-on:#FAF9F5;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --disp:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  :root[data-theme="dark"]{
+    --ground:#1A1815; --surface:#22201C; --surface-2:#282521; --line:#37332D; --line-strong:#4A453D;
+    --ink:#F2EFE8; --ink-2:#BDB7AC; --ink-3:#A49E92;
+    --tal:#3FA3EE; --tal-soft:#1A3244; --tal-ink:#9CD1FA;
+    --vis:#FFD741; --vis-soft:#3B300C; --vis-ink:#F0CE6F;
+    --ok:#7FA886; --ok-bg:#1C2A1E; --ok-ink:#9DC2A3;
+    --warn:#D2A44E; --warn-bg:#2C2312; --warn-ink:#E0BC77;
+    --glow-1:rgba(255,215,65,.10); --glow-2:rgba(63,163,238,.12);
+    --btn:#F2EFE8; --btn-on:#1A1815;
+  }
+  *{box-sizing:border-box;margin:0}
+  html{min-height:100%;background:var(--ground);background-image:radial-gradient(60% 50% at 12% 0%,var(--glow-1),transparent 70%),radial-gradient(55% 45% at 100% 100%,var(--glow-2),transparent 70%)}
+  body{font-family:var(--sans);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;align-items:center;padding:24px 16px 32px}
+  [hidden]{display:none!important}
+
+  .ribbon{position:fixed;top:0;left:0;right:0;z-index:5;background:var(--ink);color:var(--ground);font:600 12.5px/1 var(--sans);text-align:center;padding:9px 12px;letter-spacing:.01em}
+  .ribbon + .top{margin-top:30px}
+
+  .top{width:100%;max-width:580px;display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(20px,6vh,52px)}
+  .top img{height:30px;width:auto;display:block}
+  .theme{border:1px solid var(--line);background:var(--surface);color:var(--ink-2);width:38px;height:38px;border-radius:999px;display:grid;place-items:center;cursor:pointer}
+  .theme:hover{color:var(--ink);border-color:var(--line-strong)}
+  .theme svg{width:18px;height:18px}
+
+  main{width:100%;max-width:580px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(26px,6vw,44px) clamp(20px,6vw,44px) clamp(22px,5vw,36px);
+    box-shadow:0 1px 2px rgba(31,30,27,.04),0 24px 60px -30px rgba(31,30,27,.25);text-align:center;animation:rise .5s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* Illustration : les deux Takam (Visionnaire et Talent) au travail autour d'un engrenage. */
+  .art{position:relative;width:228px;height:132px;margin:0 auto 22px}
+  .art .halo{position:absolute;border-radius:50%}
+  .art .h-v{width:118px;height:118px;left:6px;top:8px;background:var(--vis-soft)}
+  .art .h-t{width:118px;height:118px;right:6px;top:8px;background:var(--tal-soft)}
+  .art img{position:absolute;width:96px;height:96px;top:22px;filter:drop-shadow(0 8px 10px rgba(31,30,27,.16))}
+  .art .k-v{left:18px;animation:bob 3.6s ease-in-out infinite}
+  .art .k-t{right:18px;animation:bob 3.6s ease-in-out -1.8s infinite}
+  .art .gear{position:absolute;left:50%;top:2px;width:40px;height:40px;margin-left:-20px;color:var(--ink-3);animation:spin 9s linear infinite;z-index:2}
+  .art .gear2{left:calc(50% + 17px);top:30px;width:24px;height:24px;margin-left:-12px;animation-direction:reverse;animation-duration:5.4s;color:var(--line-strong)}
+  @keyframes bob{50%{transform:translateY(-5px) rotate(-2deg)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .done .art .gear,.done .art .gear2{animation:none;opacity:0}
+
+  .tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--warn-ink);
+    background:var(--warn-bg);border-radius:999px;padding:5px 12px;margin-bottom:16px}
+  .tag i{width:7px;height:7px;border-radius:50%;background:var(--warn);animation:beat 1.8s ease-in-out infinite}
+  @keyframes beat{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--warn) 55%,transparent)}60%{box-shadow:0 0 0 6px transparent}}
+  .done .tag{color:var(--ok-ink);background:var(--ok-bg)} .done .tag i{background:var(--ok);animation:none}
+
+  h1{font-family:var(--disp);font-weight:600;font-size:clamp(26px,5.6vw,36px);line-height:1.15;letter-spacing:-.01em;margin-bottom:12px;text-wrap:balance}
+  .lead{font-size:16px;line-height:1.6;color:var(--ink-2);max-width:44ch;margin:0 auto;text-wrap:pretty;white-space:pre-line}
+
+  /* Retour prévu */
+  .eta{margin:24px auto 0;max-width:400px;text-align:left;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .eta .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .eta small{font-size:12.5px;color:var(--ink-3);font-weight:500}
+  .eta b{font-family:var(--disp);font-weight:600;font-size:24px;line-height:1.1}
+  .eta .left{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+  .bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:12px}
+  .bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--vis),var(--tal));transition:width .8s var(--ease)}
+  .eta.soft b{font-size:18px}
+
+  .watch{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:16px;font-size:13px;color:var(--ink-3)}
+  .watch .dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--line-strong);border-top-color:var(--tal);animation:spin 1s linear infinite}
+  .watch button{border:0;background:none;color:var(--ink-2);font:600 13px var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:2px}
+  .watch button:disabled{opacity:.5;cursor:default}
+
+  .safe{list-style:none;padding:0;margin:26px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:left}
+  .safe li{background:var(--surface-2);border-radius:10px;padding:11px 12px;font-size:13px;line-height:1.45;color:var(--ink-2);display:flex;flex-direction:column;gap:6px}
+  .safe svg{width:18px;height:18px;color:var(--ink-3)}
+  .safe b{color:var(--ink);font-weight:600}
+
+  .acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:24px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border-radius:10px;font:600 15px/1 var(--sans);text-decoration:none;cursor:pointer;
+    border:1px solid transparent;transition:transform .15s var(--ease),background .15s,border-color .15s}
+  .btn:active{transform:scale(.98)}
+  .btn svg{width:18px;height:18px}
+  .btn-main{background:var(--btn);color:var(--btn-on)} .btn-main:hover{opacity:.9}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)} .btn-ghost:hover{background:var(--surface-2)}
+  .btn:focus-visible,.theme:focus-visible,.watch button:focus-visible,a:focus-visible{outline:2px solid var(--tal);outline-offset:3px}
+
+  footer{margin-top:24px;font-size:13.5px;color:var(--ink-3);text-align:center;line-height:1.7}
+  footer a{color:var(--ink-2);text-underline-offset:3px}
+  .soc{display:flex;justify-content:center;gap:6px;margin-bottom:8px}
+  .soc a{width:38px;height:38px;border-radius:999px;display:grid;place-items:center;color:var(--ink-2);border:1px solid var(--line);background:var(--surface)}
+  .soc a:hover{color:var(--ink);border-color:var(--line-strong)}
+  .soc svg{width:17px;height:17px}
+
+  @media (max-width:520px){
+    .safe{grid-template-columns:minmax(0,1fr)}
+    .safe li{flex-direction:row;align-items:flex-start;gap:10px}
+    .safe svg{flex:0 0 auto;margin-top:1px}
+    .btn{width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){main,.art img,.art .gear,.tag i,.watch .dot{animation:none}}
+</style>
+</head>
+<body>
+<div class="ribbon" id="ribbon" hidden>Aperçu · ce que verront les visiteurs pendant la maintenance</div>
+<header class="top">
+  <a href="index.html" aria-label="Accueil TakaMatch"><img src="assets/images/logo-principal.svg" alt="TakaMatch" width="113" height="30"></a>
+  <button class="theme" id="theme" type="button" aria-label="Changer de thème"></button>
+</header>
+
+<main id="card" aria-labelledby="t" aria-live="polite">
+  <div class="art" aria-hidden="true">
+    <span class="halo h-v"></span><span class="halo h-t"></span>
+    <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+    <svg class="gear gear2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+    <img class="k-v" src="assets/images/takam/takam-visionnaire.webp" alt="" width="96" height="96">
+    <img class="k-t" src="assets/images/takam/takam-talent.webp" alt="" width="96" height="96">
+  </div>
+
+  <span class="tag"><i aria-hidden="true"></i><span id="tag">Maintenance en cours</span></span>
+  <h1 id="t">On améliore TakaMatch</h1>
+  <p class="lead" id="lead">La plateforme fait une courte pause pour une mise à jour. Tes données, tes conversations et tes crédits sont en sécurité.</p>
+
+  <div class="eta" id="eta" hidden>
+    <div class="row"><small id="etaL">Retour prévu vers</small><span class="left" id="etaLeft"></span></div>
+    <b id="etaT"></b>
+    <div class="bar" id="etaBar"><i id="etaFill"></i></div>
+  </div>
+
+  <div class="watch" id="watch"><span class="dot" aria-hidden="true"></span><span id="watchT">On vérifie toutes les 30 secondes : tu seras ramené sur TakaMatch dès que c'est reparti.</span><button type="button" id="now">Vérifier maintenant</button></div>
+
+  <ul class="safe" id="safe">
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3.5 8-10V5.5L12 2.5 4 5.5V12c0 6.5 8 10 8 10z"/><path d="m9 12 2 2 4-4.5"/></svg><span><b>Ton compte</b> et ta fiche sont en sécurité.</span></li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8 8 0 0 1-11.6 7.1L3 20.5l1.9-6.4A8 8 0 1 1 21 11.5z"/></svg><span><b>Tes messages</b> et invitations t'attendent.</span></li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><path d="M9 15v2c0 1.7 2.7 3 6 3s6-1.3 6-3v-5c0-1.7-2.7-3-6-3"/></svg><span><b>Tes crédits</b> ne bougent pas.</span></li>
+  </ul>
+
+  <div class="acts" id="acts"></div>
+</main>
+
+<footer>
+  <div class="soc">
+    <a href="https://chat.whatsapp.com/IsCXiO0V7AF27BI5eqgvR4" target="_blank" rel="noopener" aria-label="Communauté WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2a9.9 9.9 0 0 0-8.5 15l-1.4 5 5.2-1.4A9.9 9.9 0 1 0 12.04 2zm0 18.1a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3a8.2 8.2 0 1 1 7 3.9zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg></a>
+    <a href="https://www.facebook.com/takamatch" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.9.3-1.5 1.5-1.5h1.5V4.4a20 20 0 0 0-2.2-.1c-2.2 0-3.7 1.3-3.7 3.8v2.4H8v3h2.6V21z"/></svg></a>
+    <a href="https://www.instagram.com/takaamatch" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r=".6" fill="currentColor"/></svg></a>
+    <a href="https://www.linkedin.com/company/takamatch" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.9 8.8H3.7V20h3.2zM5.3 3.5a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8zM20.3 13.6c0-3-1.6-5-4.3-5a3.7 3.7 0 0 0-3.3 1.8V8.8H9.6V20h3.2v-5.6c0-1.5.3-2.9 2.1-2.9s1.9 1.7 1.9 3V20h3.2z"/></svg></a>
+    <a href="https://www.tiktok.com/@takamatch" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 3h-3.1v12.1a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.4a5.8 5.8 0 1 0 4.9 5.7V9a7.4 7.4 0 0 0 4.2 1.3V7.2A4.3 4.3 0 0 1 16.6 3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UCNpx3ccM4wzZuVc7AMehRKQ" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3z"/></svg></a>
+  </div>
+  Une question urgente ? Écris-nous à <a href="mailto:contact@takamatch.com">contact@takamatch.com</a>.
+</footer>
+
+<script>
+(function(){
+  'use strict';
+  /* Clé publique Supabase (la même que js/supabase.js) : lecture seule du réglage. */
+  var SB_URL = 'https://ucxeopgigfzmuqzuzynr.supabase.co';
+  var SB_KEY = 'sb_publishable_j-dzjIrf_94H7f0Ogg_QkQ_sGlLjW-R';
+  var EVERY = 30000;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var q = new URLSearchParams(location.search);
+  var PREVIEW = q.get('apercu') === '1';
+  var fr = function(t){ return String(t || '').replace(/ ([:;!?»])/g, ' $1').replace(/« /g, '« '); };
+  var I = {
+    home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.2 12 3l9 7.2V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+    arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></svg>',
+    wa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 20v-1.6a4.4 4.4 0 0 0-4.4-4.4H6.4A4.4 4.4 0 0 0 2 18.4V20"/><circle cx="8.5" cy="7" r="4"/><path d="M22 20v-1.6a4.4 4.4 0 0 0-3.3-4.2"/><path d="M15.5 3.2a4.4 4.4 0 0 1 0 8.5"/></svg>',
+    sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2.5 12h2M19.5 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/></svg>',
+    moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>'
+  };
+
+  /* Adresse de retour : seulement une page de ce site. */
+  var back = q.get('retour') || '';
+  if(!/^\/?[A-Za-z0-9._\-\/?=&%#]*$/.test(back) || back.indexOf('//') > -1 || /maintenance\.html/.test(back)) back = '';
+  var home = back || 'index.html';
+
+  var S = null, done = false, timer = 0;
+  var ms = function(s){ var t = s ? Date.parse(s) : NaN; return isNaN(t) ? 0 : t; };
+  function hhmm(t){ var d = new Date(t); return d.getHours() + ' h ' + String(d.getMinutes()).padStart(2, '0'); }
+  function dayOf(t){ var d = new Date(t), n = new Date(), tm = new Date(); tm.setDate(n.getDate() + 1);
+    if(d.toDateString() === n.toDateString()) return ''; if(d.toDateString() === tm.toDateString()) return 'demain, ';
+    return d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}) + ', '; }
+  function left(ms){ var m = Math.ceil(ms / 60000); if(m < 1) return 'd\'un instant à l\'autre'; if(m < 60) return 'dans ' + m + ' min';
+    var h = Math.floor(m / 60), r = m % 60; return 'dans ' + h + ' h' + (r ? ' ' + String(r).padStart(2, '0') : ''); }
+
+  function btn(label, href, icon, main){
+    var a = document.createElement('a'); a.className = 'btn ' + (main ? 'btn-main' : 'btn-ghost'); a.href = href;
+    a.innerHTML = I[icon] + '<span></span>'; a.lastChild.textContent = label;
+    if(/^https?:/.test(href)){ a.target = '_blank'; a.rel = 'noopener'; }
+    return a;
+  }
+
+  function paint(){
+    if(!S) return;
+    $('t').textContent = fr(S.title || 'On améliore TakaMatch');
+    $('lead').textContent = fr(S.message || 'La plateforme fait une courte pause pour une mise à jour. Tes données, tes conversations et tes crédits sont en sécurité.');
+    document.title = 'TakaMatch — ' + (S.title || 'Maintenance en cours');
+    tick();
+    var acts = $('acts'); acts.innerHTML = '';
+    if(S.scope === 'app') acts.appendChild(btn('Visiter le site en attendant', 'index.html', 'home', true));
+    acts.appendChild(btn('Communauté WhatsApp', 'https://chat.whatsapp.com/IsCXiO0V7AF27BI5eqgvR4', 'wa', S.scope !== 'app'));
+  }
+
+  /* Compte à rebours vers le retour prévu. */
+  function tick(){
+    if(!S || done) return;
+    var end = ms(S.ends_at), start = ms(S.started_at) || ms(S.starts_at), now = Date.now(), eta = $('eta');
+    eta.hidden = false; eta.classList.remove('soft'); $('etaBar').hidden = false;
+    if(!end){
+      eta.classList.add('soft'); $('etaL').textContent = 'Retour prévu'; $('etaT').textContent = 'D\'ici quelques minutes'; $('etaLeft').textContent = ''; $('etaBar').hidden = true; return;
+    }
+    if(now >= end){
+      eta.classList.add('soft'); $('etaL').textContent = 'Retour prévu vers ' + hhmm(end);
+      $('etaT').textContent = 'Encore un petit moment, on y est presque'; $('etaLeft').textContent = ''; $('etaFill').style.width = '96%'; return;
+    }
+    $('etaL').textContent = 'Retour prévu vers';
+    $('etaT').textContent = dayOf(end) + hhmm(end);
+    $('etaLeft').textContent = left(end - now);
+    var pct = start && end > start ? Math.min(96, Math.max(4, (now - start) / (end - start) * 100)) : 8;
+    $('etaFill').style.width = pct.toFixed(1) + '%';
+  }
+
+  /* C'est reparti : on le dit, puis on ramène le visiteur. */
+  function reopened(){
+    if(done) return; done = true; clearTimeout(timer);
+    document.body.classList.add('done');
+    $('tag').textContent = 'C\'est reparti';
+    $('t').textContent = 'TakaMatch est de retour';
+    $('lead').textContent = 'Merci pour ta patience. Tu retrouves tout là où tu l\'avais laissé.';
+    $('eta').hidden = true; $('safe').hidden = true;
+    var n = 4, w = $('watchT'); $('now').hidden = true; document.querySelector('.watch .dot').hidden = true;
+    var acts = $('acts'); acts.innerHTML = ''; acts.appendChild(btn(back ? 'Reprendre où j\'en étais' : 'Aller sur TakaMatch', home, 'arrow', true));
+    (function count(){ w.textContent = 'Redirection dans ' + n + ' s…'; if(n-- <= 0) return location.replace(home); setTimeout(count, 1000); })();
+  }
+
+  async function check(manual){
+    var b = $('now'); if(manual){ b.disabled = true; b.textContent = 'Vérification…'; }
+    try{
+      var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function(){ ctl.abort(); }, 8000) : 0;
+      var r = await fetch(SB_URL + '/rest/v1/app_settings?key=eq.maintenance&select=value', {headers:{apikey:SB_KEY}, cache:'no-store', signal:ctl ? ctl.signal : undefined});
+      clearTimeout(tm);
+      if(r.ok){
+        var rows = await r.json(), v = rows && rows[0] && rows[0].value;
+        var on = v && v.active && (!v.starts_at || ms(v.starts_at) <= Date.now());
+        if(!on) return reopened();
+        S = v; paint();
+        try{ sessionStorage.setItem('tm-maint', JSON.stringify({v:v, at:Date.now()})); }catch(e){}
+      }
+    }catch(e){ /* réseau coupé : on garde l'affichage et on réessaie plus tard */ }
+    finally{ if(manual){ b.disabled = false; b.textContent = 'Vérifier maintenant'; } }
+    if(!done){ clearTimeout(timer); timer = setTimeout(check, EVERY); }
+  }
+
+  /* ---------- Démarrage ---------- */
+  if(PREVIEW){
+    $('ribbon').hidden = false;
+    $('watchT').textContent = 'Les visiteurs sont ramenés automatiquement sur TakaMatch dès la fin de la maintenance.';
+    $('now').hidden = true;
+    S = {title:q.get('titre') || '', message:q.get('msg') || '', ends_at:q.get('fin') || null, started_at:q.get('debut') || new Date().toISOString(), scope:q.get('portee') === 'app' ? 'app' : 'all'};
+    paint();
+  } else {
+    /* Affichage immédiat avec le dernier réglage connu, puis vérification. */
+    try{ var c = JSON.parse(sessionStorage.getItem('tm-maint') || 'null'); if(c && c.v && c.v.active){ S = c.v; paint(); } }catch(e){}
+    if(!S){ S = {}; paint(); }
+    check();
+    $('now').addEventListener('click', function(){ check(true); });
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden && !done) check(); });
+    window.addEventListener('online', function(){ if(!done) check(); });
+  }
+  setInterval(tick, 15000);
+
+  var th = $('theme');
+  function paintTheme(){ var d = document.documentElement.getAttribute('data-theme') === 'dark'; th.innerHTML = d ? I.sun : I.moon; th.setAttribute('aria-label', d ? 'Passer en thème clair' : 'Passer en thème sombre'); }
+  th.addEventListener('click', function(){ var n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', n); try{ localStorage.setItem('tm-theme', n); }catch(e){} paintTheme(); });
+  paintTheme();
+})();
+</script>
+</body>
+</html>

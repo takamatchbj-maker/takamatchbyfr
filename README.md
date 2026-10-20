@@ -149,7 +149,7 @@ Le bouton « Préparer le pacte d'associés » de l'Atelier ouvre un éditeur pl
 
 ## Lancement sans paiement (depuis le 16/10/2026)
 
-- **Ce que voient les membres** : second profil, emplacement projet et pacte d'associés affichés **0 FCFA « Bientôt payant »**,
+- **Ce que voient les membres** : second profil, emplacement projet et pacte d'associés affichés **0 FCFA**,
   débloqués d'un clic sans aucune information de paiement. Achat de crédits : **« Bientôt disponible »**, packs montrés en gris avec leurs prix.
   **5 crédits d'invitation par mois** pour les Visionnaires.
 - **Base** : `supabase/20_lancement_gratuit.sql` (réglage `app_settings.launch`, fonction `claim_free()`, recharge à 5 le 1er du mois via pg_cron).
@@ -221,3 +221,21 @@ L'Atelier a deux onglets : **Notre équipe** (l'Atelier habituel) et **Partenair
 - **À vérifier avant le lancement** : les fiches sont indicatives. Les sites web ne sont renseignés que
   quand ils sont sûrs ; sinon la fiche propose une recherche web. Aucune structure n'est encore marquée
   « partenaire officiel » : à cocher une fois l'accord signé.
+
+## Mode maintenance
+
+- **Activer / arrêter** : espace équipe → **Administration › Maintenance** (super admin). L'interrupteur ouvre une fenêtre
+  de préparation : portée, heure de début (maintenant ou dans 5 / 15 / 30 min), retour prévu, message. Rien ne se ferme
+  avant la case de confirmation. Pendant la maintenance : bandeau sur tout l'espace équipe, boutons « +15 min » / « +30 min »,
+  réouverture confirmée en une étape.
+- **Portée** : « Tout le site » (vitrine, inscription, outil, fiches partagées) ou « L'outil et l'inscription » (la vitrine reste ouverte).
+  Les pages légales (CGU, confidentialité, mentions) restent toujours accessibles.
+- **Ce que voient les visiteurs** : `maintenance.html` (titre, message, retour prévu avec compte à rebours). Elle revérifie toutes
+  les 30 s et ramène chacun sur la page qu'il quittait. Aperçu : `maintenance.html?apercu=1`.
+- **Membres déjà connectés** : `js/maintenance.js` (chargé sur index, inscription, app, profil) revérifie toutes les minutes.
+  Maintenance programmée → bandeau de préavis avec compte à rebours, puis bascule à l'heure dite.
+- **L'équipe** : l'espace équipe pose un laissez-passer sur le navigateur (12 h) ; on peut y parcourir le site fermé, avec un
+  rappel en bas de l'écran. Ce n'est pas une protection : les données restent protégées par les règles de la base.
+- **Base** : `supabase/23_maintenance.sql` (réglage `app_settings.maintenance` + inscription automatique au journal d'audit).
+- **Secours** (espace équipe inaccessible) : Supabase → SQL Editor →
+  `update app_settings set value = jsonb_set(value, '{active}', 'false') where key = 'maintenance';`

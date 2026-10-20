@@ -187,12 +187,12 @@ html.pe-lock, html.pe-lock body{overflow:hidden}
 .pe-edit .pe-ti{font-family:var(--disp);font-size:19px;font-weight:600;margin:8px 0 10px;background:var(--pp)}
 .pe-edit .pe-ta{font-family:var(--disp);font-size:15px;line-height:1.6;min-height:180px;background:var(--pp);padding:12px 14px}
 .pe-edit .pe-hint{margin:8px 0 10px;font-family:var(--sans)}
-.pe-gen{border-left:3px solid var(--tal-300);padding:4px 0 4px 14px;margin:0 0 12px;opacity:.85}
+.pe-gen{padding:4px 0;margin:0 0 12px;opacity:.85}
 .pe-gen small{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.pe-jnote{display:flex;gap:10px;margin:2px 0 12px;padding:10px 12px;border-left:3px solid var(--tal-500);background:var(--tal-50);border-radius:0 6px 6px 0;font-family:var(--sans);font-size:13.5px;line-height:1.5}
+.pe-jnote{display:flex;gap:10px;margin:2px 0 12px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--tal-500) 22%,transparent);background:var(--tal-50);border-radius:8px;font-family:var(--sans);font-size:13.5px;line-height:1.5}
 .pe-jnote small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tal-700);margin-bottom:2px}
 .pe-jnote .pe-ic{color:var(--tal-600);margin-top:2px}
-.pe-jnote.edit{flex-direction:column;border-left-color:var(--vis-600);background:var(--vis-50)}
+.pe-jnote.edit{flex-direction:column;border-color:color-mix(in srgb,var(--vis-600) 30%,transparent);background:var(--vis-50)}
 .pe-ins{position:relative;height:22px;margin:0 -18px;display:flex;align-items:center;justify-content:center}
 .pe-ins button{opacity:0;display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:12px;background:var(--surface);border:1px dashed var(--tal-300)!important;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--tal-700);transition:opacity .15s;position:relative;z-index:1}
 .pe-ins::before{content:"";position:absolute;left:18px;right:18px;top:50%;border-top:1px dashed var(--tal-200);opacity:0;transition:opacity .15s}
