@@ -236,6 +236,6 @@ L'Atelier a deux onglets : **Notre équipe** (l'Atelier habituel) et **Partenair
   Maintenance programmée → bandeau de préavis avec compte à rebours, puis bascule à l'heure dite.
 - **L'équipe** : l'espace équipe pose un laissez-passer sur le navigateur (12 h) ; on peut y parcourir le site fermé, avec un
   rappel en bas de l'écran. Ce n'est pas une protection : les données restent protégées par les règles de la base.
-- **Base** : `supabase/23_maintenance.sql` (réglage `app_settings.maintenance` + inscription automatique au journal d'audit).
+- **Base** : `supabase/23_maintenance.sql` (réglage `app_settings.maintenance`, installé le 20/10/2026 ; le journal d'audit est rempli par l'espace équipe).
 - **Secours** (espace équipe inaccessible) : Supabase → SQL Editor →
   `update app_settings set value = jsonb_set(value, '{active}', 'false') where key = 'maintenance';`

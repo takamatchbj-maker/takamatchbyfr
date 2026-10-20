@@ -9,7 +9,7 @@
    · pendant la maintenance : bandeau sur tout l'espace équipe,
      prolongation en un clic (+15 min, +30 min), réouverture
      confirmée en une étape ;
-   · chaque bascule est inscrite au journal par la base (trigger).
+   · chaque bascule est inscrite au journal d'audit (admin_note).
    Réglage : app_settings › maintenance (supabase/23_maintenance.sql).
    Lu par js/maintenance.js sur les pages publiques et par
    maintenance.html. Modification réservée aux administrateurs.
@@ -86,6 +86,10 @@
     try{
       const res = await TMDB.update('app_settings', 'key=eq.maintenance', {value:v, updated_at:new Date().toISOString()});
       if(!res || !res.length) throw new Error('La base a refusé la modification : seul un administrateur peut changer ce réglage.');
+      const was = !!(M.v && M.v.active), now = !!v.active;
+      const act = now && !was ? 'Maintenance activée' : was && !now ? 'Maintenance terminée' : 'Maintenance modifiée';
+      const det = [scopeL(v.scope), now && v.starts_at ? 'début ' + when(ms(v.starts_at)) : '', now && v.ends_at ? 'retour prévu ' + when(ms(v.ends_at)) : '', now ? v.title : ''].filter(Boolean).join(' · ');
+      try{ await TMDB.rpc('admin_note', {p_action:act, p_detail:det}); }catch(e){}
       M.v = Object.assign({}, DEF, res[0].value || v); M.hist = null; A.logRows = null;
       M.busy = false; closeModal(); render(); toast(msg); return true;
     }catch(e){ M.busy = false; paintHero(); toast(e.message || 'La modification n\'a pas abouti.', 'bad'); return false; }
