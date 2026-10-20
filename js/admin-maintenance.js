@@ -19,8 +19,8 @@
   'use strict';
   if(typeof MODULES === 'undefined') return;
 
-  P.wrench = '<path d="M14.7 6.3a4 4 0 0 0 5.3 5.3l-8.3 8.3a2.4 2.4 0 0 1-3.4-3.4z"/><path d="M14.7 6.3 17 4a5 5 0 0 1 3 3l-2.3 2.3"/>';
-  P.ext = P.ext || '<path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>';
+  P.wrench = '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>';
+  P.ext = P.ext || '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>';
 
   /* Le module prend place dans « Administration », avant Paramètres. */
   const at = MODULES.findIndex(m => m.id === 'settings');
