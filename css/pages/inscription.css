@@ -1220,60 +1220,7 @@ b.req{color:var(--bad);font-weight:700}
 
 .ov-ok .ov-t{margin:14px 0 8px}
 
-/* ============================================================
-   Atelier de travail — hors produit
-   Un panneau discret pour sauter d'une étape à l'autre, changer de
-   rôle ou de thème, et remplir un exemple. Il ne fait pas partie de
-   l'onboarding : supprimez-le (#wb) avant intégration.
-   ============================================================ */
-.wb{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:200;display:flex;flex-direction:column-reverse;align-items:flex-start;gap:10px}
-
-.wb-t{
-  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
-  background:var(--ink);color:var(--ground);box-shadow:var(--shadow-pop);
-  transition:transform var(--t) var(--ease);
-}
-
-.wb-t:hover{transform:translateY(-1px)}
-
-.wb-t .ic{width:19px;height:19px}
-
-.wb-p{
-  width:272px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
-  box-shadow:var(--shadow-3);padding:14px;display:flex;flex-direction:column;gap:12px;
-  animation:pop var(--t) var(--ease) both;
-}
-
-.wb-p[hidden]{display:none!important}
-
-.wb-p .hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-
-.wb-p .hd b{font-family:var(--disp);font-size:16px;font-weight:600}
-
-.wb-p .field > label{font-size:12.5px;font-weight:600;color:var(--ink-3)}
-
-.wb-p select.inp{height:38px;font-size:14px;padding:0 10px}
-
-.wb-seg{display:grid;grid-template-columns:1fr 1fr;padding:3px;gap:2px;background:var(--surface-3);border-radius:var(--r-md)}
-
-.wb-seg button{height:32px;border-radius:var(--r-sm);font-size:13px;font-weight:600;color:var(--ink-2)}
-
-.wb-seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
-
-.wb-p .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-
-.wb-p .acts .btn{padding:0 10px}
-
-/* Sur mobile, la fenêtre occupe tout l'écran : l'atelier se range au
-   bord gauche, à mi-hauteur, loin des commandes du parcours. */
-@media (max-width:900px){
-  .wb{left:6px;bottom:auto;top:46%;flex-direction:column;align-items:flex-start}
-  .wb-t{width:34px;height:34px;opacity:.8}
-  .wb-t .ic{width:16px;height:16px}
-  .wb-p{width:min(272px,calc(100vw - 24px))}
-}
-
-.tm-shell .scene,.tm-shell #closed,.tm-shell #wb,.tm-shell #dash{display:none!important}
+.tm-shell .scene,.tm-shell #closed,.tm-shell #dash{display:none!important}
 
 .tm-shell,.tm-shell body{background:transparent!important}
 

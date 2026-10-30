@@ -23,6 +23,18 @@
     session = s || null;
     try{ if(s) localStorage.setItem(SKEY, JSON.stringify(s)); else localStorage.removeItem(SKEY); }catch(e){}
   }
+  /* Autre onglet : jetons renouvelés → on les reprend ; déconnexion → l'outil se ferme ici aussi. */
+  try{
+    addEventListener('storage', function(e){
+      if(e.key !== SKEY) return;
+      var had = !!session;
+      try{ session = e.newValue ? JSON.parse(e.newValue) : null; }catch(err){ session = null; }
+      if(had && !session){
+        if(/\/app(\.html)?$/.test(location.pathname)) location.replace('index.html');
+        else if(/\/admin(\.html)?$/.test(location.pathname)) location.reload();
+      }
+    });
+  }catch(e){}
   function fromTokens(t, user){
     var now = Math.floor(Date.now() / 1000);
     return {access_token:t.access_token, refresh_token:t.refresh_token,
@@ -144,6 +156,12 @@
       var u = await api('/auth/v1/user');
       session.user = u; setSession(session);
       return session;
+    },
+    /* Petites données attachées au compte (ex. brouillon d'inscription). */
+    saveMeta: async function(data){
+      var u = await api('/auth/v1/user', {method:'PUT', body:{data:data}});
+      if(session && u && u.id){ session.user = u; setSession(session); }
+      return u;
     },
     signOut: async function(){
       try{ if(session) await raw('/auth/v1/logout', {method:'POST'}); }catch(e){}

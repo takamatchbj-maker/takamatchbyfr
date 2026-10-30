@@ -170,7 +170,6 @@ window.TM_SHELL = true;
     var url = URL_OF[page] + (query || '');
     if(replace) location.replace(url); else location.href = url;
   }
-  var DEMO = {kind:'demo', email:'', view:'accueil', welcome:'Bienvenue dans le compte de démonstration.'};
 
   /* Profil de la base → format attendu par l'outil. */
   function toOnb(me){
@@ -192,7 +191,13 @@ window.TM_SHELL = true;
 
   async function startApp(){
     var q = new URLSearchParams(location.search);
-    if(!window.TMDB){ send({type:'account', acc:DEMO}); return; }
+    /* Pas de client de base (js/supabase.js n'a pas pu se charger) : jamais de compte fictif.
+       Hors ligne → page d'erreur réseau ; sinon → connexion. */
+    if(!window.TMDB){
+      if(navigator.onLine === false) location.replace('erreur.html?type=reseau&retour=' + encodeURIComponent('/app.html'));
+      else goTo('onb', true, '?mode=login');
+      return;
+    }
     var s = null;
     try{ s = await TMDB.ensure(); }catch(e){}
     if(!s){ goTo('onb', true, '?mode=login'); return; }

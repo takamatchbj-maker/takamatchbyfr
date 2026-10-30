@@ -2,8 +2,8 @@
    TakaMatch · Espace équipe branché sur la vraie base
    ------------------------------------------------------------
    Chargé après le script principal d'admin.html. Une fois le membre
-   de l'équipe connecté, remplace les données de démonstration (D.*)
-   par les vraies lignes Supabase et fait passer chaque action par
+   de l'équipe connecté, remplit l'état (D.*, vide au départ)
+   avec les vraies lignes Supabase et fait passer chaque action par
    une fonction sécurisée côté base (admin_*), qui vérifie le rôle,
    applique la décision, prévient l'utilisateur et écrit au journal.
    Rien n'est gardé dans le navigateur : les données vivent en mémoire.
@@ -48,7 +48,7 @@
       notes:(x.notes || []).map(n => ({at:ms(n.at), by:n.by, t:n.t})), online:!!x.online, completion:Math.round(fill / 5 * 100),
       invitesSent:x.invSent || 0, invitesRecv:x.invRecv || 0, matches:x.matches || 0, skills:x.skills || [], bio:x.bio || '',
       projects:(x.projects || []).map(p => p.title || 'Projet sans titre'), projRows:x.projects || [], photo:x.photo || '',
-      demo:!!x.demo, staff:!!x.staff, onboarded:!!x.onboarded};
+      staff:!!x.staff, onboarded:!!x.onboarded};
   }
   const VSTATUS = {pending:'pending', more_info:'more', approved:'approved', rejected:'rejected'};
   function toVerif(v, staffBy){
@@ -137,7 +137,7 @@
   async function after(msg, kind){ A.modal = null; await LIVE.load(true); if(msg) toast(msg, kind); }
   async function run(p, msg, kind){ try{ await p; await after(msg, kind); return true; }catch(e){ toast(e.message || 'L\'action n\'a pas abouti.', 'bad'); return false; } }
 
-  /* ---------- Remplacements : persistance, journal, bus de démo ---------- */
+  /* ---------- Remplacements : persistance, journal, ancien bus local ---------- */
   const _save = save;
   save = function(){ if(!LIVE.on) _save(); };   /* jamais de données réelles dans le navigateur */
   log = function(act, target, d){
@@ -149,7 +149,7 @@
   const _onPlatform = onPlatform; onPlatform = function(m){ if(!LIVE.on) _onPlatform(m); };
 
   const _statusChip = statusChip;
-  statusChip = function(u){ return _statusChip(u) + (u && u.demo ? ' <span class="chip" title="Compte de démonstration">Démo</span>' : '') + (u && u.staff ? ' <span class="chip c-tal">Équipe</span>' : ''); };
+  statusChip = function(u){ return _statusChip(u) + (u && u.staff ? ' <span class="chip c-tal">Équipe</span>' : ''); };
 
   /* ---------- Actions branchées sur la base ---------- */
   decideVerif = function(v, status, motif){
@@ -203,13 +203,13 @@
       + (u ? '<button class="btn btn-quiet" data-act="open-user" data-id="' + u.id + '">Voir le compte</button>' : ''));
   };
 
-  /* ---------- Interceptions des clics qui touchaient la démo ---------- */
+  /* ---------- Interceptions des clics : actions passées par la base ---------- */
   async function openVerif(v){
     if(!v) return;
     const u = userBy(v.uid);
     if(!v.loaded){
       toast('Ouverture du dossier…');
-      const load = async (path, label) => { try{ return await priv('identity', path); }catch(e){ return u && u.demo ? '' : missingImg(label); } };
+      const load = async (path, label) => { try{ return await priv('identity', path); }catch(e){ return missingImg(label); } };
       [v.doc, v.selfie] = await Promise.all([load(v.docPath, 'Pièce d\'identité'), load(v.selfiePath, 'Selfie')]);
       v.loaded = true;
     }
@@ -241,7 +241,6 @@
       case 'ticket': { stop(); A.ticket = id; render(); break; }
       case 'refund': stop(); toast('Les remboursements se font depuis le tableau de bord FedaPay tant que les paiements ne sont pas branchés ici.'); break;
       case 't-resolve': stop(); toast('Les litiges d\'équipe ne sont pas encore ouverts sur la plateforme.'); break;
-      case 'reset-demo': case 'reset-go': stop(); toast('L\'espace équipe affiche les vraies données : il n\'y a plus de démo à réinitialiser.'); closeModal(); break;
       case 'refresh-live': stop(); LIVE.load().then(() => toast('Données à jour.')); break;
     }
   }, true);

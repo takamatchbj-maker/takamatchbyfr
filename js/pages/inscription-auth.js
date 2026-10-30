@@ -42,7 +42,39 @@
     }
   }
 
+  /* ---------- Brouillon local : reprendre l'inscription là où on l'a laissée ----------
+     Gardé sur cet appareil pour ce compte seulement, sans photo ni couverture,
+     et effacé dès que la fiche est publiée. */
+  const DRAFT = 'tm-onb-draft';
+  let lastMeta = '';
+  function saveDraft(){
+    const uid = DB.uid(); if(!uid || O.step < 2 || O.step > PHOTOS) return;
+    try{
+      const me = Object.assign({}, ME, {photo:'', project:Object.assign({}, ME.project || {}, {cover:''})});
+      localStorage.setItem(DRAFT, JSON.stringify({uid, step:O.step, roleSel:O.roleSel, pactOk:O.pactOk, me}));
+    }catch(e){}
+    /* Copie courte sur le compte : la reprise marche aussi depuis un autre appareil. */
+    const meta = {s:O.step, r:O.roleSel || '', k:!!O.pactOk, f:ME.first || '', l:ME.last || '', x:ME.sex || '', c:ME.city || '', cc:ME.cityCc || ''};
+    const key = JSON.stringify(meta);
+    if(key !== lastMeta && DB.saveMeta){ lastMeta = key; DB.saveMeta({onb:meta}).catch(() => { lastMeta = ''; }); }
+  }
+  function readDraft(){
+    try{ const d = JSON.parse(localStorage.getItem(DRAFT) || 'null'); if(d && d.uid === DB.uid()) return d; }catch(e){}
+    const u = DB.user() || {}, m = (u.user_metadata || {}).onb;
+    if(!m || !m.s) return null;
+    /* La fiche n'est gardée que sur l'appareil : depuis un autre, on rouvre au plus à l'étape fiche. */
+    return {step:Math.min(m.s, FICHE), roleSel:m.r || null, pactOk:!!m.k, me:{first:m.f || '', last:m.l || '', sex:m.x || '', city:m.c || '', cityCc:m.cc || '', role:m.r || 'tal'}};
+  }
+  function dropDraft(){
+    try{ localStorage.removeItem(DRAFT); }catch(e){}
+    const u = DB.user() || {};
+    if(DB.uid() && DB.saveMeta && (u.user_metadata || {}).onb) DB.saveMeta({onb:null}).catch(() => {});
+  }
+  const _render = renderOnb;
+  renderOnb = function(){ const r = _render.apply(this, arguments); saveDraft(); return r; };
+
   function goApp(login){
+    dropDraft();
     O.sending = true;
     post({type:'onb-done', login:!!login, ident:DB.email()});
   }
@@ -53,6 +85,17 @@
     if(me && me.profile && me.profile.onboarded_at){ goApp(true); return; }
     /* Compte créé mais inscription pas terminée : on reprend le parcours. */
     O.login = false;
+    const d = readDraft();
+    if(d && me && me.priv && me.priv.phone){
+      /* Brouillon de ce compte : on rouvre l'étape où la personne s'était arrêtée, saisies comprises. */
+      const handle = ME.handle;
+      ME = Object.assign(structuredClone(DEFAULT_ME), d.me || {});
+      if(handle) ME.handle = handle;
+      O.roleSel = d.roleSel || null; O.pactOk = !!d.pactOk;
+      O.step = Math.max(2, Math.min(d.step || 2, PHOTOS));
+      renderOnb(); toast('On reprend là où tu t\'étais arrêté.', 'ok');
+      return;
+    }
     if(me && me.priv && me.priv.phone){ O.step = 2; }
     else { O.step = 1; O.sub = 'phone'; O.phoneTouched = false; }
     renderOnb();
@@ -182,7 +225,7 @@
   const _dash = openDash;
   openDash = function(){
     if(!DB.uid()){ toast('Ta session a expiré. Reconnecte-toi.', 'bad'); O.step = 1; O.sub = 'choose'; renderOnb(); return; }
-    work('Fiche publiée', saveAll, () => _dash());
+    work('Fiche publiée', saveAll, () => { dropDraft(); _dash(); });
   };
 
   /* ---------- Session déjà ouverte (retour de Google, rechargement…) ---------- */

@@ -239,10 +239,9 @@ const pwOk = v => PW_RULES.every(r => r[1](v || ''));
 const authOk = () => O.login ? (O.pwd || '').length > 0 : pwOk(O.pwd);
 
 /* ---------- Pseudo ---------- */
-/* Pseudos déjà pris dans l'annuaire de démonstration du prototype. */
-const TAKEN = ['offline_first','pixel_atlantique','sat_agro','zero_budget','api_lagune','savoir_dire_non','huit_mois',
-  'clause_ohada','borgou_terrain','trois_langues','apres_300','batterie_faible','carnet_de_nuit','tracer_ananas',
-  'six_secondes','huit_minutes','km_a_vide','panier_direct','sans_lampant','parcelle_onze','sept_minutes','vendue_deux_fois'];
+/* Pseudos déjà pris : rempli par la vraie vérification dans la base
+   (inscription-auth.js, fonction handle_available). Aucun pseudo inventé. */
+const TAKEN = [];
 const RESERVED = ['admin','takamatch','taka','support','equipe','contact','moderation','aide'];
 const HANDLE_RE = /^[a-z0-9_]{3,20}$/;
 function handleState(h){
@@ -319,7 +318,6 @@ function closeOnb(){
   const r = $('#onb'); r.innerHTML = ''; delete r.dataset.built; r.hidden = true;
   document.documentElement.removeAttribute('data-role');
   $('#closed').hidden = false;
-  syncWb();
   const back = O._opener && document.contains(O._opener) ? O._opener : $('#closed .btn-go');
   try{ back.focus({preventScroll:true}); }catch(e){}
 }
@@ -894,7 +892,6 @@ function renderOnb(){
   if(O.step === PERSO) syncPerso();
   if(O.step === PHOTOS) syncPreview();
   if(O.step === READY) requestAnimationFrame(() => requestAnimationFrame(animateRings));
-  syncWb();
   const f = root.querySelector('.onb-body .otp .inp, .onb-body input:not([type="hidden"]):not([type="file"])');
   /* Le premier champ ne prend le focus qu'à l'arrivée sur l'étape, pas à chaque clic. */
   if(fresh && f && window.innerWidth > 900){ try{ f.focus({preventScroll:true}); }catch(e){} }
@@ -1296,20 +1293,6 @@ function setPhoto(kind, url){
   if(O.step === FICHE && kind === 'cover'){ const b = $('#coverBox'); if(b) TMMorph(b, coverBlock()); syncFiche(); return; }
   if(O.step === PHOTOS){ renderOnb(); }
 }
-/* Images d'exemple pour l'atelier : dessinées, jamais de vraie personne. */
-function sampleImage(kind){
-  const cover = kind === 'cover', c = document.createElement('canvas');
-  c.width = cover ? 1600 : 600; c.height = cover ? 900 : 600;
-  const g = c.getContext('2d');
-  const grad = g.createLinearGradient(0, 0, c.width, c.height);
-  if(cover){ grad.addColorStop(0, '#FFD741'); grad.addColorStop(.55, '#8FC7A0'); grad.addColorStop(1, '#0A65AE'); }
-  else { grad.addColorStop(0, '#3D9FE4'); grad.addColorStop(1, '#083F69'); }
-  g.fillStyle = grad; g.fillRect(0, 0, c.width, c.height);
-  g.fillStyle = 'rgba(250,249,245,.9)';
-  if(cover){ for(let i=0;i<7;i++){ g.beginPath(); g.ellipse(160+i*210, 700-(i%3)*60, 70, 150, 0, 0, 7); g.fill(); } }
-  else { g.beginPath(); g.arc(300, 250, 110, 0, 7); g.fill(); g.beginPath(); g.ellipse(300, 560, 200, 150, 0, 0, 7); g.fill(); }
-  return c.toDataURL('image/jpeg', .86);
-}
 function syncPreview(){
   const box = $('#prevBox'); if(box) TMMorph(box, previewCard());
   const pr = $('#prevRing'); if(pr) TMMorph(pr, ringHTML(completion(), 62));
@@ -1361,7 +1344,7 @@ function openDash(){
   const r = $('#onb'); r.innerHTML = ''; delete r.dataset.built; r.hidden = true;
   $('#closed').hidden = true;
   document.documentElement.setAttribute('data-role', ME.role);
-  D.on = true; renderDash(); $('#dash').hidden = false; syncWb();
+  D.on = true; renderDash(); $('#dash').hidden = false;
   clearTimeout(D.timer);
   if(photosMissing()) D.timer = setTimeout(openRemind, 900);
 }
@@ -1443,111 +1426,6 @@ function toast(msg, kind){
 }
 
 /* ============================================================
-   Exemples de démonstration — ancrés au Bénin (§7)
-   ============================================================ */
-function fillIdentity(){
-  if(!ME.first){ ME.first = 'Koffi'; ME.last = 'Adjovi'; ME.cityCc = 'BJ'; ME.city = 'Cotonou, Bénin'; }
-  if(!ME.sex) ME.sex = 'm';
-}
-function fillHandle(){
-  if(handleState(ME.handle).k !== 'ok') ME.handle = (ME.role === 'tal' ? 'code_sous_manguier' : 'vallee_oueme');
-}
-function fillFiche(){
-  if(ME.role === 'tal'){
-    Object.assign(ME, {skills:['dev-mobile','dev-back'], level:'inter', diploma:'licence', status:'freelance',
-      sectors:['agritech','fintech'], pace:'serieux',
-      bio:"Développeur Flutter et Node depuis 5 ans. J'ai livré une app de collecte pour 3 coopératives de l'Ouémé, pensée pour la 3G et le hors-ligne. Je cherche un projet agri ou paiement où le mobile est le cœur du produit.",
-      portfolioTitle:'GitHub', portfolio:'github.com/code-sous-manguier'});
-  } else {
-    Object.assign(ME.project, {title:'Wémè Irrigation', sectors:['agritech','greentech'], seeking:['dev-mobile','terrain','finance'],
-      hook:"Dans la vallée de l'Ouémé, un maraîcher perd un tiers de sa récolte de saison sèche faute d'eau au bon moment. Wémè loue des pompes solaires à l'heure, payées par MTN MoMo.",
-      vision:"Que chaque maraîcher de la vallée irrigue à la demande, sans acheter de pompe ni brûler de gasoil.",
-      traction:"12 pompes en service à Adjohoun, 86 maraîchers abonnés, 2,4 M FCFA encaissés depuis mars.",
-      challenges:"Le suivi des pompes se fait sur un cahier. Il me faut un cofondateur mobile et quelqu'un pour tenir le terrain.",
-      link:'weme-irrigation.bj', offer:'mixte', icon:'agritech'});
-    ME.pace = 'serieux';
-  }
-}
-
-function fillPerso(){
-  Object.assign(ME.perso, {skills:['terrain','vente','finance'], level:'expert',
-    bio:"Ingénieur agronome, douze ans dans les coopératives de l'Ouémé. J'ai recruté un par un les 86 maraîchers de Wémè. Je sais vendre et tenir le terrain ; il me manque celui qui construit l'outil.",
-    portfolio:'linkedin.com/in/vallee-oueme'});
-}
-
-/* ============================================================
-   Atelier de travail (hors produit)
-   ============================================================ */
-const WB_STEPS = [
-  ['1a','1 · Compte — e-mail'], ['1b','1 · Compte — code'], ['1c','1 · Compte — téléphone'], ['1d','1 · Compte — mot de passe'],
-  ['2','2 · Le pacte'], ['3','3 · Ton rôle'], ['4','4 · Ton identité'], ['5','5 · Ton pseudo'], ['6','6 · Ta fiche'],
-  ['7','7 · Ta fiche perso (visionnaire)'], ['8','Ta photo (7 ou 8)'], ['9','Prêt'], ['dash','Tableau de bord + rappel'],
-];
-let wbRole = 'tal';
-function jumpTo(key){
-  if(key === 'dash'){
-    if(!O.roleSel) O.roleSel = wbRole;
-    ME.role = O.roleSel; fillIdentity(); fillHandle();
-    if(!ficheReady()) fillFiche();
-    openDash(); return;
-  }
-  if(D.on) closeDash();
-  if(!O.step){ openOnb({role:O.roleSel || undefined}); }
-  O.sending = false;
-  let n = parseInt(key, 10);
-  if(n === 1){
-    O.step = 1; O.login = false;
-    if(key === '1a') O.sub = 'choose';
-    else { if(!identOk(O.ident)) O.ident = 'koffi.adjovi@exemple.com'; O.sub = {'1b':'code','1c':'phone','1d':'pwd'}[key]; }
-  } else {
-    if(n >= 4 && !O.roleSel) O.roleSel = wbRole;
-    if(O.roleSel) ME.role = O.roleSel;
-    if(n >= 2) O.pactOk = O.pactOk || n > 2;
-    if(n >= 5) fillIdentity();
-    if(n >= 6) fillHandle();
-    if(n >= PERSO && !ficheReady()) fillFiche();
-    if(n === PERSO && !isVisPath()) n = PHOTOS;
-    O.step = n;
-  }
-  O.sugg = null; O._art = null;
-  renderOnb();
-}
-function setRole(r){
-  wbRole = r;
-  if(O.step >= 3 || O.roleSel){ O.roleSel = r; ME.role = r; O.sugg = null; O._art = null; }
-  if(O.step === PERSO && r !== 'vis') O.step = PHOTOS;
-  if(O.step) renderOnb(); else syncWb();
-}
-function setTheme(t){ document.documentElement.setAttribute('data-theme', t); syncWb(); }
-function curKey(){
-  if(D.on) return 'dash';
-  if(!O.step) return '';
-  if(O.step === 1) return {choose:'1a', code:'1b', phone:'1c', pwd:'1d'}[O.sub];
-  return String(O.step);
-}
-function syncWb(){
-  const sel = $('#wbStep'); if(sel) sel.value = curKey();
-  const role = O.roleSel || wbRole;
-  $$('[data-wb-role]').forEach(b => b.setAttribute('aria-pressed', b.dataset.wbRole === role));
-  const th = document.documentElement.getAttribute('data-theme');
-  $$('[data-wb-theme]').forEach(b => b.setAttribute('aria-pressed', b.dataset.wbTheme === th));
-}
-function buildWb(){
-  const w = $('#wb');
-  w.innerHTML = '<button class="wb-t" data-act="wb-toggle" aria-expanded="true" aria-controls="wbP" aria-label="Atelier de travail" title="Atelier de travail">'+ic('tools')+'</button>'
-    + '<div class="wb-p" id="wbP" role="region" aria-label="Atelier de travail">'
-    + '<div class="hd"><b>Atelier</b><span class="hint">hors produit</span></div>'
-    + '<div class="field"><label for="wbStep">Aller à l\'étape</label><select class="inp" id="wbStep"><option value="" disabled>Fenêtre fermée</option>'
-    +   WB_STEPS.map(s => '<option value="'+s[0]+'">'+esc(s[1])+'</option>').join('') + '</select></div>'
-    + '<div class="field"><label>Rôle</label><div class="wb-seg"><button data-wb-role="vis" data-act="wb-role">💡 Visionnaire</button><button data-wb-role="tal" data-act="wb-role">🛠️ Talent</button></div></div>'
-    + '<div class="field"><label>Thème</label><div class="wb-seg"><button data-wb-theme="light" data-act="wb-theme">Clair</button><button data-wb-theme="dark" data-act="wb-theme">Sombre</button></div></div>'
-    + '<div class="acts"><button class="btn btn-ghost btn-sm" data-act="wb-fill">'+ic('spark')+'Exemple</button><button class="btn btn-quiet btn-sm" data-act="wb-reset">'+ic('refresh')+'Recommencer</button></div>'
-    + '</div>';
-  /* Replié par défaut, sauf s'il tient à côté de la fenêtre sans la couvrir. */
-  if(window.innerWidth < 1640){ $('#wbP').hidden = true; $('.wb-t').setAttribute('aria-expanded','false'); }
-}
-
-/* ============================================================
    Événements
    ============================================================ */
 document.addEventListener('click', e => {
@@ -1590,12 +1468,12 @@ document.addEventListener('click', e => {
        sur place et on met à jour l'activation du bouton. */
     case 'onb-pact': O.pactOk = !O.pactOk; t.setAttribute('aria-pressed', O.pactOk); onbEnable(O.pactOk); break;
     case 'onb-role': {
-      O.roleSel = t.dataset.r; ME.role = O.roleSel; wbRole = O.roleSel;
+      O.roleSel = t.dataset.r; ME.role = O.roleSel;
       document.documentElement.setAttribute('data-role', O.roleSel);
       $$('#onb .rp').forEach(f => f.setAttribute('aria-pressed', f.dataset.r === O.roleSel));
       $('.onb-card').classList.remove('pre');
       const main = $('#onbMain'); if(main){ main.classList.remove('btn-go'); main.classList.add('btn-a'); }
-      onbEnable(true); syncWb();
+      onbEnable(true);
       const hd = $('.onb-head'); if(hd) TMMorph(hd, onbNav(onbAction()));
       break;
     }
@@ -1614,29 +1492,6 @@ document.addEventListener('click', e => {
     case 'f-icon': if(!t.disabled){ ME.project.icon = t.dataset.v; syncFiche(); } break;
     case 'f-one': setPath(t.dataset.k, t.dataset.v); syncFiche(); break;
     case 'noop': e.preventDefault(); toast('Écran non inclus dans ce fichier.'); break;
-    /* Atelier */
-    case 'wb-toggle': { const p = $('#wbP'); p.hidden = !p.hidden; t.setAttribute('aria-expanded', !p.hidden); break; }
-    case 'wb-role': setRole(t.dataset.wbRole); break;
-    case 'wb-theme': setTheme(t.dataset.wbTheme); break;
-    case 'wb-fill': {
-      if(O.step === 1 && O.sub === 'choose'){ O.ident = 'koffi.adjovi@exemple.com'; renderOnb(); break; }
-      if(O.step === 1 && O.sub === 'code'){ O.code = '482915'; renderOnb(); break; }
-      if(O.step === 1 && O.sub === 'phone'){ ME.cc = 'BJ'; ME.phone = '01 97 45 22 10'; renderOnb(); break; }
-      if(O.step === 1 && O.sub === 'pwd'){ O.pwd = 'Cotonou2026'; renderOnb(); break; }
-      if(O.step === 2){ O.pactOk = true; renderOnb(); break; }
-      if(O.step === 3){ O.roleSel = wbRole; ME.role = wbRole; renderOnb(); break; }
-      if(O.step === 4){ ME.first = ''; fillIdentity(); renderOnb(); break; }
-      if(O.step === 5){ ME.handle = ''; fillHandle(); renderOnb(); break; }
-      if(O.step === FICHE){ fillFiche(); renderOnb(); break; }
-      if(O.step === PERSO){ fillPerso(); renderOnb(); break; }
-      if(O.step === PHOTOS || D.on){
-        if(!ME.photo) ME.photo = sampleImage('photo');
-        if(D.on){ renderDash(); if($('#remind')) renderRemind(); } else renderOnb();
-        break;
-      }
-      toast('Rien à remplir sur cet écran.'); break;
-    }
-    case 'wb-reset': closeDash(); ME = structuredClone(DEFAULT_ME); O.ident = ''; O.roleSel = null; openOnb({}); break;
     /* Téléphone */
     case 'cc-open': ccOpen($('#ccList').hidden); break;
     case 'cc-pick': ccPick(t.dataset.cc); break;
@@ -1657,7 +1512,6 @@ document.addEventListener('change', e => {
     const c = $('#city'); if(c){ c.value = ''; c.focus(); }
     cityList(false); checkIdentity(); return;
   }
-  if(e.target.id === 'wbStep' && e.target.value) jumpTo(e.target.value);
   if(e.target.dataset && e.target.dataset.up){ takeFile(e.target.dataset.up, e.target.files[0]); e.target.value = ''; }
 });
 /* Glisser-déposer une image sur la zone. */
@@ -1777,7 +1631,6 @@ document.addEventListener('keydown', e => {
     if(b && !b.disabled){ e.preventDefault(); b.click(); }
     return;
   }
-  if(t.closest && t.closest('#wb')) return;
   if(e.key === 'Escape'){ e.preventDefault(); if(!O.sending) closeOnb(); }
   else if(e.altKey && e.key === 'ArrowLeft'){ e.preventDefault(); onbBack(); }
   /* Tab tourne en boucle dans la fenêtre (§8.6). */
@@ -1798,17 +1651,31 @@ function trapTab(e, box){
 document.addEventListener('scroll', e => { const c = e.target; if(c && c.classList && c.classList.contains('onb-card') && c.scrollTop) c.scrollTop = 0; }, true);
 
 /* ---------- Démarrage ---------- */
+/* Bouton « retour » du navigateur (ou geste retour sur mobile) : il revient
+   à l'étape précédente au lieu de quitter l'inscription. */
+(function(){
+  const atStart = () => O.step <= 1 && O.sub === 'choose';
+  let armed = false;
+  const arm = () => {
+    if(armed || !O.step || atStart()) return;
+    try{ history.pushState({tmOnb:1}, ''); armed = true; }catch(e){}
+  };
+  addEventListener('popstate', () => {
+    if(!armed) return;
+    armed = false;
+    if(!O.step){ history.back(); return; }   /* inscription déjà refermée : retour normal */
+    onbBack(); arm();
+  });
+  const _render = renderOnb;
+  renderOnb = function(){ const r = _render.apply(this, arguments); arm(); return r; };
+})();
+
 (function boot(){
   if(!document.documentElement.getAttribute('data-theme')){
     const dark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   }
-  if(!window.TM_SHELL){
-  buildWb();
-  const q = new URLSearchParams(location.search).get('etape');
-  if(q && WB_STEPS.some(s => s[0] === q)) jumpTo(q);
-  else openOnb({});
-  }
+  if(!window.TM_SHELL) openOnb({});
 })();
 
 "use strict";

@@ -6,7 +6,7 @@
    commander, publier, signer…) ; l'éditeur s'occupe du reste.
 
    TMPacteEditor.open({ctx, state, me:{uid, staff}, actions, price, z, onClose})
-     state   : {status, version, spec, snapshot, hash, signatures, parties, events, reviewNote, finalUrl, demo}
+     state   : {status, version, spec, snapshot, hash, signatures, parties, events, reviewNote, finalUrl}
      actions : save(spec) · saveParty(uid, data) · order() · publish(doc, hash, note)
                sign(name, hash) · reopen(reason) · reload() · goAtelier() · finalPdf()
    Renvoie {update(state, ctx), close()}.
@@ -162,7 +162,6 @@
     const fields = issues.filter(x => x.kind === 'field').length;
     let h = '';
     if(E.st.localOnly) h += note('warn', 'alert', '<b>Enregistré dans ce navigateur seulement.</b> La base de données des pactes n\'est pas encore installée : les autres associés ne voient pas ce brouillon. (Équipe TakaMatch : exécuter <span class="pe-mono">supabase/11_pactes.sql</span>.)');
-    if(E.st.demo) h += note('info', 'info', '<b>Démonstration.</b> Le pacte est gardé dans ce navigateur ; le paiement, la relecture et les signatures des autres associés sont simulés.');
     if(P.st === 'brouillon'){
       h += P.editDoc
         ? note('', 'info', 'Le pacte se rédige tout seul à partir de l\'Atelier : capital, vesting, rôles, plan d\'action. <b>Clique sur un article pour le réécrire</b>, retire ce qui ne vous concerne pas, ajoute vos propres clauses. Quand c\'est prêt, commande la relecture : un juriste le vérifie et le complète avant la signature.')

@@ -173,7 +173,6 @@ const S = {
     ],
     log:[],
   },
-  demoMin:0,
 };
 
 /* ---------- Score de compatibilité (explicable) ----------
@@ -300,8 +299,7 @@ function countUp(){
 
 /* ============================================================
    Dashboard v2 — l'outil seul, sans vitrine ni onboarding.
-   On arrive connecté, avec un compte de démonstration rempli :
-   chaque module a de la matière à éditer.
+   On arrive connecté : le compte et ses données viennent de la base.
    ============================================================ */
 Object.assign(P, {
   more:'<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
@@ -312,9 +310,8 @@ Object.assign(P, {
   ticks:'<path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/>',
 });
 
-/* ---------- Le compte de démonstration ---------- */
-const DEMO_ME = structuredClone(DEFAULT_ME);
-S.me = structuredClone(DEMO_ME);
+/* ---------- Le compte : vide jusqu'à l'arrivée du vrai compte (main.js → start) ---------- */
+S.me = structuredClone(DEFAULT_ME);
 Object.assign(S, {
   invFilter:'all', showArch:false, loading:false, atelierId:null, ateliers:{},
   prefs:{inv:true, msg:true, match:true, takam:true},
@@ -379,8 +376,6 @@ const DOMAINS = [
   {id:'produit', l:'Produit'}, {id:'tech', l:'Technique'}, {id:'finance', l:'Finances et levée'}, {id:'terrain', l:'Terrain et ventes'},
 ];
 const VESTING = ['4 ans, 1 an de cliff','3 ans, 6 mois de cliff','2 ans, sans cliff','Pas encore décidé'];
-
-/* ---------- Données de démonstration : relations en cours ---------- */
 
 /* ---------- Fiche : champs, aperçu, enregistrement ---------- */
 
@@ -511,7 +506,7 @@ function vAccueil(){
   +   '<div class="acts"><button class="btn btn-a" data-act="go" data-v="explorer">'+ic('compass')+(tal?'Explorer les projets':'Explorer les talents')+'</button></div></div>'
 
   + '<div class="grid g3" style="margin-bottom:16px">'
-  +   (S.me.fresh ? stat('eye','Vues de ta fiche', 0, 'ta fiche vient d\'être publiée') : stat('eye','Vues de ta fiche', 48, '+12 cette semaine', true))
+  +   stat('eye','Vues de ta fiche', 0, 'pas encore de vue comptée')
   +   stat('link','Invitations reçues', S.invitesRecv.length, newInv ? newInv+' à traiter' : 'aucune en attente')
   +   stat('chat','Messages', msgs, unread ? unread+' conversation'+(unread>1?'s':'')+' non lue'+(unread>1?'s':'') : 'tout est lu')
   + '</div>'
@@ -818,10 +813,6 @@ function declineInvite(id){
   inv.status = 'declined'; render();
   toast('Invitation déclinée. Répondre, même par un non, protège ta réputation.');
 }
-const REPLIES = ["Bonne question. De mon côté, je suis disponible jeudi en fin de journée.",
-  "D'accord sur le principe. Mettons ça par écrit dans l'Atelier avant d'aller plus loin.",
-  "Je préfère qu'on cadre les rôles avant de parler de capital : ça évite les malentendus.",
-  "Je t'envoie le lien de la démo ce soir. Dis-moi franchement ce que tu en penses."];
 const PACKS = [{k:'credits_essai', n:'Essai', c:3, p:2000, h:'pour tester'}, {k:'credits_elan', n:'Élan', c:10, p:5000, h:'le plus choisi', best:true}, {k:'credits_campagne', n:'Campagne', c:30, p:12000, h:'−33 % à l\'unité'}];
 /* ---------- Prix dans la devise du pays de paiement (js/prix.js) ----------
    Les montants de référence (FCFA) se règlent dans l'admin. */
@@ -1588,7 +1579,8 @@ function loadCover(file){
       cv.width = Math.round(img.width*k); cv.height = Math.round(img.height*k);
       cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
       try{ S.me.project.photo = cv.toDataURL('image/jpeg', .8); }catch(e){ S.me.project.photo = rd.result; }
-      render(); toast('Photo ajoutée. Enregistre pour la publier.', 'ok');
+      render(); if(S.view === 'fiche' && typeof syncFiche === 'function') syncFiche();   /* active « Enregistrer » */
+      toast('Photo ajoutée. Enregistre pour la publier.', 'ok');
     };
     img.onerror = () => toast('Cette image ne peut pas être lue.', 'bad');
     img.src = rd.result;
@@ -1613,14 +1605,8 @@ const SEX_L = {m:'Masculin', f:'Féminin', n:'Ne pas préciser'};
 /* Accord selon le sexe de la personne dont on parle ; forme neutre si non précisé. */
 const g = (sex, m, f, n) => sex === 'f' ? f : sex === 'm' ? m : (n == null ? m : n);
 
-/* ---------- Sexe des personnes de la démo ---------- */
-const SEX_TAL = {};
-TALENTS.forEach(t => { t.sex = SEX_TAL[t.id] || 'n'; });
-const SEX_OWN = {};
-PROJECTS.forEach(p => { p.ownerSex = SEX_OWN[p.id] || 'n'; });
-Object.keys(OWNERS).forEach(k => { OWNERS[k].sex = SEX_OWN[k] || 'n'; });
-S.me.sex = S.me.sex || 'm'; DEMO_ME.sex = 'm';
-/* Deux talents déjà engagés sur 3 projets (côté Visionnaire). */
+S.me.sex = S.me.sex || 'n';
+/* Talents déjà engagés sur 3 projets (côté Visionnaire), rempli par app-db.js. */
 const FULL = new Set();
 
 /* ============================================================
@@ -1656,18 +1642,6 @@ function isUnlocked(id){ return S.matches.some(m => m.id === id) || S.left.has(i
 function propose(t, kind, label){
   t.props = t.props.filter(p => p.kind !== kind);
   t.props.unshift({id:uid(), kind, t:label, d:new Date(), val:{}});
-  if(isAdmin(t)) simulateValidation(t, t.props[0]);
-}
-/* Côté porteur, les talents de la démo valident d'eux-mêmes au bout d'un moment. */
-function simulateValidation(t, p){
-  const tals = talentsOf(t).filter(m => !(window.TMData && TMData.on) || TMData.isDemo(m.id)); if(!tals.length) return;
-  const who = tals[(Math.random()*tals.length)|0];
-  setTimeout(() => {
-    if(!t.props.includes(p) || p.val[who.id]) return;
-    p.val[who.id] = true;
-    pushNotif('check', who.first+' a validé', '« '+p.t+' »');
-    if(S.view === 'atelier' && !S.layer) render(); else syncSide();
-  }, 5000 + Math.random()*3000);
 }
 const pendingFor = (t, id) => t.props.filter(p => !p.val[id]);
 const missingOn = (t, p) => talentsOf(t).filter(m => !p.val[m.id]);
@@ -1717,11 +1691,6 @@ async function takamAsk(t, q){
 }
 
 /* ============================================================
-   Données de démonstration
-   ============================================================ */
-
-
-/* ============================================================
    Limite d'engagement : 3 projets par talent
    ============================================================ */
 const engagedN = () => isTalMode() ? S.matches.length : 0;
@@ -1766,18 +1735,7 @@ function inviteSend(id){
   toast('Invitation envoyée à '+handleOf(x)+'.', 'ok');
   pushNotif('send', 'Invitation envoyée', titleOf(x));
   render();
-  $('#topbar').classList.add('busy');
-  setTimeout(() => {
-    $('#topbar').classList.remove('busy');
-    const inv = S.invitesSent.find(i=>i.id===id && i.status==='sent'); if(!inv) return;
-    if(Math.random() < 0.65){
-      inv.status = 'accepted';
-      if(isFull()){ pushNotif('spark', x.title+' a accepté', 'Libère une place pour rejoindre le projet.'); render();
-        return fullModal({type:'join', id}, '<b>'+esc(x.title)+'</b> a accepté ton invitation. Il te faut une place libre pour rejoindre l\'équipe.'); }
-      createMatch(id, true);
-    } else { inv.status = 'declined'; pushNotif('x', 'Invitation déclinée', titleOf(x)+'. Ça arrive, continue.');
-      toast('Invitation déclinée. Ce n\'est pas personnel.', 'bad'); if(!S.layer) render(); }
-  }, 2600);
+  /* La réponse vient de la vraie personne (app-db.js) : rien n'est simulé ici. */
 }
 
 function acceptInvite(id){
@@ -1983,16 +1941,11 @@ TALENTS.forEach(t => { delete t.pay; delete t.avail; });
 NAV.find(n => n.id === 'fiche').l.vis = 'Mes fiches';
 NAV.find(n => n.id === 'fiche').short = {tal:'Ma fiche', vis:'Mes fiches'};
 
-/* ---------- Photos de profil ---------- */
-const PHOTO_M = 'assets/images/photo-demo-homme.jpg';
-const PHOTO_F = 'assets/images/photo-demo-femme.jpg';
-/* Jamais deux fois le même visage dans une même équipe. */
-const FACE = {};
-const faceOf = id => (window.TM_FACE && window.TM_FACE(id)) || ((id === 'me' && S.me.photo) ? S.me.photo : FACE[id] === 'f' ? PHOTO_F : FACE[id] === 'm' ? PHOTO_M : null);
+/* ---------- Photos de profil : uniquement celles ajoutées par les membres ---------- */
+const faceOf = id => (window.TM_FACE && window.TM_FACE(id)) || ((id === 'me' && S.me.photo) ? S.me.photo : null);
 const LOCKPIN = '<span class="lockpin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">'+P.lock+'</svg></span>';
 
-/* ---------- Les fiches projet du compte de démonstration ---------- */
-const DEMO_PROJECTS = [];
+/* ---------- Fiches projet ---------- */
 function blankProject(){
   return {id:'PRJ-'+uid().slice(1,7).toUpperCase(), title:'', glyph:'💡', photo:'', likes:0, sectors:[], seeking:[],
     hook:'', vision:'', traction:'', assets:'', challenges:'', link:'', noLink:false, pace:'serieux', pay:'equity', online:false};
@@ -2043,7 +1996,7 @@ function saveCtx(){
 }
 function loadCtx(){
   const o = S.ctxs[ctxKey()];
-  if(o) PROJ_KEYS.forEach(k => S[k] = o[k]); else seedDemo();
+  if(o) PROJ_KEYS.forEach(k => S[k] = o[k]); else seedCtx();
   const q = S.prof[S.me.role];
   if(q) PROF_KEYS.forEach(k => S[k] = q[k]);
   S.focusIdx = 0; S.mobileThread = false; S.fv = null;
@@ -2155,9 +2108,9 @@ const groupTeams = () => Object.values(S.teams).filter(t => t.members.length >= 
 const removedDays = id => S.removed && S.removed[id] ? dAgo(S.removed[id]) : null;
 
 /* ============================================================
-   Données de démonstration, par contexte
+   Contexte jamais ouvert : structures vides (app-db.js les remplit)
    ============================================================ */
-function seedDemo(){
+function seedCtx(){
   Object.assign(S, {teams:{}, left:new Set(), removed:{}, pendingJoin:null, takTab:null,
     matches:[], threads:[], invitesRecv:[], invitesSent:[], activeThread:null, atelierId:null});
   if(!S.prof[S.me.role]){ S.notifs = []; S.favs = new Set(); S.likes = new Set(); S.reported = new Set(); }
@@ -2445,12 +2398,16 @@ function syncFiche(){
    Statistiques : les membres de l'autre côté, et les visiteurs
    sans compte arrivés par ton lien ou ton QR
    ============================================================ */
-const VIEWS5 = {w:['S34','S35','S36','S37','S38','S39'], tal:[6,9,8,13,15,19], vis:[5,7,6,9,11,14], anon:[2,3,5,4,6,8]};
+/* Les vues ne sont pas encore comptées : six dernières semaines, à zéro (aucun chiffre inventé). */
+const VIEWS5 = {w:(() => { const out = [], d = new Date();
+  for(let i = 5; i >= 0; i--){ const x = new Date(d); x.setDate(d.getDate() - i*7);
+    const t = new Date(Date.UTC(x.getFullYear(), x.getMonth(), x.getDate())), dn = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dn);
+    out.push('S' + Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7)); }
+  return out; })(), tal:[0,0,0,0,0,0], vis:[0,0,0,0,0,0], anon:[0,0,0,0,0,0]};
 function statsSeries(){
-  const tal = isTalMode(), f = S.me.fresh ? 0 : tal ? 1 : [1, .55, 0][S.me.projIdx] ?? 0;
-  const k = n => Math.round(n * f);
-  return tal ? {a:VIEWS5.vis.map(k), aL:'Visionnaires', aC:'var(--ch-vis)', b:VIEWS5.anon.map(k)}
-             : {a:VIEWS5.tal.map(k), aL:'Talents', aC:'var(--ch-tal)', b:VIEWS5.anon.map(k)};
+  const tal = isTalMode();
+  return tal ? {a:VIEWS5.vis.slice(), aL:'Visionnaires', aC:'var(--ch-vis)', b:VIEWS5.anon.slice()}
+             : {a:VIEWS5.tal.slice(), aL:'Talents', aC:'var(--ch-tal)', b:VIEWS5.anon.slice()};
 }
 function statsChart(){
   const W = 640, H = 220, L = 36, R = 10, T = 14, B = 30, sr = statsSeries();
@@ -2468,14 +2425,14 @@ function statsChart(){
       + '<rect class="hit" x="'+(cx-gw/2)+'" y="'+T+'" width="'+gw+'" height="'+ch+'" data-i="'+i+'"/>';
   });
   const ta = sr.a.reduce((a,b) => a+b, 0), tb = sr.b.reduce((a,b) => a+b, 0), tal = isTalMode();
-  if(!ta && !tb) return '<div class="card">'+emptyBox('📊','Pas encore de vues', ficheOnline() ? "Ta fiche vient d'être créée : les premières vues arrivent dans les jours qui suivent sa mise en ligne." : "Cette fiche est hors ligne. Mets-la en ligne pour qu'elle apparaisse dans l'annuaire.")+'</div>';
+  if(!ta && !tb) return '<div class="card">'+emptyBox('📊','Pas encore de vues', ficheOnline() ? "Les vues de ta fiche s'afficheront ici dès qu'elles seront comptées." : "Cette fiche est hors ligne. Mets-la en ligne pour qu'elle apparaisse dans l'annuaire.")+'</div>';
   return '<div class="grid g3" style="gap:10px">'
     + '<div class="stat"><div class="k">'+ic('eye')+'Vues sur 6 semaines</div><div class="v tnum">'+(ta+tb)+'</div><div class="d up">'+ic('trend')+'en hausse sur la dernière semaine</div></div>'
-    + (tal ? '<div class="stat"><div class="k">'+ic('star')+'Mise en favori</div><div class="v tnum">9</div><div class="d">par des visionnaires différents</div></div>'
+    + (tal ? '<div class="stat"><div class="k">'+ic('star')+'Mise en favori</div><div class="v tnum">0</div><div class="d">par des visionnaires différents</div></div>'
            : '<div class="stat"><div class="k">'+ic('heart')+'J\'aime sur ce projet</div><div class="v tnum">'+(S.me.project.likes||0)+'</div><div class="d">par des talents différents</div></div>')
     + '<div class="stat"><div class="k">'+ic('qr')+'Visites par lien et QR</div><div class="v tnum">'+tb+'</div><div class="d">de visiteurs sans compte</div></div></div>'
     + '<div><div class="lbl" style="margin:6px 0 4px">Vues de '+(tal?'ta fiche':'cette fiche')+' par semaine</div>'
-    + '<div class="chart-wrap"><svg class="chart" id="statsSvg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Vues par semaine, de S34 à S39 : par des '+sr.aL.toLowerCase()+' et par des visiteurs non identifiés">'+gr+'</svg><div class="chart-tip" id="chartTip" hidden></div></div>'
+    + '<div class="chart-wrap"><svg class="chart" id="statsSvg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Vues par semaine, de '+VIEWS5.w[0]+' à '+VIEWS5.w[5]+' : par des '+sr.aL.toLowerCase()+' et par des visiteurs non identifiés">'+gr+'</svg><div class="chart-tip" id="chartTip" hidden></div></div>'
     + '<div class="legend"><span><i style="background:'+sr.aC+'"></i>Vues par des '+sr.aL.toLowerCase()+' · <span class="mono">'+ta+'</span></span><span><i style="background:var(--ch-anon)"></i>Visiteurs non identifiés · <span class="mono">'+tb+'</span></span></div>'
     + '<p class="hint" style="margin-top:6px">'+(tal ? 'Seuls les visionnaires voient ta fiche Talent dans l\'annuaire.' : 'Seuls les talents voient tes fiches projet dans l\'annuaire.')+' Les visiteurs non identifiés sont arrivés par ton lien ou ton code QR, sans compte TakaMatch.</p>'
     + '<details class="more"><summary>'+ic('chev')+'Voir les données</summary><table class="dtable"><thead><tr><th>Semaine</th><th>'+sr.aL+'</th><th>Visiteurs</th><th>Total</th></tr></thead><tbody>'
@@ -2737,13 +2694,13 @@ function unlockModal(){
 function doUnlock(btn){
   payThen({kind:'second', key:'second', label:'Second profil · Visionnaire', amount:priceOf('second').charged}, btn, () => {
     const m = S.me;
-    m.visUnlocked = true; m.visSince = new Date(); if(!m.fresh) m.slots = Math.max(m.slots, 2);
+    m.visUnlocked = true; m.visSince = new Date();
     if(!(persoOf(m).skills || []).length && !persoOf(m).bio) copyTalentToPerso(m);
-    S.payments.unshift(...(m.fresh ? [] : [{d:today(), l:'Emplacement projet n° 2 · démo', a:priceOf('slot').charged, op:S.pay.op, ref:S.pay.ref, cc:S.pay.cc}]), {d:today(), l:'Second profil · Visionnaire', a:priceOf('second').charged, op:S.pay.op, ref:S.pay.ref, cc:S.pay.cc});
+    S.payments.unshift({d:today(), l:'Second profil · Visionnaire', a:priceOf('second').charged, op:S.pay.op, ref:S.pay.ref, cc:S.pay.cc});
     closeLayer(); confetti();
     if(S.view === 'fiche' && isDirty()) commitFiche();
     saveCtx(); m.role = 'vis';
-    /* Chaque projet de la démo reçoit son état dès maintenant (équipes, jalons). */
+    /* Chaque projet reçoit son état dès maintenant (équipes, jalons). */
     m.projects.forEach((p, i) => { m.projIdx = i; if(!S.ctxs['vis:'+p.id]){ loadCtx(); saveCtx(); } });
     m.projIdx = 0; loadCtx(); resetUi(); saveBaseline();
     S._painted = null; go('fiche');
@@ -2795,16 +2752,6 @@ function doDeleteProject(){
   loadCtx(); resetUi(); saveBaseline(); S._painted = null; go('fiche');
   toast('Fiche « '+projName(p)+' » supprimée. L\'emplacement reste disponible.', 'ok');
 }
-function demoReset(){
-  if(!isTalMode()){ saveCtx(); S.me.role = 'tal'; loadCtx(); }
-  const m = S.me;
-  m.visUnlocked = false; m.visSince = null; m.slots = 1;
-  m.projects = [blankProject()]; m.projIdx = 0;
-  Object.keys(S.ctxs).filter(k => k !== 'tal').forEach(k => delete S.ctxs[k]); delete S.prof.vis;
-  S.payments = S.payments.filter(x => !/Second profil|Emplacement projet/.test(x.l));
-  resetUi(); saveBaseline(); S._painted = null; go('parametres');
-  toast('Démo : second profil et emplacements remis à zéro.', 'ok');
-}
 
 /* ============================================================
    Paramètres et aide
@@ -2816,8 +2763,7 @@ function vParams(){
       + '<button class="btn btn-vis btn-block btn-sm" data-act="switch-role">💡 Deviens aussi Visionnaire</button>'
     : '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:6px">'+(m.visSince ? 'Débloqué le <span class="mono">'+new Date(m.visSince).toLocaleDateString('fr-FR')+'</span>' : 'Débloqué')+'. Tu es '+roleLabel(m.role)+'.</p>'
       + '<p class="hint" style="margin-bottom:12px">Tes deux profils sont indépendants : chacun a ses matchs, ses invitations, ses conversations et ses Ateliers. Ce compte (nom, email, ville, sexe, confiance) leur est commun.</p>'
-      + '<button class="btn '+(tal ? 'btn-vis' : 'btn-tal')+' btn-block btn-sm" data-act="switch-role">'+(tal ? '💡 Passer en Visionnaire' : '🛠️ Passer en Talent')+'</button>'
-      + (m.fresh ? '' : '<button class="lnk demo-reset" data-act="demo-reset">Démo : réinitialiser le second profil</button>');
+      + '<button class="btn '+(tal ? 'btn-vis' : 'btn-tal')+' btn-block btn-sm" data-act="switch-role">'+(tal ? '💡 Passer en Visionnaire' : '🛠️ Passer en Talent')+'</button>';
   return '<div class="page-h"><div><h1><span class="acc">Paramètres</span></h1><p class="sub">Ton compte, ta confiance, tes préférences. Communs à tes deux profils.</p></div></div>'
     + '<div class="cols cols-side"><div class="col" style="gap:16px">'
     +   '<section class="card card-pad"><div class="lbl" style="margin-bottom:12px">Compte</div>'
@@ -3239,15 +3185,7 @@ function sendGroup(t, txt, inputId){
   t.group.push({from:'me', txt, d:new Date()});
   const inp = $('#'+inputId); if(inp) inp.value = '';
   render(); scrollChat();
-  const others = t.members.filter(m => !m.me);
-  const who = others[(Math.random()*others.length)|0]; if(!who) return;
-  setTimeout(() => { S.typing = true; if(S.view === 'messages' && S.activeThread === 'G:'+t.id){ render(); scrollChat(); } }, 600);
-  setTimeout(() => {
-    S.typing = false;
-    if(!t.members.includes(who)) return;
-    t.group.push({from:who.id, txt:REPLIES[(Math.random()*REPLIES.length)|0], d:new Date()});
-    if(S.view === 'messages' && S.activeThread === 'G:'+t.id){ render(); scrollChat(); } else { t.unreadGroup++; syncSide(); }
-  }, 2200);
+  /* L'envoi réel passe par app-db.js : aucune réponse n'est simulée. */
   const i2 = $('#'+inputId); if(i2) try{ i2.focus(); }catch(e){}
 }
 function sendMsg(txt){
@@ -3260,12 +3198,7 @@ function sendMsg(txt){
   th.msgs.push({me:true, txt, d:new Date(), read:false});
   th.archived = false;
   render(); scrollChat();
-  setTimeout(() => { th.msgs.forEach(m => { if(m.me) m.read = true; }); S.typing = true; if(S.view === 'messages'){ render(); scrollChat(); } }, 700);
-  setTimeout(() => {
-    S.typing = false;
-    th.msgs.push({me:false, txt:REPLIES[(Math.random()*REPLIES.length)|0], d:new Date()});
-    if(S.view === 'messages' && S.activeThread === th.id){ render(); scrollChat(); } else { th.unread = true; syncSide(); }
-  }, 2100);
+  /* L'envoi réel passe par app-db.js : aucune réponse n'est simulée. */
   const inp = $('#msgIn'); if(inp) try{ inp.focus(); }catch(e){}
 }
 /* La conversation d'équipe : le groupe à partir de 3, sinon le privé. */
@@ -3396,7 +3329,6 @@ document.addEventListener('click', e => {
     case 'unlock-pay': if(S.me.visUnlocked){ closeLayer(); toast('Ce profil est déjà débloqué : aucun nouveau paiement.', 'ok'); break; } doUnlock(el); break;
     case 'proj-del': deleteProject(); break;
     case 'proj-del-go': doDeleteProject(); break;
-    case 'demo-reset': demoReset(); break;
     case 'pub-view': S.pubView = el.dataset.v; openPublic(); break;
     case 'at-switch': atSwitchMenu(el); break;
     case 'at-group': if(t){ closeLayer(); openTeamChat(t); } break;
@@ -3818,7 +3750,7 @@ document.addEventListener('click', e => {
    ============================================================ */
 if(!window.TM_SHELL) document.addEventListener('DOMContentLoaded', () => {
 S.booted = true;
-seedDemo();
+seedCtx();
 saveBaseline();
 syncOnline();
 go('accueil');
@@ -3827,10 +3759,10 @@ go('accueil');
 "use strict";
 /* ============================================================
    TakaMatch — passerelle outil ↔ coquille
-   Dans TakaMatch.html, l'outil ne démarre qu'à la réception d'un
-   compte : soit le compte que l'onboarding vient de créer (fiche,
-   pseudo, photo, rôle…), soit, à la connexion, le compte de
-   démonstration. Se déconnecter ramène à la vitrine.
+   L'outil ne démarre qu'à la réception d'un compte réel (envoyé
+   par main.js après lecture de la base). Sans base, main.js renvoie
+   vers la connexion ou la page d'erreur : jamais de compte fictif.
+   Se déconnecter ramène à la vitrine.
    ============================================================ */
 
 /* ---------- Profil de départ et second profil ----------
@@ -3870,8 +3802,8 @@ function tmSecondTalHTML(){
   };
 
   /* ---------- Compte neuf : pas de chiffres inventés (DESIGN §1) ---------- */
-  const _seed = seedDemo;
-  seedDemo = function(){
+  const _seed = seedCtx;
+  seedCtx = function(){
     if(!S.me.fresh) return _seed();
     Object.assign(S, {teams:{}, left:new Set(), removed:{}, pendingJoin:null, takTab:null,
       matches:[], threads:[], invitesRecv:[], invitesSent:[], activeThread:null, atelierId:null});
@@ -3976,7 +3908,7 @@ function tmSecondTalHTML(){
     }
     if(tmPrimary() === 'vis' && !S.me.visUnlocked) S.me.role = 'vis';
     S.booted = true;
-    seedDemo(); saveBaseline(); syncOnline();
+    seedCtx(); saveBaseline(); syncOnline();
     go(acc.view || 'accueil');
     scheduleReminder();
     if(acc.kind === 'fresh' && !acc.tool) tmBus('signup', {user:tmUserCard()});
@@ -4314,12 +4246,8 @@ supportRail = function(){
 const TM_BC = (() => { try{ return new BroadcastChannel('takamatch-staff'); }catch(e){ return null; } })();
 const TM_SEEN = new Set();
 function tmBus(type, data){
-  /* Canal de la démo hors ligne : coupé dès que les vraies données sont chargées (rien de privé dans le navigateur). */
-  if(window.TMData && TMData.on) return;
-  const m = {id:uid()+Date.now().toString(36), type, data, at:Date.now(), from:'app'};
-  TM_SEEN.add(m.id);
-  try{ if(TM_BC) TM_BC.postMessage(m); }catch(e){}
-  try{ const q = JSON.parse(localStorage.getItem('tm-bus') || '[]'); q.push(m); localStorage.setItem('tm-bus', JSON.stringify(q.slice(-150))); }catch(e){}
+  /* Ancien canal de la démo hors ligne vers l'admin : coupé. Les demandes (vérification, signalement,
+     support) passent par la base (app-db.js) ; rien de privé n'est gardé dans le navigateur. */
 }
 function tmUserCard(){
   const m = S.me;
@@ -4344,10 +4272,8 @@ document.addEventListener('click', async e => {
   const t = e.target.closest('[data-act="verify-id-go"]'); if(!t) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const fi = $('#idF'), fs = $('#idS');
-  const doc = await shrinkImage(fi && fi.files[0]), selfie = await shrinkImage(fs && fs.files[0]);
   S.me.verifyPending = true;
   if(window.TMData && TMData.on) TMData.verify(fi && fi.files[0], fs && fs.files[0]);
-  tmBus('verify-request', {user:tmUserCard(), doc, selfie});
   closeLayer(); render();
   success('Dossier envoyé', 'L\'équipe TakaMatch vérifie que ta pièce d\'identité et ton selfie correspondent à ton nom légal. Réponse sous <b>48 h</b> ; le badge '+vBadge(isTalMode() ? 'tal' : 'vis', true)+' s\'affiche dès la validation.');
   pushNotif('verif', 'Vérification en cours', 'Ton dossier est entre les mains de l\'équipe TakaMatch.');

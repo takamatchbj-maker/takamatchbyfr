@@ -133,113 +133,8 @@ const SECTORS = [
   {id:'medias', l:'Médias & Contenu', g:'🎬'}, {id:'saas', l:'SaaS & Outils B2B', g:'🧰'},
   {id:'artisanat', l:'Artisanat & Culture', g:'🎨'}, {id:'impact', l:'Impact Social', g:'🤝'},
 ];
-const SKILLS = [
-  {id:'dev-mobile', l:'Dev mobile'}, {id:'dev-front', l:'Dev front-end'}, {id:'dev-back', l:'Dev back-end'},
-  {id:'data', l:'Data & IA'}, {id:'design', l:'UX / UI Design'}, {id:'brand', l:'Identité de marque'},
-  {id:'growth', l:'Growth & Acquisition'}, {id:'contenu', l:'Contenu & Communauté'},
-  {id:'vente', l:'Vente & Partenariats'}, {id:'produit', l:'Product management'},
-  {id:'finance', l:'Finance & Levée'}, {id:'juridique', l:'Juridique & OHADA'},
-  {id:'terrain', l:'Opérations terrain'}, {id:'rh', l:'Recrutement & RH'},
-];
-const skillL = id => (SKILLS.find(s=>s.id===id)||{l:id}).l;
-const sector = id => SECTORS.find(s=>s.id===id) || {l:id, g:'✨'};
-
-/* Décision produit : l'engagement est la variable n°1 d'un échec de cofondation.
-   On la rend explicite et on la score. */
-
-const handleOf = x => '@' + (x.handle || x.ownerHandle || 'anonyme');
 function tick(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'; }
 
-/* ---------- Teinte de sujet : bleu pour un talent, or pour un projet ---------- */
-/* ---------- Couleur de sujet ----------
-   Une fiche porte la couleur du rôle de celui qu'elle décrit, pas une
-   teinte tirée de son secteur : un talent est bleu, un visionnaire est
-   or. La variation d'une fiche à l'autre reste dans la famille — trois
-   profondeurs et cinq angles, dérivés de l'ancienne teinte. */
-const TINT_STEP = ['soft', '', 'deep'];
-function tintCls(role, seed){
-  const k = Math.abs(Math.round(seed || 0));
-  const fam = role === 'vis' ? 'tint-vis' : 'tint-tal';
-  return 'tint ' + fam + (TINT_STEP[k % 3] ? ' ' + TINT_STEP[k % 3] : '');
-}
-function tintAng(seed){
-  return '--ta:' + (116 + (Math.abs(Math.round(seed || 0)) % 5) * 13) + 'deg;';
-}
-/* Un projet appartient à un visionnaire ; une fiche sans projet est un talent. */
-const roleOf = x => (x && (x.title || x.ownerHandle || x.hook)) ? 'vis' : 'tal';
-
-const PROJECTS = [
-  {id:'TM-VIS-4102', ownerHandle:'carnet_de_nuit', title:'Kèkè Santé', owner:'Dr. Sylvain Agbodjan', ownerCity:'Cotonou, Bénin', ownerVerified:true, sectors:['health','impact'], glyph:'🩺', hue:196, seeking:['dev-mobile','produit','data'], pace:'serieux', pay:'equity', likes:47, seen:1,
-    hook:"Au Bénin, un patient sur trois quitte une consultation sans ordonnance lisible et sans dossier. Kèkè Santé donne à chaque centre de santé un carnet patient numérique qui fonctionne sans connexion et se synchronise la nuit.",
-    vision:"Devenir le dossier médical partagé de l'Afrique de l'Ouest francophone, porté par les centres de santé eux-mêmes plutôt que par les ministères.",
-    traction:"4 centres pilotes à Cotonou et Abomey-Calavi. 1 840 dossiers créés en 5 mois. Une infirmière-chef formée par centre. Taux de ré-usage à 30 jours : 71 %.",
-    assets:"Agrément de recherche du ministère de la Santé. 6 M FCFA de subvention de la Fondation Orange. Un serveur mutualisé offert par une PME locale pour 18 mois.",
-    challenges:"Je suis médecin, pas développeur. L'application actuelle est un prototype Glide qui atteint ses limites. Il me faut quelqu'un qui prenne la technique en main et devienne cofondateur, pas prestataire.",
-    link:'kekesante.bj'},
-  {id:'TM-VIS-7715', ownerHandle:'tracer_ananas', title:'Gbèdji Agro', owner:'Rachelle Sohou', ownerCity:'Allada, Bénin', ownerVerified:true, sectors:['agritech','ecommerce'], glyph:'🍍', hue:45, seeking:['dev-back','terrain','growth'], pace:'plein', pay:'mixte', likes:31, seen:2,
-    hook:"L'ananas pain de sucre béninois se vend 4 fois moins cher que le costaricien alors qu'il est meilleur, parce qu'aucun acheteur européen ne peut prouver d'où il vient. Gbèdji trace chaque lot du champ au conteneur.",
-    vision:"Faire de la traçabilité un actif exportable : chaque coopérative béninoise capable de vendre en direct à un importateur, sans intermédiaire qui capte 60 % de la marge.",
-    traction:"3 coopératives équipées, 112 producteurs enregistrés, 9 tonnes tracées sur la campagne 2025. Un acheteur néerlandais a signé une lettre d'intention pour 40 tonnes.",
-    assets:"Partenariat signé avec l'ATDA Pôle 7. Matériel de terrain (28 téléphones) financé. Un entrepôt à Allada mis à disposition.",
-    challenges:"Le back-end actuel est une feuille Google Sheets avec des scripts. Il tombe dès qu'on dépasse 200 lots. Je cherche un cofondateur technique et quelqu'un qui sache tenir la relation avec les coopératives.",
-    link:'gbedji.africa'},
-  {id:'TM-VIS-2288', ownerHandle:'six_secondes', title:'Tchèko Pay', owner:'Ousmane Barry', ownerCity:'Cotonou, Bénin', ownerVerified:true, sectors:['fintech','impact'], glyph:'💳', hue:212, seeking:['dev-back','juridique','vente'], pace:'plein', pay:'salaire', likes:64, seen:1,
-    hook:"70 % des commerces de Dantokpa refusent le mobile money parce que l'USSD prend 45 secondes et bloque la file. Tchèko Pay encaisse en 6 secondes avec un QR imprimé et un SMS de confirmation, sans smartphone côté client.",
-    vision:"Devenir la caisse par défaut du commerce informel ouest-africain : un marchand, un QR, zéro matériel, zéro abonnement.",
-    traction:"210 marchands actifs à Dantokpa et Godomey. 18 M FCFA de volume transigé en novembre. Rétention marchand à 60 jours : 78 %.",
-    assets:"Convention d'agrégation signée avec MTN MoMo. Dossier d'agrément EME déposé à la BCEAO. 12 M FCFA levés en amorçage auprès de business angels béninois.",
-    challenges:"Mon associé technique est parti en septembre. J'ai besoin d'un cofondateur back-end qui ne panique pas devant un audit BCEAO, et d'un juriste pour finir l'agrément.",
-    link:'tchekopay.com'},
-  {id:'TM-VIS-9034', ownerHandle:'huit_minutes', title:'Lafia Learn', owner:'Prudence Gbaguidi', ownerCity:'Parakou, Bénin', ownerVerified:false, sectors:['edtech','impact'], glyph:'📻', hue:28, seeking:['contenu','dev-mobile','produit'], pace:'serieux', pay:'mixte', likes:22, seen:3,
-    hook:"Dans le Nord-Bénin, un élève de terminale a en moyenne 2 heures d'électricité par jour mais 4 heures de batterie de téléphone. Lafia Learn délivre tout le programme du BAC en audio de 8 minutes, téléchargeable en une fois.",
-    vision:"Que réviser ne dépende plus ni du courant, ni de la data, ni d'avoir un professeur à moins de 30 km.",
-    traction:"340 élèves testeurs à Parakou et Djougou. 61 % ont écouté plus de 10 épisodes. Taux de réussite du groupe test au BAC blanc : 54 % contre 38 % pour le groupe témoin.",
-    assets:"Studio prêté par la radio Deeman FM. 9 professeurs volontaires du lycée Mathieu Bouké. Catalogue de 40 épisodes déjà enregistrés en français et en dendi.",
-    challenges:"Je suis enseignante. Je sais produire du contenu, pas une application. Et je ne sais pas comment passer de 340 à 30 000 élèves sans budget marketing.",
-    link:''},
-  {id:'TM-VIS-6641', ownerHandle:'km_a_vide', title:'Zemidjan+', owner:'Kossi Adjovi', ownerCity:'Cotonou, Bénin', ownerVerified:true, sectors:['logistique','impact'], glyph:'🛵', hue:130, seeking:['data','dev-mobile','terrain'], pace:'serieux', pay:'equity', likes:38, seen:1,
-    hook:"Un zémidjan de Cotonou roule 90 km par jour et fait 40 % de ces kilomètres à vide. Zemidjan+ regroupe les courses et les livraisons sur un même trajet, avec une répartition calculée hors-ligne sur le téléphone du conducteur.",
-    vision:"Transformer 200 000 motos-taxis en réseau logistique urbain, sans les transformer en employés précaires d'une plateforme.",
-    traction:"Coopérative de 64 conducteurs à Akpakpa. 1 100 courses groupées testées. Revenu moyen par conducteur : +23 % sur 6 semaines.",
-    assets:"Accord avec l'Union des conducteurs de taxi-moto d'Akpakpa. Un algorithme de regroupement déjà prototypé en Python.",
-    challenges:"Le prototype tourne sur mon ordinateur, pas sur les téléphones. Il me faut quelqu'un qui sache embarquer un modèle sur des Android à 25 000 FCFA, et quelqu'un pour tenir le terrain quand je ne peux pas.",
-    link:'zemidjan.plus'},
-  {id:'TM-VIS-3390', ownerHandle:'panier_direct', title:'Adjara Market', owner:'Estelle Quenum', ownerCity:'Porto-Novo, Bénin', ownerVerified:true, sectors:['artisanat','ecommerce'], glyph:'🧺', hue:340, seeking:['growth','dev-front','contenu'], pace:'side', pay:'mixte', likes:19, seen:4,
-    hook:"Une vannière d'Adjara vend un panier 1 500 FCFA au marché. Le même panier part à 34 € dans une boutique parisienne. Adjara Market met les artisans en vente directe auprès de la diaspora, avec paiement en euros et expédition groupée.",
-    vision:"Que l'artisanat béninois se vende à son prix, à l'artisan qui l'a fait, sans passer par trois revendeurs.",
-    traction:"47 artisans référencés, 310 commandes livrées vers la France et la Belgique en 2025. Panier moyen 68 €. Marge reversée à l'artisan : 61 %.",
-    assets:"Accord logistique avec un transitaire à Cotonou. Base de 2 400 clients diaspora. Photos professionnelles de 180 produits déjà réalisées.",
-    challenges:"L'acquisition stagne : je vends surtout à des gens qui me connaissent. Je n'ai jamais fait de publicité et le site est un template Shopify qui charge en 9 secondes depuis l'Europe.",
-    link:'adjara.market'},
-  {id:'TM-VIS-8807', ownerHandle:'sans_lampant', title:'Solar Box', owner:'Wilfried Hounsou', ownerCity:'Djougou, Bénin', ownerVerified:false, sectors:['greentech','impact','fintech'], glyph:'☀️', hue:50, seeking:['finance','terrain','dev-back'], pace:'plein', pay:'equity', likes:29, seen:2,
-    hook:"Un ménage rural béninois dépense 4 500 FCFA par mois en pétrole lampant et en recharge de téléphone. Un kit solaire coûte 85 000 FCFA — inaccessible d'un coup, évident à 3 500 FCFA par mois. Solar Box fait le pont par paiement échelonné verrouillé à distance.",
-    vision:"Électrifier 100 000 foyers du Nord-Bénin par le crédit d'usage plutôt que par la subvention.",
-    traction:"146 kits installés dans l'Atacora. Taux de remboursement à 6 mois : 91 %. Trois techniciens formés sur place.",
-    assets:"Stock de 200 kits négocié auprès d'un fabricant kenyan. Agrément d'IMF partenaire pour porter le crédit. Atelier à Djougou.",
-    challenges:"Le verrouillage à distance est fait à la main, par SMS, un par un. Et je n'ai aucune idée de comment structurer un véhicule de financement pour acheter 2 000 kits d'avance.",
-    link:''},
-  {id:'TM-VIS-1156', ownerHandle:'parcelle_onze', title:'Doko Data', owner:'Armand Gnonlonfoun', ownerCity:'Cotonou, Bénin', ownerVerified:true, sectors:['agritech','saas'], glyph:'🛰️', hue:175, seeking:['data','vente','produit'], pace:'serieux', pay:'equity', likes:26, seen:5,
-    hook:"Les assureurs agricoles ouest-africains refusent d'assurer les petits producteurs parce qu'ils ne savent pas mesurer une perte de récolte à distance. Doko Data transforme l'imagerie Sentinel-2 en indice de rendement parcelle par parcelle.",
-    vision:"Devenir la source de vérité qui rend l'assurance indicielle viable sur des parcelles de moins d'un hectare.",
-    traction:"Modèle validé sur 3 200 parcelles de maïs au Bénin et au Togo, erreur moyenne 11 %. Un assureur régional en phase de test payant.",
-    assets:"Accès académique aux archives Copernicus. Jeu de données terrain de 5 ans acheté à l'INRAB. Une lettre d'intention d'un réassureur.",
-    challenges:"Je sais faire le modèle, pas le vendre. Je n'ai jamais négocié avec une compagnie d'assurance et je ne sais pas à quoi doit ressembler le produit qu'ils achètent vraiment.",
-    link:'dokodata.io'},
-  {id:'TM-VIS-5528', ownerHandle:'sept_minutes', title:'Vodun Studio', owner:'Marielle Ahouansou', ownerCity:'Ouidah, Bénin', ownerVerified:true, sectors:['medias','artisanat'], glyph:'🎬', hue:288, seeking:['contenu','brand','finance'], pace:'side', pay:'mixte', likes:41, seen:2,
-    hook:"Les enfants béninois grandissent avec des dessins animés japonais et américains. Vodun Studio adapte les contes du panthéon vodun en séries animées de 7 minutes, en français et en fon.",
-    vision:"Un studio d'animation béninois dont les personnages sont connus de Lagos à Abidjan, et dont les licences se vendent à l'étranger plutôt que l'inverse.",
-    traction:"Pilote de 7 minutes sorti en mars : 340 000 vues cumulées YouTube et TikTok. Sélectionné au FESPACO section animation.",
-    assets:"Équipe de 4 animateurs formés à l'ISMA. Bible graphique de 11 personnages. Préachat d'une chaîne panafricaine pour 6 épisodes.",
-    challenges:"Nous sommes des artistes. Personne dans l'équipe ne sait monter un plan de financement de série, ni négocier une licence. Et notre marque n'existe que dans nos têtes.",
-    link:'vodun.studio'},
-  {id:'TM-VIS-7043', ownerHandle:'vendue_deux_fois', title:'Kaba Foncier', owner:'Isidore Dansou', ownerCity:'Abomey-Calavi, Bénin', ownerVerified:false, sectors:['immobilier','impact'], glyph:'📜', hue:15, seeking:['juridique','dev-front','terrain'], pace:'serieux', pay:'mixte', likes:17, seen:7,
-    hook:"À Abomey-Calavi, une parcelle sur cinq est vendue deux fois. Kaba Foncier croise le registre ANDF, les actes de vente et un relevé GPS pour dire en 48 h si un terrain est litigieux avant que l'argent ne change de main.",
-    vision:"Rendre la vérification foncière aussi banale qu'un contrôle technique de véhicule.",
-    traction:"230 vérifications réalisées, 38 litiges détectés avant signature. 4 notaires prescripteurs. Revenu : 25 000 FCFA par dossier.",
-    assets:"Accès conventionné à la base ANDF. Deux géomètres partenaires. Un dossier type validé par un notaire de Cotonou.",
-    challenges:"Tout est manuel, je ne traite que 12 dossiers par semaine. Et le montage juridique de la responsabilité — si je me trompe, qui paie ? — n'est pas réglé.",
-    link:''},
-];
 
 /* ---------- État ---------- */
 
@@ -281,7 +176,7 @@ function renderSite(){
      sur place : rien ne clignote et la lecture n'est pas ramenée en haut. */
   const first = !el.firstChild;
   TMMorph(el, siteHeader() + siteHero() + siteMarquee() + siteConviction() + siteHow() + siteRoles() + siteScore()
-    + siteAtelier() + siteTrust() + siteCompare() + siteProjects() + sitePricing() + siteFaq() + siteCta() + siteFooter());
+    + siteAtelier() + siteTrust() + siteCompare() + sitePricing() + siteFaq() + siteCta() + siteFooter());
   if(first) el.scrollTop = 0;
   el.onscroll = () => {
     const hd = $('.site-hd');
@@ -356,113 +251,6 @@ function featI(g,t,d){
 }
 
 
-/* ---------- Illustrations fictives des fiches projet ----------
-   Scènes plates dessinées en SVG, dans la palette de marque. Ce sont
-   des images : leurs couleurs ne suivent pas le thème. Le voile or
-   posé par-dessus (.cover.art::after) garde le repère « visionnaire ». */
-const ART = {
-  'TM-VIS-4102': // Kèkè Santé — un centre de santé et son carnet numérique
-    '<rect width="320" height="118" fill="#E3EEF7"/>'
-    + '<circle cx="268" cy="28" r="15" fill="#FFD741"/>'
-    + '<rect y="92" width="320" height="26" fill="#CFE0C9"/>'
-    + '<rect x="38" y="44" width="124" height="52" rx="3" fill="#FAF9F5"/>'
-    + '<rect x="32" y="36" width="136" height="12" rx="3" fill="#0A65AE"/>'
-    + '<rect x="88" y="66" width="24" height="30" rx="2" fill="#8DB7DC"/>'
-    + '<rect x="50" y="58" width="24" height="16" rx="2" fill="#BCD3E8"/><rect x="126" y="58" width="24" height="16" rx="2" fill="#BCD3E8"/>'
-    + '<rect x="96" y="50" width="8" height="14" rx="1" fill="#B54A3F"/><rect x="93" y="53" width="14" height="8" rx="1" fill="#B54A3F"/>'
-    + '<g transform="rotate(-8 232 70)"><rect x="200" y="36" width="62" height="70" rx="8" fill="#1F1E1B"/>'
-    + '<rect x="205" y="42" width="52" height="58" rx="4" fill="#FAF9F5"/>'
-    + '<circle cx="216" cy="54" r="6" fill="#8DB7DC"/><rect x="226" y="50" width="24" height="4" rx="2" fill="#5D5A52"/><rect x="226" y="57" width="16" height="3" rx="1.5" fill="#BCD3E8"/>'
-    + '<rect x="211" y="68" width="40" height="3" rx="1.5" fill="#D2CCBC"/><rect x="211" y="75" width="34" height="3" rx="1.5" fill="#D2CCBC"/><rect x="211" y="82" width="38" height="3" rx="1.5" fill="#D2CCBC"/>'
-    + '<rect x="211" y="89" width="18" height="6" rx="3" fill="#4B7F52"/></g>',
-  'TM-VIS-7715': // Gbèdji Agro — rangées d'ananas et un lot tracé
-    '<rect width="320" height="118" fill="#F7EDCB"/>'
-    + '<circle cx="54" cy="30" r="17" fill="#FFD741"/>'
-    + '<path d="M0 64 Q80 50 160 60 T320 56 V118 H0z" fill="#B98A4E"/>'
-    + '<path d="M0 80 Q90 70 170 78 T320 74" stroke="#9C713A" stroke-width="3" fill="none"/>'
-    + '<path d="M0 98 Q90 88 170 96 T320 92" stroke="#9C713A" stroke-width="3" fill="none"/>'
-    + [[30,70],[80,66],[130,70],[180,68],[34,90],[86,86],[140,90],[192,88]].map(([x,y]) =>
-        '<path d="M'+x+' '+(y-12)+' l-7 -9 l6 3 l1 -10 l3 10 l6 -4 l-4 10z" fill="#4B7F52"/>'
-        + '<ellipse cx="'+(x+1)+'" cy="'+y+'" rx="7" ry="9" fill="#E3A21A"/>'
-        + '<path d="M'+(x-5)+' '+(y-4)+' l12 8 M'+(x-5)+' '+(y+3)+' l12 -8" stroke="#B87C0C" stroke-width="1.2"/>').join('')
-    + '<rect x="236" y="54" width="62" height="44" rx="3" fill="#0A65AE"/>'
-    + '<path d="M236 64h62M236 76h62M236 88h62" stroke="#035587" stroke-width="2"/>'
-    + '<rect x="248" y="60" width="26" height="26" rx="2" fill="#FAF9F5"/>'
-    + '<path d="M252 64h6v6h-6zM264 64h6v6h-6zM252 76h6v6h-6zM264 76h2v2h-2zM268 80h2v2h-2z" fill="#1F1E1B"/>',
-  'TM-VIS-2288': // Tchèko Pay — un étal de marché et son QR imprimé
-    '<rect width="320" height="118" fill="#F4E9D2"/>'
-    + '<path d="M22 22h206l-12 26H34z" fill="#FFD741"/>'
-    + [0,1,2,3,4,5,6].map(i => i % 2 ? '' : '<path d="M'+(22+i*29.4)+' 22h29.4l-1.7 26h-26z" fill="#0A65AE"/>').join('')
-    + '<path d="M34 48 q14 10 26 0 q14 10 26 0 q14 10 26 0 q14 10 26 0 q14 10 26 0 q14 10 26 0 q14 10 26 0" fill="#FFD741"/>'
-    + '<rect x="30" y="50" width="4" height="50" fill="#8A6008"/><rect x="216" y="50" width="4" height="50" fill="#8A6008"/>'
-    + '<rect x="24" y="80" width="202" height="22" rx="3" fill="#8A6008"/>'
-    + '<ellipse cx="62" cy="78" rx="20" ry="7" fill="#C9941A"/><circle cx="54" cy="72" r="6" fill="#E4002B"/><circle cx="64" cy="70" r="6" fill="#F28C28"/><circle cx="72" cy="74" r="5" fill="#4B7F52"/>'
-    + '<ellipse cx="116" cy="78" rx="20" ry="7" fill="#C9941A"/><circle cx="108" cy="72" r="6" fill="#FFD741"/><circle cx="118" cy="70" r="6" fill="#E3A21A"/><circle cx="126" cy="74" r="5" fill="#FFD741"/>'
-    + '<rect x="160" y="56" width="40" height="46" rx="3" fill="#FAF9F5" stroke="#1F1E1B" stroke-width="2"/>'
-    + '<path d="M166 62h9v9h-9zM185 62h9v9h-9zM166 81h9v9h-9zM180 78h3v3h-3zM186 84h3v3h-3zM190 78h4v4h-4zM180 88h4v4h-4z" fill="#1F1E1B"/>'
-    + '<rect x="166" y="94" width="28" height="4" rx="2" fill="#0A65AE"/>'
-    + '<g transform="rotate(10 272 64)"><rect x="252" y="30" width="40" height="70" rx="7" fill="#1F1E1B"/><rect x="256" y="36" width="32" height="56" rx="3" fill="#FAF9F5"/>'
-    + '<circle cx="272" cy="58" r="10" fill="#4B7F52"/><path d="m267 58 3.5 3.5 6.5-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
-    + '<rect x="262" y="74" width="20" height="3" rx="1.5" fill="#5D5A52"/><rect x="265" y="80" width="14" height="3" rx="1.5" fill="#D2CCBC"/></g>',
-  'TM-VIS-9034': // Lafia Learn — un cours audio écouté le soir
-    '<rect width="320" height="118" fill="#0B3A5E"/>'
-    + '<circle cx="270" cy="30" r="13" fill="#FFE890"/><circle cx="276" cy="26" r="11" fill="#0B3A5E"/>'
-    + [[40,20],[88,34],[150,18],[206,40],[236,14],[300,52],[20,52]].map(([x,y]) => '<circle cx="'+x+'" cy="'+y+'" r="1.6" fill="#F2E6BE"/>').join('')
-    + '<rect y="96" width="320" height="22" fill="#083F69"/>'
-    + '<rect x="40" y="74" width="70" height="10" rx="2" fill="#E3A21A"/><rect x="46" y="64" width="62" height="10" rx="2" fill="#3FA3EE"/><rect x="36" y="84" width="78" height="12" rx="2" fill="#FAF9F5"/>'
-    + '<rect x="130" y="40" width="44" height="58" rx="7" fill="#1F1E1B"/><rect x="134" y="46" width="36" height="46" rx="3" fill="#FAF9F5"/>'
-    + [4,10,16,8,20,12,6,14,9].map((h,i) => '<rect x="'+(138+i*3.6)+'" y="'+(69-h/2)+'" width="2" height="'+h+'" rx="1" fill="#007CD8"/>').join('')
-    + '<circle cx="152" cy="86" r="3.5" fill="#FFD741"/>'
-    + '<path d="M196 80a26 26 0 0 1 52 0" stroke="#FFD741" stroke-width="5" fill="none" stroke-linecap="round"/>'
-    + '<rect x="190" y="74" width="12" height="20" rx="5" fill="#FFD741"/><rect x="242" y="74" width="12" height="20" rx="5" fill="#FFD741"/>'
-    + '<path d="M262 60q8 10 0 20M270 54q13 16 0 32" stroke="#8DB7DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>',
-};
-function projArt(p){
-  const body = ART[p.id];
-  if(!body) return '';
-  return '<svg class="art-svg" viewBox="0 0 320 118" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustration du projet '+esc(p.title)+'">'+body+'</svg>';
-}
-
-/* Ce que le visionnaire propose aux talents, tel qu'il l'écrit sur sa fiche. */
-const PAY_L = {equity:'Parts uniquement', mixte:'Parts + petite rémunération', salaire:'Rémunération prévue'};
-/* ---------- Couvertures de projet : identiques à l'outil ----------
-   La photo ajoutée par le porteur (voile or par-dessus), sinon le dégradé
-   or et l'icône du premier secteur (DESIGN §9.4). */
-const COVER = 'assets/images/couverture-projet.jpg';
-const PHOTOS = {
-  'TM-VIS-4102':{p:'50% 22%', z:'150% auto'},
-  'TM-VIS-2288':{p:'50% 88%', z:'180% auto'},
-  'TM-VIS-7715':{p:'15% 55%', z:'130% auto'},
-  'TM-VIS-5528':{p:'85% 18%', z:'200% auto'},
-  'TM-VIS-6641':{p:'50% 80%'},
-};
-function photoOf(x){ if(!x) return null; if(x.photo) return {src:x.photo, p:'50% 50%'}; const d = PHOTOS[x.id]; return d ? {src:COVER, p:d.p, z:d.z} : null; }
-function photoStyle(ph, zoom){ return 'background-image:url('+ph.src+');background-position:'+ph.p+';'+(zoom && ph.z ? 'background-size:'+ph.z+'!important;' : ''); }
-function projCover(x){ const ph = photoOf(x); return ph ? {cls:'photo', style:photoStyle(ph, true), ph} : {cls:tintCls('vis', x.hue), style:tintAng(x.hue), ph:null}; }
-
-/* Badge de vérification (icône officielle) : couleur du rôle de la personne décrite. */
-const VB_PATH = 'M16 8.375C16 8.93437 15.8656 9.45312 15.5969 9.92813C15.3281 10.4031 14.9688 10.775 14.5156 11.0344C14.5281 11.1188 14.5344 11.25 14.5344 11.4281C14.5344 12.275 14.25 12.9937 13.6875 13.5875C13.1219 14.1844 12.4406 14.4812 11.6438 14.4812C11.2875 14.4812 10.9469 14.4156 10.625 14.2844C10.375 14.7969 10.0156 15.2094 9.54375 15.525C9.075 15.8438 8.55937 16 8 16C7.42812 16 6.90938 15.8469 6.44688 15.5344C5.98125 15.225 5.625 14.8094 5.375 14.2844C5.05312 14.4156 4.71562 14.4812 4.35625 14.4812C3.55937 14.4812 2.875 14.1844 2.30312 13.5875C1.73125 12.9937 1.44687 12.2719 1.44687 11.4281C1.44687 11.3344 1.45938 11.2031 1.48125 11.0344C1.02813 10.7719 0.66875 10.4031 0.4 9.92813C0.134375 9.45312 0 8.93437 0 8.375C0 7.78125 0.15 7.23438 0.446875 6.74062C0.74375 6.24687 1.14375 5.88125 1.64375 5.64375C1.5125 5.2875 1.44687 4.92812 1.44687 4.57188C1.44687 3.72813 1.73125 3.00625 2.30312 2.4125C2.875 1.81875 3.55937 1.51875 4.35625 1.51875C4.7125 1.51875 5.05312 1.58438 5.375 1.71563C5.625 1.20312 5.98438 0.790625 6.45625 0.475C6.925 0.159375 7.44063 0 8 0C8.55937 0 9.075 0.159375 9.54375 0.471875C10.0125 0.7875 10.375 1.2 10.625 1.7125C10.9469 1.58125 11.2844 1.51562 11.6438 1.51562C12.4406 1.51562 13.1219 1.8125 13.6875 2.40937C14.2531 3.00625 14.5344 3.725 14.5344 4.56875C14.5344 4.9625 14.475 5.31875 14.3562 5.64062C14.8562 5.87813 15.2563 6.24375 15.5531 6.7375C15.85 7.23438 16 7.78125 16 8.375ZM7.65938 10.7844L10.9625 5.8375C11.0469 5.70625 11.0719 5.5625 11.0437 5.40938C11.0125 5.25625 10.9344 5.13438 10.8031 5.05312C10.6719 4.96875 10.5281 4.94063 10.375 4.9625C10.2188 4.9875 10.0938 5.0625 10 5.19375L7.09062 9.56875L5.75 8.23125C5.63125 8.1125 5.49375 8.05625 5.34062 8.0625C5.18437 8.06875 5.05 8.125 4.93125 8.23125C4.825 8.3375 4.77187 8.47187 4.77187 8.63437C4.77187 8.79375 4.825 8.92813 4.93125 9.0375L6.77187 10.8781L6.8625 10.95C6.96875 11.0219 7.07812 11.0562 7.18437 11.0562C7.39375 11.0531 7.55313 10.9656 7.65938 10.7844Z';
-function vBadge(role, ok){ return '<span class="vbadge '+(ok ? (role === 'vis' ? 'vb-vis' : 'vb-tal') : 'vb-off')+'" title="'+(ok ? 'Profil vérifié par l\'équipe TakaMatch' : 'Profil pas encore vérifié')+'"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="'+VB_PATH+'"/></svg><span>('+(ok ? 'Vérifié' : 'Non vérifié')+')</span></span>'; }
-
-function siteProjects(){
-  const picks = PROJECTS.slice(0,6);
-  return '<section class="sec"><div class="site-in">'
-    + '<div class="sec-h">'
-    +   '<h2>Des projets qui cherchent leur équipe</h2>'
-    +   '<p>Un échantillon de ce que tu verras en t\'inscrivant. Chaque fiche dit ce qui bloque, quelles compétences manquent et ce que le porteur propose aux talents. Derrière chaque projet, sa fiche perso te montre qui le porte. Une photo de couverture ou l\'icône du secteur, et un ♡ pour garder les projets qui te plaisent.</p></div>'
-    + '<div class="deck">' + picks.map(p => { const cv = projCover(p);
-      return '<article class="pcard" data-act="open-onb" data-role="tal" style="cursor:pointer">'
-        + '<div class="cover '+cv.cls+'" style="'+cv.style+'">'+(cv.ph ? '' : '<span class="glyph" aria-hidden="true">'+sector(p.sectors[0]).g+'</span>')
-        +   '<span class="tags">'+(p.sectors||[]).slice(0,2).map(id=>'<span class="chip chip-onart">'+sector(id).g+' '+esc(sector(id).l)+'</span>').join('')+'</span>'
-        +   (p.likes ? '<span class="fav likes" aria-label="'+p.likes+' j\'aime">♡ '+p.likes+'</span>' : '')
-        +   '<span class="chip chip-pseudo" style="position:absolute;bottom:8px;left:9px">'+esc(handleOf(p))+'</span></div>'
-        + '<div class="body"><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><h3>'+esc(p.title)+'</h3>'+vBadge('vis', p.ownerVerified)+'</div>'
-        + '<p class="ex">'+esc(p.hook)+'</p>'
-        + '<div class="row" style="gap:5px;flex-wrap:wrap;align-items:center"><span class="sk-lbl">Recherche&nbsp;:</span>'+(p.seeking||[]).slice(0,2).map(sk=>'<span class="chip chip-a">'+esc(skillL(sk))+'</span>').join('')+'</div>'
-        + (PAY_L[p.pay] ? '<span class="offer">🤝 '+esc(PAY_L[p.pay])+'</span>' : '')
-        + '</div></article>'; }).join('')
-    + '</div></div></section>';
-}
 
 function sitePricing(){
   return '<section class="sec" id="tarifs"><div class="site-in">'
@@ -515,7 +303,7 @@ function siteFooter(){
     +   '<div class="ft-soc">' + FT_SOC.map(n => '<a class="fs fs-'+n[0]+'" href="'+SOCIAL_LINKS[n[0]]+'" target="_blank" rel="noopener" aria-label="TakaMatch sur '+n[1]+'" title="'+n[1]+'">'
     +     '<svg viewBox="'+SOCIAL_IC[n[0]].vb+'" aria-hidden="true">'+SOCIAL_IC[n[0]].p+'</svg></a>').join('') + '</div></div>'
     + '</div>'
-    + '<p style="font-size:12.5px;color:var(--ink-3);margin-top:30px">© 2026 TakaMatch. Certains projets et talents affichés sont des exemples de démonstration.</p>'
+    + '<p style="font-size:12.5px;color:var(--ink-3);margin-top:30px">© 2026 TakaMatch.</p>'
     + '</div></footer>';
 }
 

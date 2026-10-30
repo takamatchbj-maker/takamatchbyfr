@@ -7,8 +7,8 @@
 
    · pacteCtx(t)   : l'équipe telle que le pacte la voit
    · PacteStore    : où vit l'état du pacte. Par défaut : dans
-                     l'équipe elle-même (démo, hors connexion),
-                     avec un juriste et des signatures simulés.
+                     l'équipe elle-même (base pas encore prête) ;
+                     rien n'y est simulé (ni juriste, ni signatures).
    · openPacte(t)  : ouvre l'éditeur plein écran
    ============================================================ */
 
@@ -53,7 +53,7 @@ const pacteOf = t => t && (t.pacte || null);
 const pacteStatus = t => (pacteOf(t) || {}).status || '';
 
 /* ============================================================
-   Stockage local (démo, ou base pas encore prête)
+   Stockage local (base pas encore prête)
    ============================================================ */
 const PacteStore = {
   kind:'local',
@@ -64,7 +64,7 @@ const PacteStore = {
     const p = t.pacte;
     /* Mes informations civiles de départ : nom de compte. */
     if(!p.parties.me) p.parties.me = {legal:myName()};
-    return Object.assign({demo:true}, p);
+    return Object.assign({}, p);
   },
   log(t, action, detail){ t.pacte.events.unshift({at:new Date().toISOString(), action, detail:detail || '', who:'', version:t.pacte.version}); },
   async save(t, spec){ t.pacte.spec = spec; },
@@ -73,33 +73,14 @@ const PacteStore = {
     const p = t.pacte;
     p.status = 'relecture'; p.payment = payId;
     this.log(t, 'Relecture commandée', 'Paiement ' + payId);
-    /* Juriste de démonstration : il relit et publie au bout de quelques secondes. */
-    setTimeout(() => this.demoPublish(t, 'Relu. J\'ai vérifié la cohérence entre le capital, le vesting et les clauses de départ. Pensez à compléter vos informations civiles avant de signer.'), 9000);
-  },
-  async demoPublish(t, note){
-    const p = t.pacte; if(!p || p.status !== 'relecture') return;
-    const ctx = Object.assign(pacteCtx(t), {parties:p.parties});
-    const v = p.snapshot ? p.version + 1 : p.version;
-    const doc = TMPacte.build(ctx, p.spec || TMPacte.defaults(ctx), {status:'signature', version:v, reviewed:true});
-    p.snapshot = doc; p.version = v; p.hash = await TMPacte.fingerprint(doc); p.status = 'signature'; p.reviewNote = note || ''; p.signatures = {};
-    this.log(t, 'Version ' + v + ' publiée pour signature', note);
-    pushNotif('file', 'Votre pacte est prêt à signer', 'Version ' + v + ' relue par le juriste.');
-    pacteRefresh(t);
+    /* La relecture est faite par un vrai juriste depuis l'espace équipe (base) : rien n'est simulé ici. */
   },
   async sign(t, name, hash){
     const p = t.pacte, me = this.me(t);
     p.signatures[me] = {name, at:new Date().toISOString(), hash};
     this.log(t, 'Signature', name);
     this.checkDone(t);
-    /* Les autres associés de la démo signent à leur tour. */
-    const others = (p.snapshot.parties || []).filter(x => !p.signatures[x.uid]);
-    others.forEach((x, i) => setTimeout(() => {
-      if(p.status !== 'signature' || p.signatures[x.uid]) return;
-      p.signatures[x.uid] = {name:x.legal || x.first, at:new Date().toISOString(), hash:p.hash};
-      this.log(t, 'Signature', x.legal || x.first);
-      pushNotif('file', 'Nouvelle signature', (x.first || x.legal) + ' a signé le pacte.');
-      this.checkDone(t); pacteRefresh(t);
-    }, 4000 + i * 2500));
+    /* Chaque associé signe lui-même : aucune signature n'est simulée. */
   },
   checkDone(t){
     const p = t.pacte;
@@ -113,7 +94,6 @@ const PacteStore = {
     const p = t.pacte;
     p.status = 'relecture'; p.signatures = {};
     this.log(t, 'Modification demandée', reason);
-    setTimeout(() => this.demoPublish(t, 'Modification prise en compte : « ' + reason + ' ».'), 9000);
   },
   async finalPdf(t){ return false; },
 };

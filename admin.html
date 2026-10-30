@@ -220,10 +220,6 @@ select.inp{padding-right:28px}
 .login-c{text-align:center}
 .login-c .field{align-items:center}
 .login-c .field .inp{text-align:center}
-.login-c .demo-acc .lbl,.login-c .demo-acc .hint{text-align:center}
-.demo-acc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
-.demo-acc button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border-radius:var(--r-sm);font-size:12.5px;text-align:left}
-.demo-acc button:hover{background:var(--surface-2)}
 .top{position:sticky;top:0;z-index:20;height:60px;display:flex;align-items:center;gap:14px;padding:0 18px;background:var(--surface);border-bottom:1px solid var(--line)}
 .top .logo{height:28px}
 .staff-chip{font-size:11.5px;font-weight:700;color:var(--ground);background:var(--ink);padding:3px 8px;border-radius:var(--r-sm);letter-spacing:.01em}
@@ -549,14 +545,14 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 <!-- Espace équipe en ligne : comptes, rôles, prix et journal dans Supabase. -->
 <script src="js/morph.js?v=20261020a"></script>
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
-<script src="js/supabase.js?v=20261014c"></script>
+<script src="js/supabase.js?v=20261030a"></script>
 <script src="js/geo.js?v=20261010a"></script>
 <script src="js/prix.js?v=20261016a"></script>
 <script src="js/pay-icons.js?v=20261014a"></script>
 <link rel="stylesheet" href="css/pacte.css?v=20261020b">
 <script src="js/pacte.js?v=20261010a"></script>
 <script src="js/pacte-pdf.js?v=20261010a"></script>
-<script src="js/pacte-editor.js?v=20261020-lucide"></script>
+<script src="js/pacte-editor.js?v=20261029a"></script>
 </head>
 <body>
 <div class="tmg-boot" id="tmgBoot" role="status" aria-live="polite"><div class="tmg-in"><span class="tmg-spin" aria-hidden="true"></span><p>Chargement de TakaMatch…</p></div></div>
@@ -564,18 +560,15 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <script>
 "use strict";
-const DATA = {"SECTORS":[{"id":"agritech","l":"AgriTech","g":"🌱"},{"id":"fintech","l":"FinTech","g":"💳"},{"id":"edtech","l":"EdTech","g":"📚"},{"id":"health","l":"HealthTech","g":"🩺"},{"id":"logistique","l":"Logistique","g":"🚚"},{"id":"ecommerce","l":"E-commerce","g":"🛍️"},{"id":"immobilier","l":"Immobilier","g":"🏘️"},{"id":"greentech","l":"GreenTech","g":"🌍"},{"id":"medias","l":"Médias & Contenu","g":"🎬"},{"id":"saas","l":"SaaS & Outils B2B","g":"🧰"},{"id":"artisanat","l":"Artisanat & Culture","g":"🎨"},{"id":"impact","l":"Impact Social","g":"🤝"}],"SKILLS":[{"id":"dev-mobile","l":"Dev mobile"},{"id":"dev-front","l":"Dev front-end"},{"id":"dev-back","l":"Dev back-end"},{"id":"data","l":"Data & IA"},{"id":"design","l":"UX / UI Design"},{"id":"brand","l":"Identité de marque"},{"id":"growth","l":"Growth & Acquisition"},{"id":"contenu","l":"Contenu & Communauté"},{"id":"vente","l":"Vente & Partenariats"},{"id":"produit","l":"Product management"},{"id":"finance","l":"Finance & Levée"},{"id":"juridique","l":"Juridique & OHADA"},{"id":"terrain","l":"Opérations terrain"},{"id":"rh","l":"Recrutement & RH"}],"TALENTS":[{"id":"TM-TAL-4187","name":"Axel Assogba","handle":"offline_first","city":"Cotonou, Bénin","verified":true,"skills":["dev-mobile","dev-front"],"hue":210,"sex":"m","bio":"Je construis des apps Flutter qui marchent en 3G et hors-ligne. J'ai déjà livré deux produits pour des PME béninoises. Je cherche un projet santé ou paiement où le mobile est le cœur, pas un accessoire."},{"id":"TM-TAL-5092","name":"Nadia Kponou","handle":"pixel_atlantique","city":"Cotonou, Bénin","verified":true,"skills":["design","brand"],"hue":280,"sex":"f","bio":"8 ans de design produit, dont 4 sur des interfaces à faible bande passante. Je pose des design systems que des équipes juniors savent tenir. Je ne fais pas de « jolis écrans », je fais des parcours qui convertissent."},{"id":"TM-TAL-3341","name":"Ibrahim Sanogo","handle":"sat_agro","city":"Bamako, Mali","verified":true,"skills":["data","dev-back"],"hue":150,"sex":"m","bio":"Data scientist, ex-CIRAD. Je travaille sur l'imagerie satellite appliquée au rendement agricole. Je veux fonder, pas consulter — je cherche un porteur qui connaît le terrain mieux que moi."},{"id":"TM-TAL-7728","name":"Chimène Dossou","handle":"zero_budget","city":"Porto-Novo, Bénin","verified":false,"skills":["growth","contenu"],"hue":20,"sex":"f","bio":"J'ai fait passer une boutique Instagram de 400 à 28 000 abonnés en 11 mois, avec 0 FCFA de budget pub. Acquisition organique, contenu vidéo, WhatsApp Business. Je sais vendre en Afrique de l'Ouest."},{"id":"TM-TAL-2205","name":"Yao Kouassi","handle":"api_lagune","city":"Abidjan, Côte d'Ivoire","verified":true,"skills":["dev-back","saas"],"hue":195,"sex":"m","bio":"Architecte back-end, Node et PostgreSQL. J'ai tenu une API à 4 M de requêtes/jour pour un agrégateur de paiement. Je peux donner 10 h par semaine, sérieusement, pas en dilettante."},{"id":"TM-TAL-6614","name":"Fatou Ndiaye","handle":"savoir_dire_non","city":"Dakar, Sénégal","verified":true,"skills":["produit","vente"],"hue":330,"sex":"f","bio":"Product manager, 6 ans dont 3 dans une edtech passée de 0 à 120 000 utilisateurs. Je sais dire non à des fonctionnalités. Je cherche un projet à impact où la distribution est le vrai problème."},{"id":"TM-TAL-8830","name":"Kevin Aholou","handle":"huit_mois","city":"Cotonou, Bénin","verified":false,"skills":["dev-front","design"],"hue":255,"sex":"n","bio":"Sorti d'Epitech Bénin il y a 8 mois. React, TypeScript, Tailwind. Je code tous les jours et j'apprends vite. Je cherche un projet où je peux devenir bon en étant mal à l'aise."},{"id":"TM-TAL-1907","name":"Grâce Tossou","handle":"clause_ohada","city":"Cotonou, Bénin","verified":true,"skills":["juridique","finance"],"hue":10,"sex":"f","bio":"Juriste d'affaires, droit OHADA. Je monte des statuts de SAS, des pactes d'associés et des clauses de vesting qui tiennent devant un tribunal béninois. La plupart des startups signent des documents copiés sur Internet."},{"id":"TM-TAL-4456","name":"Moussa Traoré","handle":"borgou_terrain","city":"Parakou, Bénin","verified":true,"skills":["terrain","vente"],"hue":95,"sex":"m","bio":"Agronome de formation, 6 ans sur le terrain dans le Borgou. Je connais 40 coopératives par leur nom. Si votre produit agri n'a jamais été testé dans un champ, je suis la personne qu'il vous manque."},{"id":"TM-TAL-9912","name":"Léa Hounkpatin","handle":"trois_langues","city":"Cotonou, Bénin","verified":false,"skills":["contenu","brand"],"hue":300,"sex":"f","bio":"Je raconte des histoires en fon, en français et en anglais. Vidéo courte, podcast, newsletter. J'ai construit une communauté de 12 000 personnes autour de la culture béninoise sans jamais payer un seul post."},{"id":"TM-TAL-3078","name":"Serge Mensah","handle":"apres_300","city":"Lomé, Togo","verified":true,"skills":["finance","vente"],"hue":220,"sex":"m","bio":"Ex-analyste en capital-risque. J'ai vu 300 dossiers et j'en ai financé 7. Je sais ce qui fait dire non à un investisseur. Je rejoins un projet par an, en tant que cofondateur finance."},{"id":"TM-TAL-5563","name":"Aïcha Bello","handle":"batterie_faible","city":"Niamey, Niger","verified":true,"skills":["dev-mobile","dev-back"],"hue":170,"sex":"f","bio":"React Native et Node. J'ai construit une app de suivi de vaccination utilisée dans 14 centres de santé au Niger. Les contraintes de connexion et de batterie, je les connais par cœur."}],"PROJECTS":[{"id":"TM-VIS-4102","title":"Kèkè Santé","owner":"Dr. Sylvain Agbodjan","ownerHandle":"carnet_de_nuit","ownerCity":"Cotonou, Bénin","ownerVerified":true,"sectors":["health","impact"],"seeking":["dev-mobile","produit","data"],"hue":196,"likes":47,"pay":"equity","hook":"Au Bénin, un patient sur trois quitte une consultation sans ordonnance lisible et sans dossier. Kèkè Santé donne à chaque centre de santé un carnet patient numérique qui fonctionne sans connexion et se synchronise la nuit.","sex":"m"},{"id":"TM-VIS-7715","title":"Gbèdji Agro","owner":"Rachelle Sohou","ownerHandle":"tracer_ananas","ownerCity":"Allada, Bénin","ownerVerified":true,"sectors":["agritech","ecommerce"],"seeking":["dev-back","terrain","growth"],"hue":45,"likes":31,"pay":"mixte","hook":"L'ananas pain de sucre béninois se vend 4 fois moins cher que le costaricien alors qu'il est meilleur, parce qu'aucun acheteur européen ne peut prouver d'où il vient. Gbèdji trace chaque lot du champ au conteneur.","sex":"f"},{"id":"TM-VIS-2288","title":"Tchèko Pay","owner":"Ousmane Barry","ownerHandle":"six_secondes","ownerCity":"Cotonou, Bénin","ownerVerified":true,"sectors":["fintech","impact"],"seeking":["dev-back","juridique","vente"],"hue":212,"likes":64,"pay":"equity","hook":"70 % des commerces de Dantokpa refusent le mobile money parce que l'USSD prend 45 secondes et bloque la file. Tchèko Pay encaisse en 6 secondes avec un QR imprimé et un SMS de confirmation, sans smartphone côté client.","sex":"m"},{"id":"TM-VIS-9034","title":"Lafia Learn","owner":"Prudence Gbaguidi","ownerHandle":"huit_minutes","ownerCity":"Parakou, Bénin","ownerVerified":false,"sectors":["edtech","impact"],"seeking":["contenu","dev-mobile","produit"],"hue":28,"likes":22,"pay":"mixte","hook":"Dans le Nord-Bénin, un élève de terminale a en moyenne 2 heures d'électricité par jour mais 4 heures de batterie de téléphone. Lafia Learn délivre tout le programme du BAC en audio de 8 minutes, téléchargeable en une fois.","sex":"f"},{"id":"TM-VIS-6641","title":"Zemidjan+","owner":"Kossi Adjovi","ownerHandle":"km_a_vide","ownerCity":"Cotonou, Bénin","ownerVerified":true,"sectors":["logistique","impact"],"seeking":["data","dev-mobile","terrain"],"hue":130,"likes":38,"pay":"equity","hook":"Un zémidjan de Cotonou roule 90 km par jour et fait 40 % de ces kilomètres à vide. Zemidjan+ regroupe les courses et les livraisons sur un même trajet, avec une répartition calculée hors-ligne sur le téléphone du conducteur.","sex":"m"},{"id":"TM-VIS-3390","title":"Adjara Market","owner":"Estelle Quenum","ownerHandle":"panier_direct","ownerCity":"Porto-Novo, Bénin","ownerVerified":true,"sectors":["artisanat","ecommerce"],"seeking":["growth","dev-front","contenu"],"hue":340,"likes":19,"pay":"mixte","hook":"Une vannière d'Adjara vend un panier 1 500 FCFA au marché. Le même panier part à 34 € dans une boutique parisienne. Adjara Market met les artisans en vente directe auprès de la diaspora, avec paiement en euros et expédition groupée.","sex":"f"},{"id":"TM-VIS-8807","title":"Solar Box","owner":"Wilfried Hounsou","ownerHandle":"sans_lampant","ownerCity":"Djougou, Bénin","ownerVerified":false,"sectors":["greentech","impact","fintech"],"seeking":["finance","terrain","dev-back"],"hue":50,"likes":29,"pay":"equity","hook":"Un ménage rural béninois dépense 4 500 FCFA par mois en pétrole lampant et en recharge de téléphone. Un kit solaire coûte 85 000 FCFA — inaccessible d'un coup, évident à 3 500 FCFA par mois. Solar Box fait le pont par paiement échelonné verrouillé à distance.","sex":"m"},{"id":"TM-VIS-1156","title":"Doko Data","owner":"Armand Gnonlonfoun","ownerHandle":"parcelle_onze","ownerCity":"Cotonou, Bénin","ownerVerified":true,"sectors":["agritech","saas"],"seeking":["data","vente","produit"],"hue":175,"likes":26,"pay":"equity","hook":"Les assureurs agricoles ouest-africains refusent d'assurer les petits producteurs parce qu'ils ne savent pas mesurer une perte de récolte à distance. Doko Data transforme l'imagerie Sentinel-2 en indice de rendement parcelle par parcelle.","sex":"n"},{"id":"TM-VIS-5528","title":"Vodun Studio","owner":"Marielle Ahouansou","ownerHandle":"sept_minutes","ownerCity":"Ouidah, Bénin","ownerVerified":true,"sectors":["medias","artisanat"],"seeking":["contenu","brand","finance"],"hue":288,"likes":41,"pay":"mixte","hook":"Les enfants béninois grandissent avec des dessins animés japonais et américains. Vodun Studio adapte les contes du panthéon vodun en séries animées de 7 minutes, en français et en fon.","sex":"f"},{"id":"TM-VIS-7043","title":"Kaba Foncier","owner":"Isidore Dansou","ownerHandle":"vendue_deux_fois","ownerCity":"Abomey-Calavi, Bénin","ownerVerified":false,"sectors":["immobilier","impact"],"seeking":["juridique","dev-front","terrain"],"hue":15,"likes":17,"pay":"mixte","hook":"À Abomey-Calavi, une parcelle sur cinq est vendue deux fois. Kaba Foncier croise le registre ANDF, les actes de vente et un relevé GPS pour dire en 48 h si un terrain est litigieux avant que l'argent ne change de main.","sex":"m"}]};
+const DATA = {"SECTORS":[{"id":"agritech","l":"AgriTech","g":"🌱"},{"id":"fintech","l":"FinTech","g":"💳"},{"id":"edtech","l":"EdTech","g":"📚"},{"id":"health","l":"HealthTech","g":"🩺"},{"id":"logistique","l":"Logistique","g":"🚚"},{"id":"ecommerce","l":"E-commerce","g":"🛍️"},{"id":"immobilier","l":"Immobilier","g":"🏘️"},{"id":"greentech","l":"GreenTech","g":"🌍"},{"id":"medias","l":"Médias & Contenu","g":"🎬"},{"id":"saas","l":"SaaS & Outils B2B","g":"🧰"},{"id":"artisanat","l":"Artisanat & Culture","g":"🎨"},{"id":"impact","l":"Impact Social","g":"🤝"}],"SKILLS":[{"id":"dev-mobile","l":"Dev mobile"},{"id":"dev-front","l":"Dev front-end"},{"id":"dev-back","l":"Dev back-end"},{"id":"data","l":"Data & IA"},{"id":"design","l":"UX / UI Design"},{"id":"brand","l":"Identité de marque"},{"id":"growth","l":"Growth & Acquisition"},{"id":"contenu","l":"Contenu & Communauté"},{"id":"vente","l":"Vente & Partenariats"},{"id":"produit","l":"Product management"},{"id":"finance","l":"Finance & Levée"},{"id":"juridique","l":"Juridique & OHADA"},{"id":"terrain","l":"Opérations terrain"},{"id":"rh","l":"Recrutement & RH"}],"TALENTS":[],"PROJECTS":[]};
 const LOGO_SRC = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FscXVlXzEiIGRhdGEtbmFtZT0iQ2FscXVlIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAzODAuMTMgMTAwLjkxIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjZmZmOwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6IHVybCgjRMOpZ3JhZMOpX3NhbnNfbm9tXzU5KTsKICAgICAgfQoKICAgICAgLmNscy0yLCAuY2xzLTMgewogICAgICAgIGZpbGwtcnVsZTogZXZlbm9kZDsKICAgICAgfQoKICAgICAgLmNscy0zIHsKICAgICAgICBmaWxsOiB1cmwoI2xpbmVhci1ncmFkaWVudCk7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IkTDqWdyYWTDqV9zYW5zX25vbV81OSIgZGF0YS1uYW1lPSJEw6lncmFkw6kgc2FucyBub20gNTkiIHgxPSIwIiB5MT0iNTAuNDYiIHgyPSIxNjAuNDciIHkyPSI1MC40NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwMzU1ODciLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIuNDkiIHN0b3AtY29sb3I9IiMwMDdjZDgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDM1NTg3Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsaW5lYXItZ3JhZGllbnQiIHgxPSIxNjAuNDciIHkxPSI1MC40NiIgeDI9IjM4MC4xMyIgeTI9IjUwLjQ2IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2RkOWYyMiIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iI2ZmZDc0MSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkZDlmMjIiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE2MC40NywxMDAuOTFMMTAuMjQsODYuNTljLTUuNjMtLjU0LTEwLjI0LTUuNjEtMTAuMjQtMTEuMjZWMjUuNTljMC01LjY2LDQuNjEtMTAuNzMsMTAuMjQtMTEuMjZMMTYwLjQ3LDB2MTAwLjkxWiIvPgogIDxnPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTAuMDUsMjYuNzhsMjMuMTYtMS40NGMyLjE2LS4xMywzLjkzLDIuMDcsMy45Myw0Ljkzcy0xLjc3LDUuMjQtMy45Myw1LjMybC03LjI0LjI2djM0LjA5YzAsMy41MS0yLjExLDYuMjItNC42OCw2LjA1LTIuNTQtLjE3LTQuNTctMy4wOC00LjU3LTYuNTF2LTMzLjNsLTYuNjYuMjRjLTEuOS4wNy0zLjQyLTIuMDItMy40Mi00LjY2czEuNTItNC44OCwzLjQyLTVaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik00Ny42OSw1NC4xM2wzLjc3LjA0YzAtNC4wOS0uMzMtNi44My00LjIxLTYuODEtNC42MS4wMy01LjI4LDQuMzgtOC41NCw0LjM3LTIuMywwLTQuMTctMS45MS00LjE3LTQuOTUsMC02LjQ3LDcuNjQtOC40NywxMi44Mi04LjYyLDguOC0uMjYsMTQuMzYsMy45MSwxNC4zNiwxNS45N3YxOC4xMmMwLDMuNDctMi4xNiw2LjI4LTQuOTksNi4xLTIuNTEtLjE3LTQuNTQtMi41Ni00Ljg4LTUuNTQtMi40LDQuMDEtNS40OCw1LjIxLTkuMzcsNC45NS01LjM0LS4zNi05LjczLTQuNjItOS43My0xMS44MywwLTEwLjY0LDguMjQtMTEuODQsMTQuOTQtMTEuNzhaTTQ1Ljc3LDY5LjY4YzMuNzQuMTgsNS43NC0zLjQsNS43NC03Ljkxdi0uNjNsLTMuMjgtLjA4Yy0yLjUyLS4wNy01Ljk3LjQtNS45Nyw0LjQ2LDAsMi42MiwxLjU2LDQuMDcsMy41MSw0LjE2WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNjkuMywyNy41OWMwLTMuNzUsMi41MS02LjkzLDUuNzMtNy4xNCwzLjIxLS4yMiw1LjgyLDIuNyw1LjgyLDYuNTV2MjYuMDJsOS44OS0xMy42NmMuOTQtMS4zNCwyLjM1LTIuMDcsMy45MS0yLjExLDIuODEtLjA4LDUuMTYsMi41Myw1LjE2LDUuNzUsMCwxLjU3LS41NiwyLjkxLTEuMzksNC4wMmwtNS44MSw3LjMxLDguODcsMTYuNDhjLjU2LDEuMDUuOTEsMi4zMy45MSwzLjY3LDAsMy43OS0yLjczLDYuNjktNi4wNCw2LjQ4LTIuMTgtLjE0LTQuMDgtMS41OC01LjA5LTMuNThsLTcuMzMtMTQuMzMtMy4xLDMuOTh2NS45NmMwLDMuODUtMi42MSw2Ljc2LTUuODgsNi41NS0zLjE2LS4yMS01LjY3LTMuMzktNS42Ny03LjEzVjI3LjU5WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3LjM2LDU0Ljg3bDUuMzYuMDVjMC00Ljg4LS40OC04LjE1LTUuOTgtOC4xMi02LjUzLjA1LTcuNDcsNS4yMS0xMi4wNyw1LjE5LTMuMjQtLjAxLTUuODUtMi4yNi01Ljg1LTUuODcsMC03LjY2LDEwLjc1LTEwLjA4LDE4LjA4LTEwLjMsMTIuNTMtLjM2LDIwLjUxLDQuNiwyMC41MSwxOS4wNXYyMS43M2MwLDQuMTYtMy4xLDcuNS03LjE2LDcuMjMtMy41OS0uMjQtNi40OC0zLjEyLTYuOTYtNi42OS0zLjQxLDQuNzUtNy43OSw2LjEzLTEzLjMsNS43Ni03LjUzLS41LTEzLjY5LTUuNjItMTMuNjktMTQuMTQsMC0xMi41OSwxMS41OC0xMy45OSwyMS4wNi0xMy45MVpNMTI0LjY0LDczLjM4YzUuMy4yNSw4LjE2LTMuOTksOC4xNi05LjM3di0uNzZsLTQuNjYtLjEyYy0zLjU3LS4wOS04LjQ2LjQ0LTguNDYsNS4yNywwLDMuMTEsMi4yLDQuODUsNC45Niw0Ljk4WiIvPgogIDwvZz4KICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0zNjkuNjEsODYuMTRsLTIwOS4xNCwxNC43N1YwbDIwOS4xNCwxNC4zNGM1LjkyLjQyLDEwLjUyLDUuMzUsMTAuNTIsMTEuMjl2NDkuMjNjMCw1Ljk0LTQuNTksMTAuODctMTAuNTIsMTEuMjlaIi8+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xNzcuMDYsMzAuMzRjMC03LjE0LDUuNjUtMTIuNzEsMTIuNDUtMTIuMzksNS4yOS4yNSw5LjcxLDMuOTEsMTEuMyw4Ljg2bDkuMzIsMjguMjhjLjcsMi4yMywxLjE2LDQuMTMsMS4zOSw1LjU0bC4zOCwyLjMxaC40NnMuMzgtMi4zMy4zOC0yLjMzYy4zMS0xLjQxLjY5LTMuMjMsMS40NS01LjU1bDguOTYtMjcuODFjMS40MS00LjQyLDUuMzgtNy40OCw5Ljg3LTcuMjcsNS41Ny4yNiwxMC4wNyw1LjUyLDEwLjA3LDExLjY3djQyLjI4YzAsNC4wMi0yLjk1LDcuNDgtNi42Myw3LjY2LTMuNjUuMTgtNi43LTMuMDUtNi43LTcuMTZ2LTM0LjIyaC0uNDRzLS41OCwzLjI5LS41OCwzLjI5Yy0uMzcsMi4wMS0xLjAyLDQuNTktMS44Myw3LjE4bC04LjMzLDI2LjNjLS45OCwzLjE2LTMuODYsNS42OC03LjE1LDUuODQtMy40LjE3LTYuMjktMi4xMi03LjMxLTUuMjVsLTktMjYuODdjLS44OS0yLjcyLTEuNjItNS41My0yLjAyLTcuNTctLjI0LTEuMTktLjQ5LTIuMzktLjY1LTMuNWgtLjQ5czAsMzYuNTUsMCwzNi41NWMwLDQuMTgtMy4yOCw3Ljc1LTcuMzMsNy45NHMtNy41Ny0zLjExLTcuNTctNy4zOFYzMC4zNFoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTI2OS4zMSw1NC40NGw0LjMzLS4wM2MwLTQuMzUtLjM4LTcuMjgtNC44NC03LjMxLTUuNTEtLjAzLTYuMzMsNC43OS0xMC4zOSw0LjgtMi45NCwwLTUuMzYtMi4xNi01LjM2LTUuNjUsMC03LjQzLDkuNjgtOS4yNiwxNS44OC05LjEzLDkuOTIuMjEsMTUuODMsNC43NiwxNS44MywxNy4wN3YxOC41YzAsMy41NC0yLjI2LDYuNjctNS4yOSw2LjgyLTIuNzQuMTMtNS0yLjE1LTUuMzgtNS4yOS0yLjczLDQuNTUtNi4zMiw2LjI0LTEwLjk5LDYuNDctNi42OC4zMy0xMi40Mi0zLjk4LTEyLjQyLTEyLjMyLDAtMTIuMzEsMTAuNTgtMTMuODcsMTguNjQtMTMuOTJaTTI2Ny4wNSw3MS40NWM0LjM2LS4xNSw2LjY1LTQuMTMsNi42NS04Ljk0di0uNjhsLTMuNzUuMDdjLTIuOTYuMDYtNy4xMi43NS03LjEyLDUuMjYsMCwyLjksMS44OSw0LjM3LDQuMjMsNC4yOVoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTI5Mi41NiwzOC42NGwyLjAxLjA0LjI0LTUuMzZjLjEyLTMuMTgsMi4zNS01LjcsNC45Ni01LjYsMi43MS4xMSw0Ljg4LDIuOSw0Ljg4LDYuMjR2NC45MWwzLjM0LjA3YzEuOTEuMDQsMy40MSwyLjA0LDMuNDEsNC4zNnMtMS41LDQuMzYtMy40MSw0LjM1aC0zLjExczAsMTUuODYsMCwxNS44NmMwLDQuMDYsMS43OSw0LjgzLDMuMDYsNS4yNCwyLjM1Ljc3LDQuMDIsMS42Myw0LjAyLDQuMDksMCw1LjItNC4wNiw1LjU0LTcuNjUsNS43Mi03LjU2LjM3LTEwLjIxLTQuMjgtMTAuMTUtMTMuNjRsLjA2LTE3LjMzaC0xLjY2Yy0yLjAyLS4wMi0zLjY0LTIuMDctMy42NC00LjQ5czEuNjItNC41MSwzLjY0LTQuNDZaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0zMzAuNTEsMzguNDRjNC45LjExLDEwLjgzLDIuNTMsMTAuODMsOC43NywwLDMuMDctMS4zNSw0LjgtMy42MSw0LjgxLTMuNTQuMDEtMy40NC00LjUxLTcuNTgtNC41NC0yLjg3LS4wMS01LjAzLDMuMTMtNS4wMywxMC41NXMyLjI3LDEwLjUsNS4wMywxMC40MWM0LjE3LS4xNCw0LjI1LTUuMjcsNy44NC01LjM2LDIuMzYtLjA2LDMuODEsMS43NywzLjgxLDQuOTcsMCw2LjM3LTYuMzUsOS4xOC0xMS43LDkuNDQtMTAuMTEuNS0xNS03LjA5LTE1LTE5LjI1LDAtMTEuMTksNS40My0yMC4wMiwxNS40Mi0xOS44MVoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTM0Ni42MiwyOS45NGMwLTMuMzcsMi4wNS02LjA0LDQuNTEtNS45MSwyLjQ0LjEyLDQuNDMsMi45NSw0LjQzLDYuMjZ2MTQuOTljMS4xOC0zLjI5LDMuNTItNi4wOSw3LjU5LTYsNi4zLjEzLDguNjYsNS42NSw4LjY2LDEzLjUxdjE2LjM1YzAsMy4yMS0xLjg3LDUuOTQtNC4xNiw2LjA1LTIuMzEuMTEtNC4yMy0yLjQ4LTQuMjMtNS43NHYtMTQuNzdjMC01LjM3LTIuMTYtNi40LTMuNjUtNi40MS0xLjc3LDAtNC4yMiwxLjIyLTQuMjIsNy45N3YxMy41YzAsMy4zMS0xLjk5LDYuMTMtNC40Myw2LjI1LTIuNDYuMTItNC41MS0yLjU1LTQuNTEtNS45MlYyOS45NFoiLz4KICA8L2c+Cjwvc3ZnPg==';
 const VB_PATH = 'M16 8.375C16 8.93437 15.8656 9.45312 15.5969 9.92813C15.3281 10.4031 14.9688 10.775 14.5156 11.0344C14.5281 11.1188 14.5344 11.25 14.5344 11.4281C14.5344 12.275 14.25 12.9937 13.6875 13.5875C13.1219 14.1844 12.4406 14.4812 11.6438 14.4812C11.2875 14.4812 10.9469 14.4156 10.625 14.2844C10.375 14.7969 10.0156 15.2094 9.54375 15.525C9.075 15.8438 8.55937 16 8 16C7.42812 16 6.90938 15.8469 6.44688 15.5344C5.98125 15.225 5.625 14.8094 5.375 14.2844C5.05312 14.4156 4.71562 14.4812 4.35625 14.4812C3.55937 14.4812 2.875 14.1844 2.30312 13.5875C1.73125 12.9937 1.44687 12.2719 1.44687 11.4281C1.44687 11.3344 1.45938 11.2031 1.48125 11.0344C1.02813 10.7719 0.66875 10.4031 0.4 9.92813C0.134375 9.45312 0 8.93437 0 8.375C0 7.78125 0.15 7.23438 0.446875 6.74062C0.74375 6.24687 1.14375 5.88125 1.64375 5.64375C1.5125 5.2875 1.44687 4.92812 1.44687 4.57188C1.44687 3.72813 1.73125 3.00625 2.30312 2.4125C2.875 1.81875 3.55937 1.51875 4.35625 1.51875C4.7125 1.51875 5.05312 1.58438 5.375 1.71563C5.625 1.20312 5.98438 0.790625 6.45625 0.475C6.925 0.159375 7.44063 0 8 0C8.55937 0 9.075 0.159375 9.54375 0.471875C10.0125 0.7875 10.375 1.2 10.625 1.7125C10.9469 1.58125 11.2844 1.51562 11.6438 1.51562C12.4406 1.51562 13.1219 1.8125 13.6875 2.40937C14.2531 3.00625 14.5344 3.725 14.5344 4.56875C14.5344 4.9625 14.475 5.31875 14.3562 5.64062C14.8562 5.87813 15.2563 6.24375 15.5531 6.7375C15.85 7.23438 16 7.78125 16 8.375ZM7.65938 10.7844L10.9625 5.8375C11.0469 5.70625 11.0719 5.5625 11.0437 5.40938C11.0125 5.25625 10.9344 5.13438 10.8031 5.05312C10.6719 4.96875 10.5281 4.94063 10.375 4.9625C10.2188 4.9875 10.0938 5.0625 10 5.19375L7.09062 9.56875L5.75 8.23125C5.63125 8.1125 5.49375 8.05625 5.34062 8.0625C5.18437 8.06875 5.05 8.125 4.93125 8.23125C4.825 8.3375 4.77187 8.47187 4.77187 8.63437C4.77187 8.79375 4.825 8.92813 4.93125 9.0375L6.77187 10.8781L6.8625 10.95C6.96875 11.0219 7.07812 11.0562 7.18437 11.0562C7.39375 11.0531 7.55313 10.9656 7.65938 10.7844Z';
 
 /* ============================================================
    TakaMatch — espace équipe (administration)
-   Prototype autonome : les données de démonstration sont celles de
-   la plateforme (mêmes projets, talents, pseudos). Les changements
-   sont gardés dans ce navigateur (localStorage). Les événements de
-   l'outil (inscriptions, demandes de vérification, signalements,
-   messages au support) arrivent en direct quand TakaMatch.html est
-   ouvert dans le même navigateur.
+   Les données affichées viennent de la base (js/admin-live.js).
+   Avant leur chargement, ou pour un module pas encore branché,
+   les listes sont vides : aucune donnée inventée.
    ============================================================ */
 
 /* ---------- Icônes ---------- */
@@ -646,8 +639,6 @@ function ago(t){ const m = (Date.now() - t)/6e4; if(m < 1) return "à l'instant"
   const h = m/60; if(h < 24) return 'il y a '+Math.round(h)+' h'; const d = Math.round(h/24); return d === 1 ? 'hier' : 'il y a '+d+' j'; }
 const sector = id => DATA.SECTORS.find(s => s.id === id) || {l:id, g:'✨'};
 const skillL = id => (DATA.SKILLS.find(s => s.id === id) || {l:id}).l;
-const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/^dr\.\s*/,'').replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'');
-function seeded(seed){ let x = 0; for(const c of String(seed)) x = (x*31 + c.charCodeAt(0)) >>> 0; return () => { x = (x*1103515245 + 12345) >>> 0; return (x >>> 8) / 16777216; }; }
 function vBadge(role, ok){ const cls = ok ? (role === 'vis' ? 'vb-vis' : 'vb-tal') : 'vb-off';
   return '<span class="vbadge '+cls+'"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="'+VB_PATH+'"/></svg><span>('+(ok ? 'Vérifié' : 'Non vérifié')+')</span></span>'; }
 function toast(msg, kind){ const el = document.createElement('div'); el.className = 'toast '+(kind||''); el.innerHTML = ic(kind === 'bad' ? 'alert' : 'check')+'<span>'+esc(msg)+'</span>';
@@ -692,7 +683,7 @@ const canSee = m => !!(A.me && ROLES[A.me.role].can.includes(m));
 const canDo = a => !!(A.me && ROLES[A.me.role].act.includes(a));
 
 /* ============================================================
-   Données de démonstration (cohérentes avec la plateforme)
+   Référentiels : prix par défaut, pays et moyens de paiement
    ============================================================ */
 const PRICES = {second:3000, slot:5000, pacte:15000, essai:2000, elan:5000, campagne:12000};
 /* Paiements : FedaPay, moyens selon le pays (même tableau que l'outil et le serveur). */
@@ -706,146 +697,20 @@ const OP_COLOR = {'MTN MoMo':'#FFCC00', 'Moov':'#0077A8', 'Moov Money':'#0077A8'
 const payOp = (op, s) => { const k = window.TMPayIcons && TMPayIcons.keyOf(op); return k ? '<span class="pay-op">'+TMPayIcons.icon(k, s)+'<span>'+esc(op)+'</span></span>' : esc(op || '—'); };
 const ccOfCity = city => { const n = String(city || '').split(',').pop().trim(); return Object.keys(PAY_CC).find(k => PAY_CC[k].n === n) || 'BJ'; };
 
-function phoneOf(r){ return '+229 01 '+[0,0,0,0].map(() => String(10 + Math.floor(r()*89))).join(' '); }
+/* État de départ : des listes vides. Les vraies lignes arrivent de la base (js/admin-live.js). */
 function seedState(){
-  const users = [], r = seeded('takamatch');
-  const mk = (o) => { const rr = seeded(o.handle); const u = Object.assign({
-      id:'U-'+(1000 + users.length), email:slug(o.legal)+'@gmail.com', phone:phoneOf(rr), sex:'m',
-      created:daysAgo(10 + Math.floor(rr()*120), 9 + Math.floor(rr()*10)), lastSeen:daysAgo(Math.floor(rr()*6), 8 + Math.floor(rr()*12)),
-      status:'active', credits:0, verifiedEmail:true, verifiedPhone:rr() > .3, verifiedId:false, notes:[], online:true, fresh:false,
-      completion:70 + Math.floor(rr()*31), invitesSent:Math.floor(rr()*9), invitesRecv:Math.floor(rr()*7), matches:Math.floor(rr()*3)}, o);
-    users.push(u); return u; };
-  DATA.TALENTS.forEach(t => mk({legal:t.name, handle:t.handle, city:t.city, roles:['tal'], primary:'tal', verifiedId:t.verified, sex:t.sex,
-    skills:t.skills, bio:t.bio, talentId:t.id}));
-  DATA.PROJECTS.forEach(p => mk({legal:p.owner.replace(/^Dr\.\s*/,''), handle:p.ownerHandle, city:p.ownerCity, roles:['vis'], primary:'vis', verifiedId:p.ownerVerified,
-    sex:p.sex, projects:[p.id], credits:1 + Math.floor(r()*3)}));
-  mk({legal:'Franck Birezo', handle:'franck_b', email:'franck.b@exemple.com', phone:'+229 01 97 45 25 63', city:'Cotonou, Bénin', roles:['tal','vis'], primary:'tal',
-    verifiedId:false, sex:'m', projects:['PRJ-SIKA','PRJ-KANVO'], credits:2, created:daysAgo(46, 10), matches:4, completion:95});
-  /* Quelques comptes à surveiller */
-  const sus = mk({legal:'Brice Kpodo', handle:'gain_rapide', city:'Cotonou, Bénin', roles:['tal'], primary:'tal', sex:'m', created:daysAgo(4, 22), completion:38, verifiedPhone:false, invitesSent:3, invitesRecv:0, matches:0,
-    bio:'Je finance vos projets rapidement. Frais de dossier à prévoir.'});
-  const ban = mk({legal:'Jules Avocè', handle:'invest_express', city:'Lomé, Togo', roles:['vis'], primary:'vis', sex:'m', created:daysAgo(60, 11), status:'banned', online:false, completion:52});
-  ban.notes.push({at:daysAgo(21, 15), by:'Mariam Dossou', t:'Banni : demandes d\'argent répétées à 3 talents (signalements R-2031, R-2034, R-2035).'});
-  const susp = mk({legal:'Clarisse Hounkpè', handle:'clarisse_h', city:'Abomey-Calavi, Bénin', roles:['tal'], primary:'tal', sex:'f', created:daysAgo(35, 9), status:'suspended', suspendedUntil:daysAgo(-5), online:false});
-  susp.notes.push({at:daysAgo(2, 10), by:'Carine Zinsou', t:'Suspendue 7 jours : propos déplacés dans un groupe d\'équipe.'});
-  ['Ruth Agossou|ruth_terrain|Bohicon, Bénin|tal|f','Hermann Dègbo|hermann_d|Natitingou, Bénin|vis|m','Sènami Lokossou|senami_code|Cotonou, Bénin|tal|f','Yves Houngbédji|yves_agri|Pobè, Bénin|vis|m']
-    .forEach((s, i) => { const [n, h, c, role, sx] = s.split('|'); mk({legal:n, handle:h, city:c, roles:[role], primary:role, sex:sx, created:daysAgo(i, 8 + i*3), completion:72 + i*6, fresh:true, invitesSent:0, invitesRecv:0, matches:0}); });
-  const U = h => users.find(u => u.handle === h);
-
-  /* Dossiers de vérification */
-  const verifs = [
-    {u:'senami_code', at:daysAgo(0, 8, 12), status:'pending'},
-    {u:'yves_agri', at:daysAgo(0, 7, 40), status:'pending', mismatch:'Yves H.'},
-    {u:'ruth_terrain', at:daysAgo(1, 18, 5), status:'pending'},
-    {u:'franck_b', at:daysAgo(1, 11, 30), status:'pending'},
-    {u:'hermann_d', at:daysAgo(3, 16), status:'more', blurry:true, history:[{at:daysAgo(2, 10), by:'Rodrigue Ahyi', t:'Complément demandé : photo de la pièce floue, merci de la reprendre en pleine lumière.'}]},
-    {u:'gain_rapide', at:daysAgo(3, 23, 50), status:'pending', mismatch:'Bruno Kpadonou'},
-  ].concat(users.filter(u => u.verifiedId).slice(0, 6).map((u, i) => ({u:u.handle, at:daysAgo(15 + i*6, 10), status:'approved', decidedAt:daysAgo(14 + i*6, 15), decidedBy:i % 2 ? 'Rodrigue Ahyi' : 'Mariam Dossou'})))
-    .concat([{u:'clarisse_h', at:daysAgo(30, 9), status:'rejected', decidedAt:daysAgo(29, 14), decidedBy:'Rodrigue Ahyi', motif:'Document expiré'}])
-    .map((v, i) => Object.assign({id:'V-'+(3100 + i), live:false, doc:'', selfie:'', history:[]}, v, {uid:U(v.u).id}));
-
-  /* Signalements */
-  const reports = [
-    {id:'R-2041', at:daysAgo(0, 9, 5), prio:'high', kind:'message', reason:'Demande d\'argent ou arnaque', by:'offline_first', target:'gain_rapide',
-      text:'Il me demande 25 000 FCFA de « frais de dossier » avant de financer notre projet.', status:'new', thread:'T-1'},
-    {id:'R-2040', at:daysAgo(0, 7, 30), prio:'high', kind:'profil', reason:'Faux profil ou usurpation', by:'carnet_de_nuit', target:'gain_rapide',
-      text:'La photo de profil est celle d\'un ministre. Le profil propose de « financer » des projets.', status:'new'},
-    {id:'R-2039', at:daysAgo(1, 21, 10), prio:'medium', kind:'message', reason:'Propos déplacés', by:'huit_minutes', target:'clarisse_h',
-      text:'Messages insultants dans le groupe de l\'équipe après un désaccord sur le capital.', status:'progress', thread:'T-2', assigned:'Carine Zinsou'},
-    {id:'R-2038', at:daysAgo(2, 15), prio:'low', kind:'projet', reason:'Autre raison', by:'pixel_atlantique', target:'vendue_deux_fois',
-      text:'La fiche annonce 300 parcelles cartographiées, je doute que ce soit vrai.', status:'new'},
-    {id:'R-2036', at:daysAgo(5, 11), prio:'medium', kind:'comportement', reason:'Engagement non tenu', by:'six_secondes', target:'sat_agro',
-      text:'A disparu après le jalon 2, ne répond plus depuis 3 semaines.', status:'done', decision:'Avertissement envoyé', decidedBy:'Carine Zinsou', decidedAt:daysAgo(4, 16)},
-    {id:'R-2035', at:daysAgo(22, 10), prio:'high', kind:'message', reason:'Demande d\'argent ou arnaque', by:'api_lagune', target:'invest_express', text:'Demande de 50 000 FCFA « pour bloquer la place ».', status:'done', decision:'Compte banni', decidedBy:'Mariam Dossou', decidedAt:daysAgo(21, 15)},
-  ].map(x => Object.assign({live:false, notes:[]}, x));
-  const threads = {
-    'T-1':{a:'gain_rapide', b:'offline_first', msgs:[
-      {from:'gain_rapide', t:'Bonjour, votre projet m\'intéresse beaucoup. Je peux le financer à hauteur de 5 millions.', at:daysAgo(1, 18, 2)},
-      {from:'offline_first', t:'Merci ! Vous êtes investisseur ?', at:daysAgo(1, 18, 20)},
-      {from:'gain_rapide', t:'Oui. Pour ouvrir le dossier, il faut d\'abord 25 000 FCFA de frais, par MoMo sur ce numéro : 01 66 xx xx xx.', at:daysAgo(1, 18, 31), flag:true},
-      {from:'offline_first', t:'Je préfère qu\'on passe par la plateforme.', at:daysAgo(0, 8, 50)}]},
-    'T-2':{a:'clarisse_h', b:'huit_minutes', group:'Lafia Learn', msgs:[
-      {from:'huit_minutes', t:'Je propose 15 % pour chacun des talents, comme indiqué dans le pacte.', at:daysAgo(2, 19)},
-      {from:'clarisse_h', t:'C\'est du vol, tu nous prends pour des idiots.', at:daysAgo(2, 19, 12), flag:true},
-      {from:'clarisse_h', t:'[message masqué par la modération]', at:daysAgo(2, 19, 14), flag:true},
-      {from:'huit_minutes', t:'Je préfère qu\'on en parle calmement demain.', at:daysAgo(2, 19, 30)}]},
-    'T-3':{a:'tracer_ananas', b:'senami_code', group:'Gbèdji Agro', msgs:[
-      {from:'tracer_ananas', t:'La part de Sènami passe de 15 à 8 % : elle n\'a pas livré le module de traçabilité.', at:daysAgo(3, 10)},
-      {from:'senami_code', t:'Le module est livré depuis lundi, il est dans le dépôt partagé. Je refuse cette baisse.', at:daysAgo(3, 11)},
-      {from:'tracer_ananas', t:'Je ne l\'ai pas vu. On demande l\'arbitrage de TakaMatch.', at:daysAgo(3, 12)}]},
-  };
-
-  /* Équipes et Ateliers */
-  const P = id => DATA.PROJECTS.find(p => p.id === id) || {};
-  const T = id => DATA.TALENTS.find(t => t.id === id) || {};
-  const teams = [
-    {id:'A-01', project:'Kèkè Santé', owner:'carnet_de_nuit', talents:['franck_b', T('TM-TAL-5563').handle], jalons:3, since:daysAgo(12), pacte:false, state:'active'},
-    {id:'A-02', project:'Lafia Learn', owner:'huit_minutes', talents:['franck_b', 'clarisse_h'], jalons:1, since:daysAgo(20), pacte:false, state:'active'},
-    {id:'A-03', project:'Sika Tontine', owner:'franck_b', talents:[T('TM-TAL-2205').handle, T('TM-TAL-1907').handle], jalons:2, since:daysAgo(14), pacte:false, state:'active'},
-    {id:'A-04', project:'Kanvô', owner:'franck_b', talents:[T('TM-TAL-5092').handle], jalons:1, since:daysAgo(6), pacte:false, state:'active'},
-    {id:'A-05', project:'Gbèdji Agro', owner:'tracer_ananas', talents:['senami_code', 'sat_agro'], jalons:4, since:daysAgo(48), pacte:true, state:'dispute', thread:'T-3',
-      dispute:{at:daysAgo(3, 12), t:'Désaccord sur la part de capital de Sènami (15 % → 8 %) et la livraison du module de traçabilité.', by:'tracer_ananas'}},
-    {id:'A-06', project:'Tchèko Pay', owner:'six_secondes', talents:['pixel_atlantique', 'api_lagune'], jalons:5, since:daysAgo(71), pacte:true, state:'active'},
-    {id:'A-07', project:'Zemidjan+', owner:'km_a_vide', talents:['offline_first'], jalons:2, since:daysAgo(9), pacte:false, state:'active'},
-  ].map(t => Object.assign({notes:[]}, t));
-  const departures = [
-    {at:daysAgo(30, 16), project:'Vodun Studio', who:'franck_b', type:'Départ', motif:'Se concentrer sur deux projets'},
-    {at:daysAgo(11, 10), project:'Tchèko Pay', who:'sat_agro', type:'Retrait', motif:'Engagement non tenu'},
-    {at:daysAgo(26, 9), project:'Solar Box', who:'savoir_dire_non', type:'Départ', motif:'Changement de situation professionnelle'},
-  ];
-
-  /* Paiements */
-  const prods = [['Pack Essai · 3 crédits', PRICES.essai, 'credits'], ['Pack Élan · 10 crédits', PRICES.elan, 'credits'], ['Pack Campagne · 30 crédits', PRICES.campagne, 'credits'],
-    ['Second profil', PRICES.second, 'second'], ['Emplacement projet', PRICES.slot, 'slot'], ['Pacte d\'associés', PRICES.pacte, 'pacte']];
-  const payers = users.filter(u => u.roles.includes('vis') && u.status !== 'banned');
-  const payments = [];
-  for(let i = 0; i < 46; i++){
-    const pr = prods[Math.floor(r() * (i % 7 === 0 ? 6 : 4))], u = payers[Math.floor(r() * payers.length)];
-    const st = r() < .07 ? 'failed' : 'ok', cc = ccOfCity(u.city), cops = PAY_CC[cc].ops;
-    const op = !cops.length || r() < .15 ? 'Carte bancaire' : cops[Math.floor(r() * Math.min(cops.length, r() < .5 ? 1 : cops.length))];
-    payments.push({id:'PAY-'+(88400 + i), at:daysAgo(Math.floor(r()*58), 7 + Math.floor(r()*14), Math.floor(r()*59)), uid:u.id, label:pr[0], amount:pr[1], kind:pr[2],
-      op, cc, provider:'FedaPay', status:st, ref:'FP'+(2610000000 + Math.floor(r()*9e8))});
-  }
-  payments.push({id:'PAY-88390', at:daysAgo(9, 14), uid:U('franck_b').id, label:'Pack Élan · 10 crédits', amount:PRICES.elan, kind:'credits', op:'MTN MoMo', cc:'BJ', provider:'FedaPay', status:'refunded', ref:'FP2610330211', refund:{by:'Edwige Akplogan', at:daysAgo(8, 10), motif:'Double débit signalé par l\'utilisateur'}});
-  payments.sort((a, b) => b.at - a.at);
-
-  /* Support */
-  const tickets = [
-    {id:'S-512', at:daysAgo(0, 8, 40), uid:U('ruth_terrain').id, topic:'Une question sur mon compte', status:'open', msgs:[{from:'user', t:'Bonjour, j\'ai envoyé ma pièce d\'identité hier soir. Combien de temps faut-il pour la vérification ?', at:daysAgo(0, 8, 40)}]},
-    {id:'S-511', at:daysAgo(0, 7, 15), uid:U('hermann_d').id, topic:'Un paiement mobile money', status:'open', msgs:[{from:'user', t:'J\'ai payé 3 000 FCFA par Moov mais mon profil Talent n\'est pas débloqué. Référence MP2610778812.', at:daysAgo(0, 7, 15)}]},
-    {id:'S-509', at:daysAgo(1, 16, 2), uid:U('offline_first').id, topic:'Un problème technique', status:'waiting', assigned:'Ibrahim Saka', msgs:[
-      {from:'user', t:'La synchronisation des messages ne marche pas sur mon vieux téléphone Android.', at:daysAgo(1, 16, 2)},
-      {from:'staff', by:'Ibrahim Saka', t:'Merci pour le signalement. Quelle version d\'Android utilises-tu ? Une capture d\'écran nous aiderait.', at:daysAgo(1, 17, 30)}]},
-    {id:'S-503', at:daysAgo(4, 10), uid:U('six_secondes').id, topic:'Une question sur mon compte', status:'closed', assigned:'Ibrahim Saka', msgs:[
-      {from:'user', t:'Comment changer mon numéro de téléphone ?', at:daysAgo(4, 10)},
-      {from:'staff', by:'Ibrahim Saka', t:'Dans Paramètres › Compte › Modifier. Un code SMS te sera envoyé pour le vérifier.', at:daysAgo(4, 11)}]},
-  ];
-
-  const staff = [
-    {id:'ST-1', name:'Mariam Dossou', email:'admin@takamatch.bj', pwd:'Admin2026!', role:'super', status:'active', created:daysAgo(120), last:daysAgo(0, 8)},
-    {id:'ST-2', name:'Rodrigue Ahyi', email:'verif@takamatch.bj', pwd:'Verif2026!', role:'verif', status:'active', created:daysAgo(90), last:daysAgo(0, 9)},
-    {id:'ST-3', name:'Carine Zinsou', email:'modo@takamatch.bj', pwd:'Modo2026!', role:'moder', status:'active', created:daysAgo(90), last:daysAgo(1, 18)},
-    {id:'ST-4', name:'Ibrahim Saka', email:'support@takamatch.bj', pwd:'Support2026!', role:'support', status:'active', created:daysAgo(60), last:daysAgo(0, 7)},
-    {id:'ST-5', name:'Edwige Akplogan', email:'finance@takamatch.bj', pwd:'Finance2026!', role:'finance', status:'active', created:daysAgo(60), last:daysAgo(2, 15)},
-  ];
-  const audit = [
-    {at:daysAgo(2, 10), by:'Rodrigue Ahyi', role:'verif', act:'Complément demandé', target:'@hermann_d', d:'Dossier V-3104 · photo floue'},
-    {at:daysAgo(2, 10, 5), by:'Carine Zinsou', role:'moder', act:'Compte suspendu (7 jours)', target:'@clarisse_h', d:'Propos déplacés dans un groupe d\'équipe'},
-    {at:daysAgo(2, 9, 58), by:'Carine Zinsou', role:'moder', act:'Conversation ouverte', target:'Groupe Lafia Learn', d:'Motif : vérification du signalement R-2039'},
-    {at:daysAgo(4, 16), by:'Carine Zinsou', role:'moder', act:'Avertissement envoyé', target:'@sat_agro', d:'Signalement R-2036'},
-    {at:daysAgo(8, 10), by:'Edwige Akplogan', role:'finance', act:'Remboursement', target:'@franck_b', d:'PAY-88390 · 5 000 FCFA · double débit'},
-    {at:daysAgo(21, 15), by:'Mariam Dossou', role:'super', act:'Compte banni', target:'@invest_express', d:'Demandes d\'argent répétées'},
-  ];
-  return {v:4, users, verifs, reports, threads, teams, departures, payments, tickets, staff, audit, seen:[],
-    settings:{second:3000, slot:5000, pacte:15000, essai:2000, elan:5000, campagne:12000, monthly:3, expiry:10, maxProjects:3, maxEngage:3,
-      links:{facebook:'https://www.facebook.com/takamatch', instagram:'https://www.instagram.com/takaamatch', linkedin:'https://www.linkedin.com/company/takamatch', tiktok:'https://www.tiktok.com/@takamatch', youtube:'https://www.youtube.com/channel/UCNpx3ccM4wzZuVc7AMehRKQ', whatsapp:'https://chat.whatsapp.com/IsCXiO0V7AF27BI5eqgvR4'}}};
+  return {v:5, users:[], verifs:[], reports:[], threads:{}, teams:[], departures:[], payments:[], tickets:[], staff:[], audit:[], seen:[],
+    settings:{second:3000, slot:5000, pacte:15000, essai:2000, elan:5000, campagne:12000, monthly:5, expiry:10, maxProjects:3, maxEngage:3,
+      links:{facebook:'https://www.facebook.com/takamatch', instagram:'https://www.instagram.com/takaamatch', linkedin:'https://www.linkedin.com/company/takamatch', tiktok:'https://www.tiktok.com/@takamatch', youtube:'https://www.youtube.com/channel/UCNpx3ccM4wzZuVc7AMehRKQ', whatsapp:'https://chat.whatsapp.com/IsCXiO0V7AF27BI5eqgvR4', email:'contact@takamatch.com'}}};
 }
 
 /* ---------- État ---------- */
-const KEY = 'tm-admin-v4';
+const KEY = 'tm-admin-v5';
+/* L'ancienne version (v4) gardait des données de démonstration dans le navigateur : on l'efface. */
+try{ localStorage.removeItem('tm-admin-v4'); }catch(e){}
 let D = null;
 const A = {me:null, view:'overview', tab:{}, q:{}, drawer:null, modal:null, sideOpen:false, unlocked:new Set()};
-function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if(s && s.v === 4) return s; }catch(e){} return seedState(); }
+function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if(s && s.v === 5) return s; }catch(e){} return seedState(); }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(D)); }catch(e){ try{ const lite = JSON.parse(JSON.stringify(D)); lite.verifs.forEach(v => { v.doc = ''; v.selfie = ''; }); localStorage.setItem(KEY, JSON.stringify(lite)); }catch(err){} } }
 D = load();
 /* Index des comptes par id et par pseudo : reconstruit seulement quand la liste change. */
@@ -865,22 +730,12 @@ function av(u, lg){ if(!u) return '<span class="av">?</span>';
 function whoCell(u){ if(!u) return '—'; return '<span class="who">'+av(u)+'<span style="min-width:0"><b>'+esc(u.legal)+'</b><small>@'+esc(u.handle)+'</small></span></span>'; }
 function roleChips(u){ return u.roles.map(r => '<span class="chip '+(r === 'vis' ? 'c-vis' : 'c-tal')+'">'+(r === 'vis' ? '💡 Visionnaire' : '🛠️ Talent')+'</span>').join(' '); }
 function statusChip(u){ return u.status === 'banned' ? '<span class="chip c-bad">Banni</span>' : u.status === 'suspended' ? '<span class="chip c-warn">Suspendu</span>' : '<span class="chip c-ok">Actif</span>'; }
+/* Pièce absente : un simple cadre, jamais une fausse pièce d'identité. */
 function docSvg(u, kind, v){
-  const name = (v && v.mismatch) || u.legal, parts = name.split(' '), last = parts.slice(-1)[0].toUpperCase(), first = parts.slice(0, -1).join(' ') || '—';
-  const sx = u.sex === 'f' ? 'F' : 'M', blur = v && v.blurry ? ' filter="url(#b)"' : '';
-  const svg = kind === 'doc'
-    ? '<svg xmlns="http://www.w3.org/2000/svg" width="520" height="330" viewBox="0 0 520 330"><defs><filter id="b"><feGaussianBlur stdDeviation="2.6"/></filter><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#DCE9DD"/><stop offset=".5" stop-color="#F7F0C9"/><stop offset="1" stop-color="#F3D9D2"/></linearGradient></defs>'
-      + '<g'+blur+'><rect x="6" y="6" width="508" height="318" rx="18" fill="url(#g)" stroke="#9BA79C"/><text x="26" y="42" font-family="Arial" font-size="15" font-weight="700" fill="#2E4B33">PIÈCE D\'IDENTITÉ</text><text x="494" y="42" text-anchor="end" font-family="Arial" font-size="12" fill="#B54A3F" font-weight="700">SPÉCIMEN · DÉMO</text>'
-      + '<rect x="26" y="62" width="128" height="160" rx="8" fill="#C9C2B3"/><circle cx="90" cy="120" r="30" fill="#8F877A"/><rect x="50" y="160" width="80" height="50" rx="25" fill="#8F877A"/>'
-      + '<g font-family="Arial" fill="#1F1E1B"><text x="176" y="80" font-size="11" fill="#5D5A52">NOM</text><text x="176" y="100" font-size="20" font-weight="700">'+esc(last)+'</text>'
-      + '<text x="176" y="128" font-size="11" fill="#5D5A52">PRÉNOMS</text><text x="176" y="148" font-size="18">'+esc(first)+'</text>'
-      + '<text x="176" y="176" font-size="11" fill="#5D5A52">SEXE</text><text x="176" y="194" font-size="16">'+sx+'</text>'
-      + '<text x="260" y="176" font-size="11" fill="#5D5A52">N°</text><text x="260" y="194" font-size="16" font-family="Courier">'+esc(u.id.replace('U-','BJ-'))+'••••</text>'
-      + '<text x="176" y="222" font-size="11" fill="#5D5A52">EXPIRE LE</text><text x="176" y="240" font-size="16">'+(v && v.motif === 'Document expiré' ? '12/03/2024' : '18/09/2031')+'</text></g>'
-      + '<rect x="26" y="262" width="468" height="42" rx="6" fill="#ffffff" opacity=".55"/><text x="38" y="289" font-family="Courier" font-size="14" fill="#5D5A52">IDBEN&lt;&lt;'+esc(last)+'&lt;&lt;'+esc(first.split(' ')[0].toUpperCase())+'&lt;&lt;&lt;&lt;&lt;&lt;</text></g></svg>'
-    : '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="#D9D3C6"/><circle cx="200" cy="165" r="78" fill="#8F877A"/><rect x="88" y="262" width="224" height="170" rx="100" fill="#8F877A"/>'
-      + '<rect x="230" y="250" width="150" height="96" rx="8" fill="#F7F0C9" stroke="#9BA79C" transform="rotate(-8 300 300)"/><text x="200" y="30" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="#5D5A52">SELFIE AVEC LA PIÈCE · DÉMO</text>'
-      + '<text x="200" y="185" text-anchor="middle" font-family="Arial" font-size="40" font-weight="700" fill="#F4F1EA">'+esc(initials(u.legal))+'</text></svg>';
+  const label = kind === 'doc' ? 'Pièce d\'identité' : 'Selfie', w = kind === 'doc' ? 520 : 400, h = kind === 'doc' ? 330 : 400;
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"><rect width="'+w+'" height="'+h+'" rx="18" fill="#E4E0D6"/>'
+    + '<text x="'+(w/2)+'" y="'+(h/2 - 6)+'" text-anchor="middle" font-family="Arial" font-size="18" font-weight="700" fill="#5D5A52">'+label+'</text>'
+    + '<text x="'+(w/2)+'" y="'+(h/2 + 22)+'" text-anchor="middle" font-family="Arial" font-size="13" fill="#706C5E">Aucun fichier à afficher</text></svg>';
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }
 
@@ -928,10 +783,10 @@ function renderView(){
   paintOverlay();
   if(A.view === 'settings') prixPreview();
 }
-/* Modules déjà branchés sur la vraie base ; les autres montrent encore la démo. */
+/* Modules déjà branchés sur la vraie base ; les autres restent vides pour l'instant. */
 const LIVE_VIEWS = ['staff', 'audit', 'settings', 'pactes', 'takam'];
 const DEMO_NOTE = '<div class="demo-note">'+'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
-  + '<span><b>Données de démonstration.</b> Ce module sera branché sur les vraies données à la phase 2 : ce que tu fais ici n\'agit pas sur le site.</span></div>';
+  + '<span><b>Module pas encore branché.</b> Aucune donnée pour le moment : il sera relié à la base à la phase 2. Ce que tu fais ici n\'agit pas sur le site.</span></div>';
 function rerender(){ const y = ($('.main') || {}).scrollTop; render(); }
 function pageH(t, p, acts){ return '<div class="page-h"><div><h1>'+t+'</h1>'+(p ? '<p>'+p+'</p>' : '')+'</div>'+(acts ? '<div class="acts">'+acts+'</div>' : '')+'</div>'; }
 function tabs(key, list){ const cur = A.tab[key] || list[0][0];
@@ -1057,7 +912,7 @@ VIEWS.overview = () => {
     + '<div class="grid g2">'
     +   (canSee('payments') || A.me.role === 'super' ? '<section class="card card-pad"><div class="sec-t"><h3>Revenus par produit</h3><span class="hint">depuis le début</span></div><div class="hbars">'
     +     byKind.map(k => '<div class="hbar"><span>'+k[0]+'</span><span class="t"><i style="width:'+(k[1]/kmax*100)+'%;background:var(--ok)"></i></span><span class="mono" style="text-align:right;font-size:12px">'+fcfa(k[1])+'</span></div>').join('')+'</div></section>'
-    :     '<section class="card card-pad"><div class="sec-t"><h3>Répartition des profils</h3></div><div class="hbars">'+[['Talents', tal, '#007CD8'], ['Visionnaires', vis, '#C99A1E'], ['Vérifiés', ver, 'var(--ok)']].map(k => '<div class="hbar"><span>'+k[0]+'</span><span class="t"><i style="width:'+(k[1]/u.length*100)+'%;background:'+k[2]+'"></i></span><span class="mono" style="text-align:right">'+k[1]+'</span></div>').join('')+'</div></section>')
+    :     '<section class="card card-pad"><div class="sec-t"><h3>Répartition des profils</h3></div><div class="hbars">'+[['Talents', tal, '#007CD8'], ['Visionnaires', vis, '#C99A1E'], ['Vérifiés', ver, 'var(--ok)']].map(k => '<div class="hbar"><span>'+k[0]+'</span><span class="t"><i style="width:'+(k[1]/Math.max(1, u.length)*100)+'%;background:'+k[2]+'"></i></span><span class="mono" style="text-align:right">'+k[1]+'</span></div>').join('')+'</div></section>')
     +   '<section class="card card-pad"><div class="sec-t"><h3>Dernières actions de l\'équipe</h3>'+(canSee('audit') ? '<button class="btn btn-quiet btn-sm" data-act="go" data-v="audit">Tout voir'+ic('arrow')+'</button>' : '')+'</div><div class="timeline">'
     +     feed.map(a => '<div class="it"><i></i><div><b>'+esc(a.by)+'</b> · '+esc(a.act)+' <span class="mono" style="font-size:12px">'+esc(a.target)+'</span><br><span>'+ago(a.at)+(a.d ? ' · '+esc(a.d) : '')+'</span></div></div>').join('')
     +   '</div></section></div>';
@@ -1140,7 +995,7 @@ VIEWS.users = () => {
 function userDrawer(u){
   const acts = canDo('users'), reps = D.reports.filter(r => r.target === u.handle), repsBy = D.reports.filter(r => r.by === u.handle);
   const pays = D.payments.filter(p => p.uid === u.id), spent = pays.filter(p => p.status === 'ok').reduce((a, p) => a + p.amount, 0);
-  const projs = (u.projects || []).map(id => (DATA.PROJECTS.find(p => p.id === id) || {title:id === 'PRJ-SIKA' ? 'Sika Tontine' : id === 'PRJ-KANVO' ? 'Kanvô' : id}).title);
+  const projs = (u.projects || []).map(id => (DATA.PROJECTS.find(p => p.id === id) || {title:id}).title);
   const teams = D.teams.filter(t => t.owner === u.handle || t.talents.includes(u.handle));
   const vf = D.verifs.filter(v => v.uid === u.id).sort((a, b) => b.at - a.at)[0];
   return drawer(esc(u.legal), statusChip(u),
@@ -1451,12 +1306,12 @@ async function savePrix(){
 VIEWS.settings = () => { const s = D.settings, n = (k, l, unit) => '<div class="field"><label for="s_'+k+'">'+l+'</label><div class="row"><input class="inp mono" id="s_'+k+'" data-set="'+k+'" type="number" min="0" value="'+s[k]+'"><span class="hint" style="white-space:nowrap">'+unit+'</span></div></div>';
   return pageH('Paramètres de la plateforme', 'Prix, taux de conversion, limites et liens. Chaque modification est journalisée.', '')
     + prixSection()
-    + '<div class="demo-note" style="margin-top:18px">'+ic('info')+'<span><b>Règles et liens : données de démonstration.</b> Ces réglages ne sont pas encore branchés sur la base (phase 2) : ils n\'agissent pas sur le site.</span></div>'
+    + '<div class="demo-note" style="margin-top:18px">'+ic('info')+'<span><b>Règles et liens : pas encore branchés.</b> Ces réglages ne sont pas encore reliés à la base (phase 2) : ils n\'agissent pas sur le site.</span></div>'
     + '<div class="grid g2" style="margin-top:12px"><section class="card card-pad"><h3 style="font-size:17px;margin-bottom:14px">Règles</h3><div class="grid g2">'
     + n('monthly', 'Crédits offerts par mois', 'crédits') + n('expiry', 'Expiration des invitations', 'jours') + n('maxProjects', 'Projets par visionnaire', 'au maximum') + n('maxEngage', 'Projets par talent', 'au maximum') + '</div></section>'
     + '<section class="card card-pad" style="grid-column:1/-1"><h3 style="font-size:17px;margin-bottom:14px">Réseaux sociaux et communauté</h3><div class="grid g3">'
     + Object.keys(s.links).map(k => '<div class="field"><label for="l_'+k+'">'+k[0].toUpperCase()+k.slice(1)+'</label><input class="inp" id="l_'+k+'" data-link="'+k+'" value="'+esc(s.links[k])+'"></div>').join('')+'</div></section>'
-    + '<section class="card card-pad" style="grid-column:1/-1"><h3 style="font-size:17px;margin-bottom:6px">Données de démonstration</h3><p class="hint" style="margin:0 0 12px">Remet l\'espace équipe dans son état de départ (utilisateurs, dossiers, journal). Les comptes de l\'équipe sont aussi réinitialisés.</p><button class="btn btn-bad-ghost" data-act="reset-demo">'+ic('refresh')+'Réinitialiser la démo</button></section></div>';
+    + '</div>';
 };
 
 /* ============================================================
@@ -1803,8 +1658,6 @@ document.addEventListener('click', e => {
     case 'save-settings': { const ch = []; $$('[data-set]').forEach(i => { const k = i.dataset.set, v = +i.value; if(v !== D.settings[k]){ ch.push(k+' : '+D.settings[k]+' → '+v); D.settings[k] = v; } });
       $$('[data-link]').forEach(i => { const k = i.dataset.link; if(i.value !== D.settings.links[k]){ ch.push(k+' : lien modifié'); D.settings.links[k] = i.value; } });
       if(!ch.length) return toast('Aucun changement.'); log('Paramètres modifiés', 'Plateforme', ch.join(' ; ')); save(); render(); toast('Paramètres enregistrés.'); break; }
-    case 'reset-demo': modal('<h2>Réinitialiser la démo ?</h2><p>Toutes les données de l\'espace équipe reviennent à leur état de départ, y compris les comptes de l\'équipe et le journal.</p><div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-bad" data-act="reset-go">Réinitialiser</button></div>'); break;
-    case 'reset-go': try{ localStorage.removeItem(KEY); }catch(err){} D = seedState(); log('Démo réinitialisée', 'Espace équipe', ''); A.modal = null; A.drawer = null; render(); break;
     case 'gres': { const u = userBy(id); $('#gres').hidden = true; $('#gq').value = ''; if(u){ log('Fiche utilisateur consultée', '@'+u.handle, 'Recherche globale'); openDrawer(() => userDrawer(userBy(id))); } break; }
   }
 });
@@ -1922,7 +1775,7 @@ addEventListener('popstate', () => {
   A.view = v; A.drawer = null; A.modal = null; A.sideOpen = false; render(); window.scrollTo(0, 0);
 });
 </script>
-<script src="js/admin-live.js?v=20261012a"></script>
+<script src="js/admin-live.js?v=20261029a"></script>
 <script src="js/partenaires-data.js?v=20261012a"></script>
 <script src="js/admin-partenaires.js?v=20261020-lucide"></script>
 <script src="js/admin-maintenance.js?v=20261020-lucide"></script>

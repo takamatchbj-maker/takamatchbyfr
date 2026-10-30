@@ -26,7 +26,7 @@ takamatch/
 │   ├── vendor/           pdfmake (création du PDF dans le navigateur)
 │   └── pages/            Code propre à chaque page
 └── assets/
-    ├── images/           Logos, couverture, photos de démonstration
+    ├── images/           Logos, couverture
     │   └── takam/        Tête de Takam (WebP transparent, 320 px) : takam-talent (bonnet bleu),
     │                     takam-visionnaire (bonnet jaune). Originaux HD : ../marque/takam/
     ├── icons/            Favicon

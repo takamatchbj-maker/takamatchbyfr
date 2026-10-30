@@ -9,11 +9,8 @@
      favoris et notifications du profil actif ;
    · enregistre chaque action (inviter, répondre, écrire,
      quitter, favoris, signaler, fiche, Atelier, achats).
-   Les comptes de démonstration de la base répondent d'eux-mêmes
-   (fonctions demo_* côté serveur) : ils se comportent comme de
-   vrais membres tant qu'ils existent.
-   Le compte de démonstration local (app.html?demo=1) n'est pas
-   concerné : il garde ses données écrites en dur.
+   Tout ce qui s'affiche vient de la base : aucune réponse, aucun
+   chiffre ni aucun membre n'est simulé.
    ============================================================ */
 (function(){
   if(!window.TMDB) return;
@@ -29,7 +26,7 @@
     lastProf:'', lastIdent:'', lastPriv:'', lastProj:{}, lastAt:{}, busy:false};
 
   /* ---------- Lecture ---------- */
-  const PROF_COLS = 'id,handle,city,country,photo_url,avatar_hue,primary_role,skills,sectors,level,diploma,status,pace,bio,portfolio_url,portfolio_title,no_portfolio,talent_online,verified_id,is_demo,account_status,updated_at,perso';
+  const PROF_COLS = 'id,handle,city,country,photo_url,avatar_hue,primary_role,skills,sectors,level,diploma,status,pace,bio,portfolio_url,portfolio_title,no_portfolio,talent_online,verified_id,account_status,updated_at,perso';
   async function loadAll(){
     const sel = (t, q) => DB.select(t, q).catch(e => { console.warn('[TakaMatch]', t, e.message); return []; });
     const r = await Promise.all([
@@ -76,7 +73,7 @@
       city:p.city || '', skills:p.skills || [], sectors:p.sectors || [], level:p.level || '', pace:p.pace || 'serieux',
       verified:!!p.verified_id, seen:daysOld(p.updated_at), bio:p.bio || '', portfolio:p.portfolio_url || '',
       portfolioTitle:p.portfolio_title || '', hue:p.avatar_hue || (hashN(p.id) % 360), sex:sexOf(p.id),
-      photo:p.photo_url || '', demo:!!p.is_demo, rate:'',
+      photo:p.photo_url || '', rate:'',
       hidden:!p.talent_online || !active(p)};
   }
   function toProject(pr){
@@ -85,13 +82,13 @@
       owner:fullName(pr.owner_id) || '@' + (o.handle || 'porteur'), ownerCity:o.city || '', ownerVerified:!!o.verified_id,
       ownerSex:sexOf(pr.owner_id), sectors:pr.sectors || [], glyph:pr.glyph || sector((pr.sectors || [])[0]).g,
       hue:hashN(pr.id) % 360, seeking:pr.seeking || [], pace:pr.pace || 'serieux', pay:pr.offer || 'equity',
-      likes:hashN(pr.id) % 48, seen:daysOld(pr.updated_at), hook:pr.hook || '', vision:pr.vision || '',
+      likes:0, seen:daysOld(pr.updated_at), hook:pr.hook || '', vision:pr.vision || '',
       traction:pr.traction || '', assets:pr.assets || '', challenges:pr.challenges || '', link:pr.link || '',
-      noLink:!!pr.no_link, photo:pr.cover_url || '', demo:!!o.is_demo,
+      noLink:!!pr.no_link, photo:pr.cover_url || '',
       hidden:!pr.online || !active(o)};
   }
   function myProject(pr){
-    return {id:pr.id, title:pr.title || '', glyph:pr.glyph || '💡', photo:pr.cover_url || '', likes:hashN(pr.id) % 48,
+    return {id:pr.id, title:pr.title || '', glyph:pr.glyph || '💡', photo:pr.cover_url || '', likes:0,
       sectors:pr.sectors || [], seeking:pr.seeking || [], hook:pr.hook || '', vision:pr.vision || '', traction:pr.traction || '',
       assets:pr.assets || '', challenges:pr.challenges || '', link:pr.link || '', noLink:!!pr.no_link,
       pace:pr.pace || 'serieux', pay:pr.offer || 'equity', online:!!pr.online};
@@ -301,9 +298,9 @@
     if(!S.reported) S.reported = new Set();
   }
 
-  /* L'outil appelle seedDemo() pour chaque contexte jamais ouvert. */
-  const _seed = seedDemo;
-  seedDemo = function(){ if(!D.on) return _seed(); buildCtx(); };
+  /* L'outil appelle seedCtx() pour chaque contexte jamais ouvert. */
+  const _seed = seedCtx;
+  seedCtx = function(){ if(!D.on) return _seed(); buildCtx(); };
 
   /* ---------- Rechargement ---------- */
   function signature(){
@@ -332,13 +329,11 @@
     finally{ D.busy = false; }
   }
   D.refresh = refresh;
-  D.isDemo = id => !!(D.prof.get(id) || {}).is_demo;
 
   /* ---------- Démarrage ---------- */
   async function boot(){
     const top = $('#topbar'); if(top) top.classList.add('busy');
     try{
-      try{ await DB.rpc('demo_welcome'); }catch(e){}
       await loadAll();
       /* Compte suspendu ou banni par l'équipe : on ferme la session et on explique. */
       const pf = (D.me && D.me.profile) || {}, st = pf.account_status || 'active';
@@ -402,7 +397,6 @@
      ============================================================ */
   const fail = e => { toast((e && e.message) || 'L\'action n\'a pas abouti. Réessaie.', 'bad'); refresh(true); };
   const later = (ms, fn) => new Promise(r => setTimeout(() => r(fn && fn()), ms));
-  const isDemoItem = x => !!(x && x.demo);
 
   /* La célébration du match (identique à celle de l'outil). */
   function celebrate(id){
@@ -440,17 +434,6 @@
     toast((tal ? 'Candidature envoyée à ' : 'Invitation envoyée à ') + handleOf(x) + '.', 'ok');
     render();
     refresh(true);
-    /* Les comptes de démonstration répondent au bout de quelques secondes. */
-    if(isDemoItem(x)){
-      await later(4000 + Math.random() * 4000);
-      let res = 'noop';
-      try{ res = await DB.rpc('demo_answer_invitation', {p_invitation:invId}); }catch(e){}
-      await refresh(true);
-      if(res === 'accepted'){
-        if(S.layer) closeLayer();
-        celebrate(id);
-      } else if(res === 'declined') toast('Invitation déclinée par ' + handleOf(x) + '. Ce n\'est pas personnel, continue.', 'bad');
-    }
   };
 
   /* Répondre à une invitation reçue. */
@@ -495,17 +478,7 @@
   };
 
   /* Messages : conversation privée et groupe d'équipe. */
-  async function afterSend(cid, viewId){
-    const hasDemo = D.cmem.some(m => m.conversation_id === cid && m.user_id !== D.uid && !m.left_at && (D.prof.get(m.user_id) || {}).is_demo);
-    if(!hasDemo){ refresh(true); return; }
-    await later(900);
-    S.typing = true; if(S.view === 'messages' && S.activeThread === viewId){ render(); scrollChat(); }
-    await later(1800 + Math.random() * 1500);
-    try{ await DB.rpc('demo_reply', {p_conv:cid}); }catch(e){}
-    S.typing = false;
-    await refresh(true);
-    if(S.view === 'messages'){ render(); scrollChat(); }
-  }
+  function afterSend(cid, viewId){ refresh(true); }
   function post(cid, txt, viewId){
     if(!cid) return toast('Cette conversation n\'est pas encore ouverte.', 'bad');
     DB.insert('messages', {conversation_id:cid, sender_id:D.uid, body:txt})
@@ -660,8 +633,12 @@
   }
   async function persist(){
     const m = S.me, uid = D.uid;
+    /* Une image envoyée remplace son aperçu local par son adresse : ce n'est pas
+       une modification de la personne, la fiche reste « enregistrée ». */
+    const wasClean = typeof isDirty === 'function' && !isDirty();
+    const realign = () => { if(wasClean && isDirty()){ saveBaseline(true); if(typeof syncFiche === 'function' && S.view === 'fiche') syncFiche(); } };
     try{
-      if(m.photo && /^data:/.test(m.photo)) m.photo = await upImg('avatars', m.photo, 'photo');
+      if(m.photo && /^data:/.test(m.photo)){ m.photo = await upImg('avatars', m.photo, 'photo'); realign(); }
       const ps = profSnap();
       if(ps !== D.lastProf){ await DB.update('profiles', 'id=eq.' + uid, JSON.parse(ps)); D.lastProf = ps; }
       const is = identSnap();
@@ -669,7 +646,7 @@
       const ph = String(m.phone || '');
       if(ph !== D.lastPriv){ await DB.update('profile_private', 'id=eq.' + uid, {phone:ph}); D.lastPriv = ph; }
       for(const p of m.projects){
-        if(p.photo && /^data:/.test(p.photo)) p.photo = await upImg('covers', p.photo, 'couverture');
+        if(p.photo && /^data:/.test(p.photo)){ p.photo = await upImg('covers', p.photo, 'couverture'); realign(); }
         const row = projRow(p), js = JSON.stringify(row);
         if(isUuid(p.id)){
           if(D.lastProj[p.id] !== js){ await DB.update('projects', 'id=eq.' + p.id, row); D.lastProj[p.id] = js; }
@@ -762,7 +739,7 @@
     uid(t, m){ return useDb(t) ? memberUid(t, m) : LocalPacte.uid(t, m); },
     me(t){ return useDb(t) ? D.uid : LocalPacte.me(t); },
     async load(t){
-      if(!useDb(t)){ const st = await LocalPacte.load(t); if(D.on){ st.demo = false; st.localOnly = true; } return st; }
+      if(!useDb(t)){ const st = await LocalPacte.load(t); if(D.on) st.localOnly = true; return st; }
       const pid = t.id, q = 'project_id=eq.' + pid;
       let rows;
       try{
