@@ -212,6 +212,12 @@ select.inp{padding-right:28px}
 .login::before{width:520px;height:520px;background:var(--vis-500);opacity:.35;left:-160px;top:-120px}
 .login::after{width:560px;height:560px;background:var(--tal-500);opacity:.25;right:-180px;bottom:-160px}
 .login-c{position:relative;z-index:1;width:min(420px,100%);padding:30px 28px}
+.pw-w{position:relative}.pw-w .inp{padding-right:44px}
+.pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;display:grid;place-items:center;border:0;background:none;color:var(--ink-3);border-radius:8px;cursor:pointer}
+.pw-eye:hover,.pw-eye.on{color:var(--ink)}.pw-eye svg{width:18px;height:18px}
+.pw-rules{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px;color:var(--ink-3)}
+.pw-rules li{display:flex;gap:8px;align-items:center}.pw-rules li span{width:14px;text-align:center}
+.pw-rules li.ok{color:var(--ok-ink)}
 .splash{position:relative;z-index:1;display:grid;justify-items:center;gap:18px}
 .splash .logo{height:40px}
 .splash .spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--ink-2);animation:tmgSpin .8s linear infinite}
@@ -545,7 +551,7 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 <!-- Espace équipe en ligne : comptes, rôles, prix et journal dans Supabase. -->
 <script src="js/morph.js?v=20261020a"></script>
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
-<script src="js/supabase.js?v=20261030a"></script>
+<script src="js/supabase.js?v=20261101a"></script>
 <script src="js/geo.js?v=20261010a"></script>
 <script src="js/prix.js?v=20261016a"></script>
 <script src="js/pay-icons.js?v=20261014a"></script>
@@ -798,57 +804,122 @@ function table(head, rows, empty){ if(!rows.length) return '<div class="card emp
   return '<div class="tbl-w"><table><thead><tr>'+head.map(h => '<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.slice(0, n).join('')+'</tbody></table></div>'
     + (n < rows.length ? '<div style="text-align:center;margin-top:12px"><button class="btn btn-ghost btn-sm" data-act="tbl-more" data-k="'+esc(key)+'">Afficher '+Math.min(TBL_PAGE, rows.length - n)+' de plus <span class="hint">('+n+' sur '+rows.length+')</span></button></div>' : ''); }
 
-/* ---------- Connexion : e-mail + code à 6 chiffres (Supabase) ----------
-   Pas de mot de passe. Seules les adresses ajoutées par un super admin
-   (Équipe et accès) entrent ; elles reçoivent leur rôle à la première connexion. */
-let L = {step:'mail', email:'', busy:false, err:''};
+/* ---------- Connexion : identifiant (e-mail) + mot de passe (Supabase) ----------
+   Première connexion ou mot de passe oublié : un code à 6 chiffres arrive
+   par e-mail, puis la personne choisit son mot de passe (règles ci-dessous).
+   Seules les adresses ajoutées par un super admin (Équipe et accès) entrent. */
+const PWD_MIN = 12;
+function pwdRules(v, email){
+  v = v || ''; const local = String(email || '').split('@')[0].toLowerCase();
+  return [
+    {ok:v.length >= PWD_MIN, l:PWD_MIN + ' caractères au moins'},
+    {ok:/[a-z]/.test(v) && /[A-Z]/.test(v), l:'Des minuscules et des majuscules'},
+    {ok:/\d/.test(v), l:'Au moins un chiffre'},
+    {ok:/[!@#$%^&*()_+\-=\[\]{};'\\:"|<>?,.\/`~]/.test(v), l:'Au moins un symbole : ! ? # @ $ % & * …'},
+    {ok:!!v && !(local.length >= 3 && v.toLowerCase().includes(local)), l:'Ne reprend pas ton identifiant'}
+  ];
+}
+const pwdOk = (v, email) => pwdRules(v, email).every(r => r.ok);
+const pwdRulesH = (v, email) => '<ul class="pw-rules" id="pwRules" aria-live="polite">' + pwdRules(v, email).map(r => '<li'+(r.ok ? ' class="ok"' : '')+'><span aria-hidden="true">'+(r.ok ? '✓' : '•')+'</span>'+esc(r.l)+'</li>').join('') + '</ul>';
+const pwdField = (id, label, auto, extra) => '<div class="field"><label for="'+id+'">'+label+'</label><div class="pw-w"><input class="inp" id="'+id+'" type="password" autocomplete="'+auto+'"'+(extra || '')+'>'
+  + '<button type="button" class="pw-eye" data-act="lg-eye" data-for="'+id+'" aria-label="Afficher le mot de passe" title="Afficher">'+ic('eye')+'</button></div></div>';
+
+let L = {step:'pwd', email:'', busy:false, err:''};
 function renderLogin(){
-  const mail = L.step === 'mail';
-  TMMorph($('#root'), '<div class="login"><form class="card login-c" id="loginF" autocomplete="off" novalidate>'
+  const s = L.step;
+  const intro = {
+    pwd:'Accès réservé à l\'équipe TakaMatch. Chaque connexion est inscrite au journal.',
+    mail:'Première connexion ou mot de passe oublié : entre ton adresse, tu reçois un code pour choisir ton mot de passe.',
+    code:'Code envoyé à <b>'+esc(L.email)+'</b>. Il est valable 10 minutes. Regarde aussi dans les indésirables.',
+    new:'Choisis ton mot de passe. Il te servira à chaque connexion à l\'espace équipe.'
+  }[s];
+  const mailF = '<div class="field"><label for="lgE">Identifiant (adresse e-mail)</label><input class="inp" id="lgE" type="email" placeholder="ton@email.com" autocomplete="username" value="'+esc(L.email)+'"></div>';
+  const fields = s === 'pwd' ? mailF + pwdField('lgP', 'Mot de passe', 'current-password')
+    : s === 'mail' ? mailF
+    : s === 'code' ? '<div class="field"><label for="lgC">Code reçu par e-mail</label><input class="inp mono" id="lgC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" value="'+esc(L.code || '')+'" style="letter-spacing:.35em;font-size:20px"></div>'
+    : '<input type="email" autocomplete="username" value="'+esc(L.email)+'" hidden>' + pwdField('lgN', 'Nouveau mot de passe', 'new-password') + pwdField('lgN2', 'Confirme le mot de passe', 'new-password') + pwdRulesH('', L.email);
+  const label = {pwd:'Se connecter', mail:'Recevoir un code', code:'Valider le code', new:'Enregistrer et entrer'}[s];
+  const links = s === 'pwd' ? '<button type="button" class="btn btn-quiet btn-sm" data-act="lg-forgot">Première connexion ou mot de passe oublié ?</button>'
+    : s === 'mail' ? '<button type="button" class="btn btn-quiet btn-sm" data-act="lg-back">Retour à la connexion</button>'
+    : s === 'code' ? '<button type="button" class="btn btn-quiet btn-sm" data-act="lg-forgot">Changer d\'adresse</button><button type="button" class="btn btn-quiet btn-sm" data-act="lg-resend">Renvoyer le code</button>'
+    : '<button type="button" class="btn btn-quiet btn-sm" data-act="lg-cancel">Annuler</button>';
+  TMMorph($('#root'), '<div class="login"><form class="card login-c" id="loginF" novalidate>'
     + '<img class="logo" src="'+LOGO_SRC+'" alt="TakaMatch">'
     + '<h1 style="font-size:26px;margin-bottom:4px">Espace équipe</h1>'
-    + '<p style="color:var(--ink-2);margin:0 0 18px">'+(mail ? 'Accès réservé à l\'équipe TakaMatch. Chaque connexion est inscrite au journal.' : 'Code envoyé à <b>'+esc(L.email)+'</b>. Il est valable 10 minutes. Regarde aussi dans les indésirables.')+'</p>'
-    + '<div class="col">'
-    + (mail
-        ? '<div class="field"><label for="lgE">Adresse e-mail</label><input class="inp" id="lgE" type="email" placeholder="ton@email.com" autocomplete="username" value="'+esc(L.email)+'"></div>'
-        : '<div class="field"><label for="lgC">Code reçu par e-mail</label><input class="inp mono" id="lgC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" value="'+esc(L.code || '')+'" style="letter-spacing:.35em;font-size:20px"></div>')
+    + '<p style="color:var(--ink-2);margin:0 0 18px">'+intro+'</p>'
+    + '<div class="col">' + fields
     + '<div id="lgErr">'+(L.err ? '<div class="err">'+esc(L.err)+'</div>' : '')+'</div>'
-    + '<button class="btn btn-a btn-block" type="submit" style="height:42px"'+(L.busy ? ' disabled' : '')+'>'+ic('lock')+(L.busy ? 'Un instant…' : mail ? 'Recevoir un code' : 'Se connecter')+'</button>'
-    + (mail ? '' : '<div class="row" style="justify-content:center;gap:14px;margin-top:4px"><button type="button" class="btn btn-quiet btn-sm" data-act="lg-back">Changer d\'adresse</button><button type="button" class="btn btn-quiet btn-sm" data-act="lg-resend">Renvoyer le code</button></div>')
-    + '</div><p class="hint" style="margin-top:14px">Pas de mot de passe : un code à usage unique t\'est envoyé à chaque connexion. Tu peux te connecter depuis n\'importe quel ordinateur ou téléphone.</p></form></div>');
-  const f = $(mail ? '#lgE' : '#lgC'); if(f) setTimeout(() => f.focus(), 30);
+    + '<button class="btn btn-a btn-block" type="submit" style="height:42px"'+(L.busy ? ' disabled' : '')+'>'+ic('lock')+(L.busy ? 'Un instant…' : label)+'</button>'
+    + '<div class="row" style="justify-content:center;gap:14px;margin-top:4px;flex-wrap:wrap">'+links+'</div>'
+    + '</div></form></div>');
+  const f = $({pwd:L.email ? '#lgP' : '#lgE', mail:'#lgE', code:'#lgC', new:'#lgN'}[s]); if(f) setTimeout(() => f.focus(), 30);
 }
 function lgFail(e){ L.busy = false; L.err = (e && e.message) || 'La demande n\'a pas abouti.'; renderLogin(); }
+const validMail = em => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em);
+/* Le rôle est lu dans la base (jamais dans le navigateur) ; sans accès, on referme la session. */
+async function staffRole(){
+  let role = null;
+  try{ role = await TMDB.rpc('staff_claim'); }catch(e){ role = null; }
+  if(role && ROLES[role]) return role;
+  try{ await TMDB.signOut(); }catch(e){}
+  L = {step:'pwd', email:L.email, busy:false, err:'Cette adresse n\'a pas accès à l\'espace équipe. Demande à un super admin de t\'ajouter dans « Équipe et accès ».'};
+  A.me = null; renderLogin(); return null;
+}
 async function doLogin(){
   if(L.busy) return;
-  if(L.step === 'mail'){
-    const em = ($('#lgE').value || '').trim().toLowerCase();
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){ L.err = 'Entre une adresse e-mail valide.'; L.email = em; return renderLogin(); }
-    L.email = em; L.busy = true; L.err = ''; renderLogin();
-    try{ await TMDB.sendCode(em, true); L.step = 'code'; L.busy = false; renderLogin(); }catch(e){ lgFail(e); }
+  const s = L.step;
+  if(s === 'pwd' || s === 'mail'){
+    const em = ($('#lgE').value || '').trim().toLowerCase(); L.email = em;
+    if(!validMail(em)){ L.err = 'Entre une adresse e-mail valide.'; return renderLogin(); }
+    if(s === 'pwd'){
+      const pw = ($('#lgP') || {}).value || '';
+      if(!pw){ L.err = 'Entre ton mot de passe.'; return renderLogin(); }
+      L.busy = true; L.err = ''; renderLogin();
+      try{ await TMDB.signInPassword(em, pw); await enter(); }
+      catch(e){ lgFail(e.code === 'invalid_credentials' || e.status === 400 ? new Error('Identifiant ou mot de passe incorrect.') : e); }
+      return;
+    }
+    L.busy = true; L.err = ''; renderLogin();
+    try{ await TMDB.sendCode(em, true); L.step = 'code'; L.code = ''; L.busy = false; renderLogin(); }catch(e){ lgFail(e); }
     return;
   }
-  const code = ($('#lgC').value || '').replace(/\D/g, '');
-  L.code = code;
-  if(code.length !== 6){ L.err = 'Le code compte 6 chiffres.'; return renderLogin(); }
+  if(s === 'code'){
+    const code = ($('#lgC').value || '').replace(/\D/g, ''); L.code = code;
+    if(code.length !== 6){ L.err = 'Le code compte 6 chiffres.'; return renderLogin(); }
+    L.busy = true; L.err = ''; renderLogin();
+    try{ await TMDB.verifyCode(L.email, code); }catch(e){ return lgFail(e); }
+    if(!(await staffRole())) return;
+    L = {step:'new', email:L.email, busy:false, err:''}; renderLogin();
+    return;
+  }
+  /* Nouveau mot de passe */
+  const a = ($('#lgN') || {}).value || '', b = ($('#lgN2') || {}).value || '';
+  if(!pwdOk(a, L.email)){ L.err = 'Ton mot de passe ne respecte pas encore toutes les règles.'; renderLogin(); const n = $('#lgN'); if(n){ n.value = a; syncPwdRules(n); } return; }
+  if(a !== b){ L.err = 'Les deux mots de passe ne sont pas identiques.'; return renderLogin(); }
   L.busy = true; L.err = ''; renderLogin();
-  try{ await TMDB.verifyCode(L.email, code); await enter(); }catch(e){ lgFail(e); }
+  try{
+    await TMDB.setPassword(a);
+    TMDB.rpc('admin_note', {p_action:'Mot de passe défini', p_detail:'Espace équipe'}).catch(() => {});
+    await enter();
+  }catch(e){ lgFail(e); }
+}
+function syncPwdRules(inp){
+  const r = $('#pwRules'); if(!r) return;
+  const email = (A.me && A.me.email) || L.email;
+  r.outerHTML = pwdRulesH(inp.value, email);
 }
 /* Session ouverte : on vérifie le rôle dans la base (jamais dans le navigateur). */
 async function enter(){
-  let role = null;
-  try{ role = await TMDB.rpc('staff_claim'); }catch(e){ role = null; }
-  if(!role || !ROLES[role]){
-    try{ await TMDB.signOut(); }catch(e){}
-    L = {step:'mail', email:L.email, busy:false, err:'Cette adresse n\'a pas accès à l\'espace équipe. Demande à un super admin de t\'ajouter dans « Équipe et accès ».'};
-    A.me = null; return renderLogin();
-  }
+  const role = await staffRole(); if(!role) return;
+  /* Pas encore de mot de passe choisi (connexion par code) : on le demande avant d'entrer. */
+  const md = (TMDB.user() || {}).user_metadata || {};
+  if(!md.pwd_ok){ L = {step:'new', email:TMDB.email(), busy:false, err:''}; A.me = null; return renderLogin(); }
   const em = TMDB.email(); let name = em.split('@')[0];
   try{ const rows = await TMDB.rpc('staff_members'); A.staffRows = rows; const me = (rows || []).find(r => r.is_me); if(me && me.name) name = me.name; }catch(e){}
   A.me = {id:TMDB.uid(), name, email:em, role, status:'active'};
   { const h = decodeURIComponent((location.hash || '').slice(1)); A.view = (VIEWS[h] && ROLES[role].can.includes(h)) ? h : 'overview'; }
   try{ history.replaceState({tmv:A.view}, '', '#' + A.view); }catch(e){}
-  L = {step:'mail', email:'', busy:false, err:''};
+  L = {step:'pwd', email:'', busy:false, err:''};
   TMDB.rpc('admin_note', {p_action:'Connexion', p_detail:'Espace équipe'}).catch(() => {});
   render(); toast('Bonjour '+name.split(' ')[0]+'.');
 }
@@ -1572,7 +1643,11 @@ document.addEventListener('click', e => {
   const a = t.dataset.act, id = t.dataset.id;
   const need = (ok) => { if(!ok){ toast('Action réservée à un autre rôle.', 'bad'); } return ok; };
   switch(a){
-    case 'lg-back': L = {step:'mail', email:L.email, busy:false, err:''}; renderLogin(); break;
+    case 'lg-back': L = {step:'pwd', email:L.email, busy:false, err:''}; renderLogin(); break;
+    case 'lg-forgot': L = {step:'mail', email:L.email, busy:false, err:''}; renderLogin(); break;
+    case 'lg-cancel': TMDB.signOut().catch(() => {}); L = {step:'pwd', email:L.email, busy:false, err:''}; renderLogin(); break;
+    case 'lg-eye': { const i = document.getElementById(t.dataset.for); if(!i) break; const show = i.type === 'password'; i.type = show ? 'text' : 'password';
+      t.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'); t.classList.toggle('on', show); break; }
     case 'lg-resend': TMDB.sendCode(L.email, true).then(() => { L.code = ''; L.err = ''; renderLogin(); toast('Nouveau code envoyé. Utilise le plus récent.'); }).catch(err => toast(err.message, 'bad')); break;
     case 'save-prix': savePrix(); break;
     case 'go': { const v = t.dataset.v; if(v !== A.view){ try{ history.pushState({tmv:v}, '', '#' + v); }catch(err){} }
@@ -1584,8 +1659,29 @@ document.addEventListener('click', e => {
         + '<button data-act="pwd">'+ic('key')+'Changer mon mot de passe</button><button data-act="logout" style="color:var(--bad-ink)">'+ic('out')+'Se déconnecter</button>';
       document.body.appendChild(p); break; }
     case 'logout': { const p = $('.pop'); if(p) p.remove(); logout(); break; }
-    case 'pwd': { const p = $('.pop'); if(p) p.remove(); modal('<h2>Changer mon mot de passe</h2><div class="col"><div class="field"><label for="p1">Nouveau mot de passe</label><input class="inp" id="p1" type="password"></div><p class="hint" style="margin:0">8 caractères au moins.</p></div><div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-a" data-act="pwd-go">Enregistrer</button></div>'); break; }
-    case 'pwd-go': { const v = $('#p1').value; if(v.length < 8) return toast('8 caractères au moins.', 'bad'); A.me.pwd = v; log('Mot de passe modifié', A.me.email, ''); closeModal(); toast('Mot de passe modifié.'); break; }
+    case 'pwd': { const p = $('.pop'); if(p) p.remove(); modal('<h2>Changer mon mot de passe</h2><form class="col" id="pwF" novalidate>'
+      + '<input type="email" autocomplete="username" value="'+esc(A.me.email)+'" hidden>'
+      + pwdField('p0', 'Mot de passe actuel', 'current-password') + pwdField('p1', 'Nouveau mot de passe', 'new-password') + pwdField('p2', 'Confirme le nouveau mot de passe', 'new-password')
+      + pwdRulesH('', A.me.email) + '<p class="hint" style="margin:0">Mot de passe oublié ? Déconnecte-toi puis choisis « Première connexion ou mot de passe oublié ».</p></form>'
+      + '<div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-a" data-act="pwd-go">Enregistrer</button></div>');
+      setTimeout(() => { const f = $('#p0'); if(f) f.focus(); }, 30); break; }
+    case 'pwd-go': {
+      const cur = $('#p0').value, a = $('#p1').value, b = $('#p2').value;
+      if(!cur) return toast('Entre ton mot de passe actuel.', 'bad');
+      if(!pwdOk(a, A.me.email)) return toast('Le nouveau mot de passe ne respecte pas encore toutes les règles.', 'bad');
+      if(a !== b) return toast('Les deux nouveaux mots de passe ne sont pas identiques.', 'bad');
+      if(a === cur) return toast('Le nouveau mot de passe doit être différent de l\'actuel.', 'bad');
+      t.disabled = true;
+      (async () => {
+        try{ await TMDB.signInPassword(A.me.email, cur); }
+        catch(err){ t.disabled = false; return toast(err.code === 'invalid_credentials' || err.status === 400 ? 'Mot de passe actuel incorrect.' : err.message, 'bad'); }
+        try{
+          await TMDB.setPassword(a);
+          TMDB.rpc('admin_note', {p_action:'Mot de passe modifié', p_detail:'Espace équipe'}).catch(() => {});
+          closeModal(); toast('Mot de passe modifié.');
+        }catch(err){ t.disabled = false; toast(err.message, 'bad'); }
+      })();
+      break; }
     case 'tab': A.tab[t.dataset.k] = t.dataset.v; if(t.dataset.k === 'support') A.ticket = null; render(); break;
     case 'close-drawer': A.drawer = null; paintOverlay(); break;
     case 'close-modal': closeModal(); break;
@@ -1664,6 +1760,7 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const t = e.target;
   if(t.dataset && (t.dataset.pr || t.dataset.fx || t.dataset.fxs)){ prixPreview(); return; }
+  if(t.id === 'lgN' || t.id === 'p1'){ syncPwdRules(t); return; }
   if(t.id === 'lgC'){ const d = t.value.replace(/\D/g, '').slice(0, 6); if(t.value !== d) t.value = d; if(d.length === 6) doLogin(); return; }
   if(t.dataset.chk !== undefined || t.matches('[data-chk]')){ const all = $$('[data-chk]').every(c => c.checked); const b = $('#vOk'); if(b) b.disabled = !all; return; }
   if(t.id === 'gq'){ const q = t.value.trim().toLowerCase(), g = $('#gres'); if(q.length < 2){ g.hidden = true; return; }
@@ -1697,7 +1794,7 @@ function staffModal(s){
     + '<div class="field"><label for="sfN">Nom affiché</label><input class="inp" id="sfN" value="'+esc(s ? (s.name || '') : '')+'" placeholder="Prénom Nom"></div>'
     + '<div class="field"><label for="sfE">Adresse e-mail</label><input class="inp" id="sfE" type="email" value="'+esc(s ? s.email : '')+'" placeholder="prenom@email.com"'+(s ? ' readonly' : '')+'></div>'
     + '<div class="field"><label for="sfR">Rôle</label><select class="inp" id="sfR">'+Object.keys(ROLES).map(k => '<option value="'+k+'"'+(s && s.admin_role === k ? ' selected' : '')+'>'+ROLES[k].l+' — '+ROLES[k].d+'</option>').join('')+'</select></div>'
-    + '<p class="hint" style="margin:0">'+(s ? 'Le changement s\'applique à sa prochaine action.' : 'La personne se connecte sur cette même page avec son adresse : un code lui est envoyé par e-mail. Aucun mot de passe à transmettre.')+'</p></div>'
+    + '<p class="hint" style="margin:0">'+(s ? 'Le changement s\'applique à sa prochaine action.' : 'À sa première connexion, la personne choisit « Première connexion ou mot de passe oublié » : elle reçoit un code par e-mail puis crée son propre mot de passe. Aucun mot de passe à transmettre.')+'</p></div>'
     + '<div class="acts"><button class="btn btn-ghost" data-act="close-modal">Annuler</button><button class="btn btn-a" data-act="staff-save" data-e="'+esc(s ? s.email : '')+'">'+(s ? 'Enregistrer' : 'Donner l\'accès')+'</button></div>');
 }
 async function saveStaff(){
@@ -1764,7 +1861,7 @@ if(TMDB.session()) renderSplash(); else render();
 (async () => {
   let ok = false;
   try{ if(await TMDB.ensure()){ await enter(); ok = !!A.me; } }catch(e){}
-  if(!ok && !A.me && L.step === 'mail' && !$('#loginF')) render();
+  if(!ok && !A.me && L.step === 'pwd' && !$('#loginF')) render();
 })();
 /* Retour / suivant du navigateur : on passe d'un module à l'autre sans quitter l'espace équipe. */
 const VIEW_OF_HASH = () => decodeURIComponent((location.hash || '').slice(1));

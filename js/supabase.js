@@ -54,6 +54,10 @@
     '23514':'Une des informations ne respecte pas le format attendu.',
     '42501':'Tu n\'as pas le droit de faire cette action.',
     PGRST301:'Ta session a expiré. Reconnecte-toi.',
+    invalid_credentials:'Identifiant ou mot de passe incorrect.',
+    weak_password:'Ce mot de passe est trop faible. Choisis-en un plus long et plus varié.',
+    same_password:'Le nouveau mot de passe doit être différent de l\'actuel.',
+    reauthentication_needed:'Pour des raisons de sécurité, déconnecte-toi puis reconnecte-toi avant de changer ton mot de passe.',
     user_banned:'Ce compte est suspendu ou fermé par l\'équipe TakaMatch. Si tu penses que c\'est une erreur, écris à contact@takamatch.com.'
   };
   function readable(data, status){
@@ -139,6 +143,17 @@
     verifyCode: async function(email, token){
       var t = await raw('/auth/v1/verify', {method:'POST', auth:false, body:{type:'email', email:email, token:token}});
       setSession(fromTokens(t, t.user)); return session;
+    },
+    /* Connexion par identifiant + mot de passe (espace équipe). */
+    signInPassword: async function(email, password){
+      var t = await raw('/auth/v1/token?grant_type=password', {method:'POST', auth:false, body:{email:email, password:password}});
+      setSession(fromTokens(t, t.user)); return session;
+    },
+    /* Nouveau mot de passe pour le compte connecté ; « pwd_ok » note qu'il a été choisi. */
+    setPassword: async function(password){
+      var u = await api('/auth/v1/user', {method:'PUT', body:{password:password, data:{pwd_ok:true}}});
+      if(session && u && u.id){ session.user = u; setSession(session); }
+      return u;
     },
     googleUrl: function(redirectTo){
       return SB_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectTo);

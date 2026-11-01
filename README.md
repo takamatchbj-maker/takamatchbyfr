@@ -62,7 +62,7 @@ Settings → Pages → Deploy from a branch → `main` / `(root)`.
 - Les comptes, fiches, invitations, messages et l'Atelier vivent dans la base **Supabase** (projet `takamatch`).
   Le navigateur ne garde que de petits réglages (thème, visites guidées déjà vues, pays pour les prix).
 - Connexion : **e-mail + code à usage unique** (pas de mot de passe) ou **Google**. Les codes partent par le SMTP **Brevo**.
-- L'espace équipe (`admin.html`) est en ligne mais protégé : connexion par code, réservée aux membres de la table `staff`.
+- L'espace équipe (`admin.html`) est en ligne mais protégé : connexion par **identifiant (e-mail) + mot de passe**, réservée aux membres de la table `staff`. Première connexion ou mot de passe oublié : code à 6 chiffres par e-mail, puis choix du mot de passe (12 caractères min., minuscules, majuscules, chiffres et symboles ; règle aussi imposée par Supabase › Auth › Email). Chaque membre change son mot de passe depuis son profil (menu en haut à droite).
 - Ne jamais mettre dans ce dépôt le dossier `supabase/`, le dossier `paiements` ni un fichier `.env`.
 
 ## Notifications par e-mail
