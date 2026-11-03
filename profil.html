@@ -106,11 +106,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
 (function(){
   'use strict';
   var q = new URLSearchParams(location.search);
-  var H = (q.get('h') || '').replace(/^@/, '').trim(), R = q.get('r') || '', PID = q.get('p') || '';
+  var H = (q.get('h') || '').replace(/^@/, '').trim(), R = q.get('r') || '', PID = q.get('p') || '', CODE = '';
+  /* Adresse courte : s = « username » (tal_) ou « username_p<code> » (vis_). */
+  var SLUG = (q.get('s') || '').toLowerCase(), SPLIT = R === 'vis' && SLUG.match(/^([a-z0-9_]{3,20})_p([a-z0-9]{3,})$/);
+  if(SLUG && !H){ H = SPLIT ? SPLIT[1] : SLUG; CODE = SPLIT ? SPLIT[2] : ''; }
   var box = document.getElementById('pf');
   /* Adresse courte dans la barre : takamatch.com/vis_pseudo ou /tal_pseudo. */
   if(/^[a-z0-9_]{3,20}$/i.test(H) && (R === 'vis' || R === 'tal')){
-    try{ history.replaceState(history.state, '', '/' + R + '_' + H.toLowerCase()); }catch(e){}
+    try{ history.replaceState(history.state, '', '/' + R + '_' + H.toLowerCase() + (CODE ? '_p' + CODE : '')); }catch(e){}
   }
 
   /* Déjà connecté sur ce navigateur : la fiche s'ouvre dans TakaMatch. */
@@ -118,7 +121,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
     if(q.get('public') === '1' || !window.TMDB) return false;
     var s = null; try{ s = await TMDB.ensure(); }catch(e){}
     if(!s) return false;
-    location.replace('app.html?voir=' + encodeURIComponent(H) + (R ? '&r=' + R : '') + (PID ? '&p=' + encodeURIComponent(PID) : ''));
+    location.replace('app.html?voir=' + encodeURIComponent(H) + (R ? '&r=' + R : '') + (PID ? '&p=' + encodeURIComponent(PID) : '') + (CODE ? '&c=' + encodeURIComponent(CODE) : ''));
     return true;
   }
 
@@ -199,9 +202,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
       + '<div class="pf-meta"><span class="pf-handle">@' + esc(d.handle) + '</span>' + (d.city ? '<span>' + esc(d.city) + '</span>' : '') + badge(d.verified, role) + (d.founder ? '<span class="pf-founder" title="Inscrit pendant le lancement de TakaMatch">✦ Membre fondateur</span>' : '') + '</div></div></div>';
     var main;
     if(role === 'vis'){
-      var cur = projects.filter(function(p){ return p.id === PID; })[0] || projects[0];
-      var tabs = projects.length > 1 ? '<nav class="pf-tabs">' + projects.map(function(p){
-          return '<a href="/vis_' + encodeURIComponent(d.handle) + '?p=' + p.id + (q.get('public') ? '&public=1' : '') + '" class="' + (p === cur ? 'on' : '') + '">' + esc((p.glyph || '') + ' ' + p.title) + '</a>'; }).join('') + '</nav>' : '';
+      /* Un seul projet par lien : le nombre de projets du porteur n'est jamais affiché. */
+      var cur = projects[0], tabs = '';
+      if(cur && cur.code && !CODE){ CODE = cur.code; try{ history.replaceState(history.state, '', '/vis_' + String(d.handle).toLowerCase() + '_p' + CODE); }catch(e){} }
       main = tabs + projectCard(cur) + persoCard(d.perso);
       document.title = (cur.title || 'Projet') + ' · TakaMatch';
     } else {
@@ -215,7 +218,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
     if(!H) return empty('Lien incomplet', 'Ce lien ne mène à aucune fiche. Vérifie qu\'il a été copié en entier.');
     if(await maybeApp()) return;
     try{
-      var d = await TMDB.rpc('public_profile', {p_handle:H});
+      var d = await TMDB.rpc('public_profile', CODE ? {p_handle:H, p_code:CODE} : {p_handle:H});
+      /* « username_pxxx » peut aussi être un pseudo entier : on réessaie sans découper. */
+      if(!d && SPLIT){ H = SLUG; CODE = ''; d = await TMDB.rpc('public_profile', {p_handle:H}); }
       if(!d) return empty('Fiche introuvable', 'Aucune fiche ne correspond à @' + H + '. Le pseudo a peut-être changé.');
       render(d);
     }catch(e){ empty('Fiche indisponible', e.message || 'Réessaie dans un instant.'); }

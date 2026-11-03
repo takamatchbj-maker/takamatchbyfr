@@ -1373,7 +1373,11 @@ if(window.matchMedia) try{ matchMedia('(prefers-color-scheme: dark)').addEventLi
 function publicLink(){
   /* Format unique des fiches, partout (lien, QR code, partage) :
      https://takamatch.com/vis_username (Visionnaire) · https://takamatch.com/tal_username (Talent). */
-  return 'https://takamatch.com/' + (isTalMode() ? 'tal' : 'vis') + '_' + String(S.me.handle || '').toLowerCase();
+  const h = String(S.me.handle || '').toLowerCase();
+  if(isTalMode()) return 'https://takamatch.com/tal_' + h;
+  /* Visionnaire : un lien par projet (_p + 3 premières lettres du titre), sans révéler combien il en porte. */
+  const c = S.me.project && S.me.project.code;
+  return 'https://takamatch.com/vis_' + h + (c ? '_p' + c : '');
 }
 let QR_LIB = null;
 function loadQrLib(){

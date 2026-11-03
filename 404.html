@@ -7,10 +7,10 @@
      GitHub Pages n'ayant pas de réécriture d'adresse, cette page les reconnaît
      et ouvre la fiche publique (profil.html), qui garde l'adresse courte affichée. */
   (function(){
-    var m = location.pathname.match(/^\/(vis|tal)_([A-Za-z0-9_]{3,20})\/?$/i);
+    var m = location.pathname.match(/^\/(vis|tal)_([A-Za-z0-9_]{3,40})\/?$/i);
     if(!m) return;
     var q = new URLSearchParams(location.search);
-    q.set('h', m[2].toLowerCase()); q.set('r', m[1].toLowerCase());
+    q.set('s', m[2].toLowerCase()); q.set('r', m[1].toLowerCase()); q.delete('h');
     document.documentElement.style.visibility = 'hidden';
     location.replace('/profil.html?' + q.toString());
   })();

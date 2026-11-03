@@ -84,11 +84,11 @@
       hue:hashN(pr.id) % 360, seeking:pr.seeking || [], pace:pr.pace || 'serieux', pay:pr.offer || 'equity',
       likes:0, seen:daysOld(pr.updated_at), hook:pr.hook || '', vision:pr.vision || '',
       traction:pr.traction || '', assets:pr.assets || '', challenges:pr.challenges || '', link:pr.link || '',
-      noLink:!!pr.no_link, photo:safeImg(pr.cover_url),
+      noLink:!!pr.no_link, photo:safeImg(pr.cover_url), code:pr.share_code || '',
       hidden:!pr.online || !active(o)};
   }
   function myProject(pr){
-    return {id:pr.id, title:pr.title || '', glyph:pr.glyph || '💡', photo:safeImg(pr.cover_url), likes:0,
+    return {id:pr.id, code:pr.share_code || '', title:pr.title || '', glyph:pr.glyph || '💡', photo:safeImg(pr.cover_url), likes:0,
       sectors:pr.sectors || [], seeking:pr.seeking || [], hook:pr.hook || '', vision:pr.vision || '', traction:pr.traction || '',
       assets:pr.assets || '', challenges:pr.challenges || '', link:pr.link || '', noLink:!!pr.no_link,
       pace:pr.pace || 'serieux', pay:pr.offer || 'equity', online:!!pr.online};
@@ -369,13 +369,13 @@
   function openShared(){
     const q = new URLSearchParams(location.search), h = (q.get('voir') || '').replace(/^@/, '').toLowerCase();
     if(!h) return;
-    const r = q.get('r'), pid = q.get('p');
+    const r = q.get('r'), pid = q.get('p'), code = (q.get('c') || '').toLowerCase();
     try{ history.replaceState(history.state, '', location.pathname); }catch(e){}
     if(h === String(S.me.handle || '').toLowerCase()){ go('fiche'); return; }
     const low = v => String(v || '').toLowerCase();
     /* Une fiche projet se consulte en profil Talent, une fiche Talent en profil Visionnaire. */
     const findIn = mode => mode === 'tal'
-      ? (pid && PROJECTS.find(x => x.id === pid && !x.hidden)) || PROJECTS.find(x => !x.hidden && low(x.ownerHandle) === h)
+      ? (pid && PROJECTS.find(x => x.id === pid && !x.hidden)) || (code && PROJECTS.find(x => !x.hidden && low(x.ownerHandle) === h && x.code === code)) || PROJECTS.find(x => !x.hidden && low(x.ownerHandle) === h)
       : TALENTS.find(x => !x.hidden && low(x.handle) === h);
     const want = r === 'tal' ? 'vis' : r === 'vis' ? 'tal' : null;
     const order = want ? [want] : [S.me.role, S.me.role === 'tal' ? 'vis' : 'tal'];
@@ -385,7 +385,7 @@
       setTimeout(() => openFiche(x.id), 350);
       return;
     }
-    location.href = (r === 'vis' || r === 'tal') ? '/' + r + '_' + encodeURIComponent(h) + '?' + (pid ? 'p=' + encodeURIComponent(pid) + '&' : '') + 'public=1'
+    location.href = (r === 'vis' || r === 'tal') ? '/' + r + '_' + encodeURIComponent(h) + (r === 'vis' && code ? '_p' + encodeURIComponent(code) : '') + '?public=1'
       : 'profil.html?h=' + encodeURIComponent(h) + (pid ? '&p=' + encodeURIComponent(pid) : '') + '&public=1';
   }
 
@@ -653,11 +653,11 @@
         if(p.photo && /^data:/.test(p.photo)){ p.photo = await upImg('covers', p.photo, 'couverture'); realign(); }
         const row = projRow(p), js = JSON.stringify(row);
         if(isUuid(p.id)){
-          if(D.lastProj[p.id] !== js){ await DB.update('projects', 'id=eq.' + p.id, row); D.lastProj[p.id] = js; }
+          if(D.lastProj[p.id] !== js){ const u = await DB.update('projects', 'id=eq.' + p.id, row); D.lastProj[p.id] = js; if(u && u[0] && u[0].share_code) p.code = u[0].share_code; }
         } else if((p.title || p.hook) && D.acc && D.acc.has_visionary){
           const r = await DB.insert('projects', Object.assign({owner_id:uid}, row));
           const nid = r && r[0] && r[0].id; if(!nid) continue;
-          const old = p.id; p.id = nid; D.lastProj[nid] = js;
+          const old = p.id; p.id = nid; D.lastProj[nid] = js; p.code = r[0].share_code || '';
           if(S.ctxs['vis:' + old]){ S.ctxs['vis:' + nid] = S.ctxs['vis:' + old]; delete S.ctxs['vis:' + old]; }
         }
       }
