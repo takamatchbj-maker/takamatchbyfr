@@ -108,6 +108,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
   var q = new URLSearchParams(location.search);
   var H = (q.get('h') || '').replace(/^@/, '').trim(), R = q.get('r') || '', PID = q.get('p') || '';
   var box = document.getElementById('pf');
+  /* Adresse courte dans la barre : takamatch.com/vis_pseudo ou /tal_pseudo. */
+  if(/^[a-z0-9_]{3,20}$/i.test(H) && (R === 'vis' || R === 'tal')){
+    var keep = new URLSearchParams(); if(PID) keep.set('p', PID); if(q.get('public')) keep.set('public', q.get('public'));
+    try{ history.replaceState(history.state, '', '/' + R + '_' + H.toLowerCase() + (keep.toString() ? '?' + keep.toString() : '')); }catch(e){}
+  }
 
   /* Déjà connecté sur ce navigateur : la fiche s'ouvre dans TakaMatch. */
   async function maybeApp(){
@@ -197,7 +202,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
     if(role === 'vis'){
       var cur = projects.filter(function(p){ return p.id === PID; })[0] || projects[0];
       var tabs = projects.length > 1 ? '<nav class="pf-tabs">' + projects.map(function(p){
-          return '<a href="?h=' + encodeURIComponent(d.handle) + '&r=vis&p=' + p.id + (q.get('public') ? '&public=1' : '') + '" class="' + (p === cur ? 'on' : '') + '">' + esc((p.glyph || '') + ' ' + p.title) + '</a>'; }).join('') + '</nav>' : '';
+          return '<a href="/vis_' + encodeURIComponent(d.handle) + '?p=' + p.id + (q.get('public') ? '&public=1' : '') + '" class="' + (p === cur ? 'on' : '') + '">' + esc((p.glyph || '') + ' ' + p.title) + '</a>'; }).join('') + '</nav>' : '';
       main = tabs + projectCard(cur) + persoCard(d.perso);
       document.title = (cur.title || 'Projet') + ' · TakaMatch';
     } else {

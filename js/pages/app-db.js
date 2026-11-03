@@ -385,7 +385,8 @@
       setTimeout(() => openFiche(x.id), 350);
       return;
     }
-    location.href = 'profil.html?h=' + encodeURIComponent(h) + (r ? '&r=' + r : '') + (pid ? '&p=' + encodeURIComponent(pid) : '') + '&public=1';
+    location.href = (r === 'vis' || r === 'tal') ? '/' + r + '_' + encodeURIComponent(h) + '?' + (pid ? 'p=' + encodeURIComponent(pid) + '&' : '') + 'public=1'
+      : 'profil.html?h=' + encodeURIComponent(h) + (pid ? '&p=' + encodeURIComponent(pid) : '') + '&public=1';
   }
 
   addEventListener('message', e => {

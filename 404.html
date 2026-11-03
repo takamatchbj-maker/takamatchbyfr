@@ -2,6 +2,19 @@
 <html lang="fr" data-default="404">
 <head>
 <meta charset="utf-8">
+<script>
+  /* Adresses courtes des fiches : /vis_pseudo (projet) et /tal_pseudo (talent).
+     GitHub Pages n'ayant pas de réécriture d'adresse, cette page les reconnaît
+     et ouvre la fiche publique (profil.html), qui garde l'adresse courte affichée. */
+  (function(){
+    var m = location.pathname.match(/^\/(vis|tal)_([A-Za-z0-9_]{3,20})\/?$/i);
+    if(!m) return;
+    var q = new URLSearchParams(location.search);
+    q.set('h', m[2].toLowerCase()); q.set('r', m[1].toLowerCase());
+    document.documentElement.style.visibility = 'hidden';
+    location.replace('/profil.html?' + q.toString());
+  })();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>TakaMatch — Un petit détour</title>

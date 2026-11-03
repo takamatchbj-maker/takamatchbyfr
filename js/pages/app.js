@@ -1371,11 +1371,11 @@ if(window.matchMedia) try{ matchMedia('(prefers-color-scheme: dark)').addEventLi
    Le lien ouvre profil.html : la fiche visible sans compte (nom et photo masqués).
    Une personne déjà connectée sur son navigateur est envoyée vers la même fiche dans l'outil. */
 function publicLink(){
-  const u = new URL('profil.html', location.href); u.search = ''; u.hash = '';
-  u.searchParams.set('h', S.me.handle || '');
-  u.searchParams.set('r', isTalMode() ? 'tal' : 'vis');
+  /* Adresse courte : takamatch.com/vis_pseudo (fiche projet) ou /tal_pseudo (fiche talent). */
+  const role = isTalMode() ? 'tal' : 'vis';
+  const u = new URL('/' + role + '_' + String(S.me.handle || '').toLowerCase(), location.href); u.search = ''; u.hash = '';
   const p = S.me.project;
-  if(!isTalMode() && p && /^[0-9a-f-]{36}$/i.test(p.id)) u.searchParams.set('p', p.id);
+  if(role === 'vis' && p && /^[0-9a-f-]{36}$/i.test(p.id) && (S.me.projects || []).length > 1) u.searchParams.set('p', p.id);
   return u.href;
 }
 let QR_LIB = null;
