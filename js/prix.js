@@ -57,7 +57,9 @@
      · packs de crédits : « Bientôt disponible », prix montrés en gris ;
      · 5 crédits d'invitation par mois.
      Réglé dans Supabase (app_settings « launch ») ; ces valeurs servent si la base ne répond pas. */
-  var LAUNCH = {free:true, monthly:5, keys:['second', 'slot', 'pacte'], soon:'Bientôt disponible'};
+  var LAUNCH = {free:true, monthly:5, keys:['second', 'slot', 'pacte'], soon:'Bientôt disponible',
+    /* Badge « Membre fondateur » : comptes dont l'inscription est terminée au plus tard ce jour-là. */
+    founderUntil:'2027-03-31'};
 
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
   var state = {prices:clone(DEFAULT_PRICES), fx:clone(DEFAULT_FX), at:0};
@@ -93,6 +95,7 @@
     /* true : l'achat de crédits n'est pas encore ouvert. */
     creditsSoon:function(){ return !!LAUNCH.free; },
     monthly:function(){ return LAUNCH.monthly; },
+    isFounder:function(d){ return !!d && +new Date(d) <= +new Date(LAUNCH.founderUntil + 'T23:59:59Z'); },
     calc:calc, curOf:curOf, fmt:fmt, num:num,
     /* Données brutes de la base → format interne (sert aussi au serveur). */
     fromRows:function(priceRows, fxRows){

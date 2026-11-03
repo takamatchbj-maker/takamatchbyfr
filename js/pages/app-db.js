@@ -26,7 +26,7 @@
     lastProf:'', lastIdent:'', lastPriv:'', lastProj:{}, lastAt:{}, busy:false};
 
   /* ---------- Lecture ---------- */
-  const PROF_COLS = 'id,handle,city,country,photo_url,avatar_hue,primary_role,skills,sectors,level,diploma,status,pace,bio,portfolio_url,portfolio_title,no_portfolio,talent_online,verified_id,account_status,updated_at,perso';
+  const PROF_COLS = 'id,handle,city,country,photo_url,avatar_hue,primary_role,skills,sectors,level,diploma,status,pace,bio,portfolio_url,portfolio_title,no_portfolio,talent_online,verified_id,account_status,updated_at,perso,onboarded_at';
   async function loadAll(){
     const sel = (t, q) => DB.select(t, q).catch(e => { console.warn('[TakaMatch]', t, e.message); return []; });
     const r = await Promise.all([
@@ -71,7 +71,7 @@
   function toTalent(p){
     return {id:p.id, handle:p.handle || 'membre', name:fullName(p.id) || String(p.handle || 'membre').replace(/_/g, ' '),
       city:p.city || '', skills:p.skills || [], sectors:p.sectors || [], level:p.level || '', pace:p.pace || 'serieux',
-      verified:!!p.verified_id, seen:daysOld(p.updated_at), bio:p.bio || '', portfolio:p.portfolio_url || '',
+      verified:!!p.verified_id, founder:TMPrix.isFounder(p.onboarded_at), seen:daysOld(p.updated_at), bio:p.bio || '', portfolio:p.portfolio_url || '',
       portfolioTitle:p.portfolio_title || '', hue:p.avatar_hue || (hashN(p.id) % 360), sex:sexOf(p.id),
       photo:p.photo_url || '', rate:'',
       hidden:!p.talent_online || !active(p)};
@@ -79,7 +79,7 @@
   function toProject(pr){
     const o = D.prof.get(pr.owner_id) || {};
     return {id:pr.id, ownerId:pr.owner_id, ownerHandle:o.handle || 'porteur', title:pr.title || 'Projet sans titre',
-      owner:fullName(pr.owner_id) || '@' + (o.handle || 'porteur'), ownerCity:o.city || '', ownerVerified:!!o.verified_id,
+      owner:fullName(pr.owner_id) || '@' + (o.handle || 'porteur'), ownerCity:o.city || '', ownerVerified:!!o.verified_id, ownerFounder:TMPrix.isFounder(o.onboarded_at),
       ownerSex:sexOf(pr.owner_id), sectors:pr.sectors || [], glyph:pr.glyph || sector((pr.sectors || [])[0]).g,
       hue:hashN(pr.id) % 360, seeking:pr.seeking || [], pace:pr.pace || 'serieux', pay:pr.offer || 'equity',
       likes:0, seen:daysOld(pr.updated_at), hook:pr.hook || '', vision:pr.vision || '',
@@ -146,6 +146,7 @@
     m.slots = a.project_slots || 1;
     m.visUnlocked = !!(a.has_talent && a.has_visionary);
     m.online = !!p.talent_online;
+    m.founder = TMPrix.isFounder(p.onboarded_at);
     m.verifiedId = !!p.verified_id; m.verifiedPhone = !!p.verified_phone; m.verifiedEmail = true;
     m.verifyPending = !!(D.verif && D.verif.status === 'pending');
     m.photo = p.photo_url || m.photo || '';

@@ -501,6 +501,7 @@ function vAccueil(){
   const msgs = S.threads.reduce((a,t)=>a+t.msgs.length,0);
 
   return '<div class="page-h"><div><h1>Bonjour <span class="acc">'+esc(me.first||'à toi')+'</span></h1>'
+  +   (me.founder ? '<p style="margin:4px 0 0">'+founderBadge(true)+'</p>' : '')
   +   '<p class="sub">'+(tal ? "Prêt à co-créer la prochaine success story africaine ?" : "Prêt à trouver les personnes qui feront exister ton idée ?")+'</p></div>'
   +   '<div class="spacer"></div>'
   +   '<div class="acts"><button class="btn btn-a" data-act="go" data-v="explorer">'+ic('compass')+(tal?'Explorer les projets':'Explorer les talents')+'</button></div></div>'
@@ -516,6 +517,7 @@ function vAccueil(){
   +     '<section class="card card-pad"><div class="sec-t"><h3>'+(tal?'Projets faits pour toi':'Talents faits pour ton projet')+'</h3>'
   +       '<button class="btn btn-quiet btn-sm" data-act="go" data-v="explorer">Tout voir'+ic('arrow')+'</button></div>'
   +       (ranked.length ? '<div class="deck">'+ranked.map(r=>card(r.x, r.s)).join('')+'</div>'
+            : launchMode(true) ? launchPanel(true)
             : emptyBox('🔍','Rien à suggérer',"Complète ta fiche pour qu'on puisse calculer des compatibilités."))
   +     '</section>'
   +     '<section class="card card-pad"><div class="sec-t"><h3>Activité récente</h3>'
@@ -620,11 +622,12 @@ function skelDeck(){
 }
 const EXP_PAGE = 12;   /* fiches affichées d'un coup ; les suivantes à la demande */
 function mosaic(list){
-  if(!list.length) return emptyState();
+  if(!list.length) return launchMode() ? launchPanel() + exampleDeck() : emptyState();
   const sig = [S.me.role, S.tab, S.q, S.filterSkill, S.filterSector, S.fPay].join('|');
   if(S._expSig !== sig){ S._expSig = sig; S.expShown = EXP_PAGE; }
   const n = Math.min(list.length, S.expShown || EXP_PAGE);
   return '<div class="deck">' + list.slice(0, n).map(r => card(r.x, r.s)).join('') + '</div>'
+    + (launchMode() ? launchPanel() + exampleDeck() : '')
     + (n < list.length ? '<div style="display:flex;justify-content:center;margin-top:16px"><button class="btn btn-ghost" data-act="exp-more">Voir plus de fiches <span class="mono" style="margin-left:6px">'+n+' / '+list.length+'</span></button></div>' : '');
 }
 
@@ -1434,10 +1437,11 @@ function talentProjectOf(t){
 /* ---------- J'aime (projets uniquement) ---------- */
 function likesOf(x){ return (x.likes||0) + (S.likes.has(x.id) ? 1 : 0); }
 function likeHTML(x, big){
-  const on = S.likes.has(x.id), n = likesOf(x);
+  const on = S.likes.has(x.id), n = likesOf(x), nH = n ? '<span class="tnum">'+n+'</span>' : '';
   if(isTalMode() && PROJECTS.includes(x))
-    return '<button class="likebtn'+(on?' on':'')+(big?' big':'')+'" data-act="like" data-id="'+x.id+'" aria-pressed="'+on+'" aria-label="'+(on?'Retirer ton J\'aime':'Aimer ce projet')+' ('+n+' J\'aime)">'+ic('heart')+'<span class="tnum">'+n+'</span></button>';
-  return '<span class="likebtn ro'+(big?' big':'')+'" aria-label="'+n+' J\'aime">'+ic('heart')+'<span class="tnum">'+n+'</span></span>';
+    return '<button class="likebtn'+(on?' on':'')+(big?' big':'')+'" data-act="like" data-id="'+x.id+'" aria-pressed="'+on+'" aria-label="'+(on?'Retirer ton J\'aime':'Aimer ce projet')+(n ? ' ('+n+' J\'aime)' : '')+'">'+ic('heart')+nH+'</button>';
+  if(!n) return '';
+  return '<span class="likebtn ro'+(big?' big':'')+'" aria-label="'+n+' J\'aime">'+ic('heart')+nH+'</span>';
 }
 
 /* ---------- Anneaux et jauges : la couleur de la fiche décrite ---------- */
@@ -1474,7 +1478,7 @@ function detailOpts(x){ return {unlocked:isUnlocked(x.id), fav:true, report:true
 
 /* ---------- Explorer : mode Cartes ---------- */
 function focusView(list){
-  if(!list.length) return emptyState();
+  if(!list.length) return launchMode() ? launchPanel() + exampleDeck() : emptyState();
   const i = clamp(S.focusIdx, 0, list.length-1); S.focusIdx = i;
   const {x, s} = list[i];
   const pager = '<div class="pager">'
@@ -2087,12 +2091,12 @@ function thumb(x, size){ return isTalMode() ? projThumb(x, size) : avatarOf(x, s
 /* ---------- Ta fiche, vue par les autres ---------- */
 function meAsTalent(){
   const m = S.me;
-  return {id:'me', name:myName(), handle:m.handle, city:m.city, verified:m.verifiedId, skills:m.skills, level:m.level,
+  return {id:'me', name:myName(), handle:m.handle, city:m.city, verified:m.verifiedId, founder:!!m.founder, skills:m.skills, level:m.level,
     pace:m.pace, bio:m.bio, sectors:m.sectors, portfolio:m.portfolio, hue:m.avatarHue};
 }
 function meAsProject(){
   const m = S.me, p = m.project;
-  return Object.assign({}, p, {id:'me-proj', owner:myName(), ownerHandle:m.handle, ownerCity:m.city, ownerVerified:m.verifiedId,
+  return Object.assign({}, p, {id:'me-proj', owner:myName(), ownerHandle:m.handle, ownerCity:m.city, ownerVerified:m.verifiedId, ownerFounder:!!m.founder,
     hue:1, likes:p.likes||0, title:p.title || 'Ton projet'});
 }
 
@@ -2220,7 +2224,7 @@ function detailHTML(x, kind, o){
     + (handle ? '<span class="chip chip-handle" style="position:absolute;top:12px;left:14px">@'+esc(handle)+'</span>' : '')
     + (btns ? '<span class="hero-btns">'+btns+'</span>' : '') + '</div>'
     + '<div class="meta"><div class="row" style="gap:10px;flex-wrap:wrap"><h2 style="font-size:24px;flex:1;min-width:180px">'+name+'</h2>'
-    +   vBadge(proj ? 'vis' : 'tal', verified)+'</div>'
+    +   vBadge(proj ? 'vis' : 'tal', verified)+((proj ? x.ownerFounder : x.founder) ? founderBadge() : '')+'</div>'
     +   sub + infos + chips + '</div>'
     + '<div class="secs">'+secs+'</div>';
 }
@@ -2277,6 +2281,78 @@ function emptyState(){
   return '<div class="card">'+emptyBox('🔍','Rien ne correspond', payTxt ? "Aucun projet ne propose de rémunération avec ces filtres. Élargis-les ou vide la recherche." : "Aucune fiche ne passe tous tes filtres. Élargis-les ou vide la recherche.",
     '<button class="btn btn-ghost btn-sm" style="margin-top:6px" data-act="clear-filters">Réinitialiser les filtres</button>')+'</div>';
 }
+/* ============================================================
+   Lancement : peu de fiches au départ
+   - En dessous de LAUNCH_FEW fiches visibles, l'Explorer et l'Accueil
+     affichent un encart « TakaMatch vient d'ouvrir » (inviter, partager)
+     et une fiche d'EXEMPLE clairement étiquetée (ni invitable, ni comptée).
+   - Les compteurs de résultats ne sont pas mis en avant.
+   ============================================================ */
+const LAUNCH_FEW = 8;
+function launchMode(any){
+  if(!any && (S.tab !== 'decouvrir' || anyFilter())) return false;
+  return pool().filter(x => !x.hidden).length < LAUNCH_FEW;
+}
+function founderBadge(big){
+  return '<span class="fbadge'+(big ? ' big' : '')+'" title="Inscrit pendant le lancement de TakaMatch">'+ic('spark')+'Membre fondateur</span>';
+}
+const SITE_URL = 'https://takamatch.com/';
+function inviteText(){
+  return 'Je suis sur TakaMatch, la plateforme qui réunit porteurs de projet et talents pour cofonder en Afrique francophone. '
+    + 'Tu as une idée ou des compétences à mettre dans une aventure ? Inscris-toi, c\'est gratuit : ' + SITE_URL;
+}
+function launchPanel(compact){
+  const me = S.me, share = me.handle ? publicLink() : '';
+  return '<section class="launch-p'+(compact ? ' compact' : '')+'"><div class="lp-h"><span class="lp-g" aria-hidden="true">🌱</span><div>'
+    + '<h3>TakaMatch vient d\'ouvrir</h3>'
+    + '<p>Tu fais partie des premiers membres'+(me.founder ? ' : ton badge '+founderBadge()+' restera sur ta fiche' : '')+'. De nouvelles fiches arrivent chaque semaine. '
+    + 'Le meilleur moyen de trouver ton '+(isTalMode() ? 'projet' : 'associé')+' : inviter les personnes de ton réseau.</p></div></div>'
+    + '<div class="lp-acts">'
+    + '<a class="btn btn-soft btn-sm" href="https://wa.me/?text='+encodeURIComponent(inviteText())+'" target="_blank" rel="noopener">'+socIc('whatsapp')+'Inviter sur WhatsApp</a>'
+    + '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="'+esc(inviteText())+'" data-l="Message d\'invitation">'+ic('link')+'Copier le message</button>'
+    + (share ? '<button class="btn btn-ghost btn-sm" data-act="copy" data-t="'+esc(share)+'" data-l="Lien de ta fiche">'+ic('users')+'Partager ma fiche</button>' : '')
+    + '</div></section>';
+}
+/* Fiches d'exemple : pour montrer ce qu'est une bonne fiche. Jamais présentées comme de vrais membres. */
+const EXAMPLES = {
+  tal:{title:'Développeuse mobile · paiements', handle:'@exemple', city:'Cotonou', skills:['dev-mobile','dev-back','produit'],
+    bio:'5 ans à construire des applis de paiement mobile pour des PME. Je cherche un projet où je serai associée, pas prestataire : idéalement fintech ou agritech, avec un porteur qui connaît déjà son terrain.',
+    parts:[['Ce que j\'apporte','Une appli publiée et maintenue seule de A à Z ; intégration MTN MoMo et Moov Money ; tests auprès de vrais utilisateurs.'],
+           ['Ce que je cherche','Un projet avec un problème clair, un porteur disponible au moins 15 h par semaine et des parts au capital écrites dès le départ.'],
+           ['Disponibilité','Engagement sérieux : 10 à 25 h par semaine.']]},
+  proj:{title:'Collecte de récoltes par SMS', handle:'@exemple', city:'Parakou', sectors:['agritech','fintech'], seeking:['dev-mobile','growth'], glyph:'🌱',
+    hook:'Les petits producteurs vendent leur récolte en dessous du prix du marché faute d\'acheteurs. On les relie aux acheteurs par simple SMS.',
+    parts:[['Le problème','Dans le Borgou, un producteur de maïs perd en moyenne un tiers de sa marge en intermédiaires.'],
+           ['Où en est le projet','40 producteurs interrogés, 12 prêts à tester, un acheteur partenaire. Prototype sur papier.'],
+           ['Qui je cherche','Un ou une dev mobile pour le prototype, et une personne pour animer le réseau des producteurs.'],
+           ['Ce que j\'offre','Des parts au capital (vesting sur 4 ans) et un pacte d\'associés signé dès l\'entrée.']]}
+};
+function exampleDeck(){
+  const k = isTalMode() ? 'proj' : 'tal', x = EXAMPLES[k];
+  const chips = (k === 'tal' ? x.skills : x.seeking).map(id => '<span class="chip">'+esc(skillL(id))+'</span>').join('');
+  return '<div class="ex-zone"><div class="ex-h"><h3>À quoi ressemble une bonne fiche ?</h3><span class="hint">Un exemple pour t\'inspirer, pas un vrai membre.</span></div>'
+    + '<div class="deck"><article class="pcard ex-card" aria-label="Exemple de fiche">'
+    + '<div class="cover ex-cover"><span class="ex-tag">'+ic('eye')+'Exemple de fiche</span>'+(k === 'proj' ? '<span class="glyph" aria-hidden="true">'+x.glyph+'</span>' : '<span class="portrait"><span class="ex-av" aria-hidden="true">🛠</span></span>')+'</div>'
+    + '<div class="body"><h3>'+esc(x.title)+'</h3><div class="who"><span class="handle">'+esc(x.handle)+'</span><span class="sep">·</span>'+esc(x.city)+'</div>'
+    + '<p class="ex">'+esc(k === 'tal' ? x.bio : x.hook)+'</p><div class="chips"><span class="chips-l">'+(k === 'tal' ? 'Compétences :' : 'Recherche :')+'</span>'+chips+'</div>'
+    + '<div class="foot"><button class="btn btn-ghost btn-sm" style="flex:1" data-act="example-open" data-k="'+k+'">'+ic('eye')+'Lire l\'exemple</button></div></div></article></div></div>';
+}
+function openExample(k){
+  const x = EXAMPLES[k]; if(!x) return;
+  modal('Exemple de fiche '+(k === 'tal' ? 'Talent' : 'projet'),
+    '<p class="hint row" style="gap:6px;margin-top:0">'+ic('eye')+'Cette fiche n\'appartient à personne : elle montre ce qui rend une fiche convaincante.</p>'
+    + '<h3 style="margin:10px 0 4px">'+esc(x.title)+'</h3><p style="margin:0 0 12px">'+esc(k === 'tal' ? x.bio : x.hook)+'</p>'
+    + x.parts.map(p => '<div style="margin:0 0 10px"><b>'+esc(p[0])+'</b><p style="margin:2px 0 0">'+esc(p[1])+'</p></div>').join('')
+    + '<div class="ex-tips"><b>Pourquoi elle marche</b><ul><li>Des faits précis plutôt que des adjectifs.</li><li>Ce que la personne cherche est dit clairement.</li><li>La disponibilité et le partage du capital sont annoncés tôt.</li></ul></div>',
+    '<button class="btn btn-ghost" data-act="close">Fermer</button><button class="btn btn-a" data-act="example-go">'+ic('edit')+'Améliorer ma fiche</button>');
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-act="example-open"],[data-act="example-go"]'); if(!t) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(t.dataset.act === 'example-open') openExample(t.dataset.k);
+  else { closeLayer(); go('fiche'); }
+}, true);
+
 function repaintExplorer(){
   const box = $('#expBody'); if(!box) return;
   const list = filtered();
@@ -2641,7 +2717,10 @@ const CMDS = () => [
 /* ============================================================
    Deux profils, trois projets : bascule et paiements
    ============================================================ */
-function resultsLine(n){ return n+' résultat'+(n>1?'s':'')+', classé'+(n>1?'s':'')+' par compatibilité avec '+(isTalMode() ? 'ta fiche.' : esc(projName(S.me.project))+'.'); }
+function resultsLine(n){
+  /* Au lancement, on ne met pas en avant un petit nombre de fiches. */
+  if(launchMode()) return n ? 'Les premières fiches de la communauté, classées par compatibilité avec '+(isTalMode() ? 'ta fiche.' : esc(projName(S.me.project))+'.') : 'TakaMatch vient d\'ouvrir : les premières fiches arrivent.';
+  return n+' résultat'+(n>1?'s':'')+', classé'+(n>1?'s':'')+' par compatibilité avec '+(isTalMode() ? 'ta fiche.' : esc(projName(S.me.project))+'.'); }
 function today(){ const d = new Date(); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
 function go(v){
   const leaving = S.view === 'fiche' && v !== 'fiche' && isDirty();
@@ -2907,7 +2986,7 @@ function card(x, s){
     return '<article class="pcard person"><div class="cover '+tintCls('tal', x.hue)+'" style="'+tintAng(x.hue)+'">'+favBtn+'<span class="portrait">'+avatarOf(x, 72)+'</span></div>'
       + '<div class="body"><h3>'+nameHTML(x)+'</h3>'
       +   '<div class="who"><span class="handle">'+esc(handleOf(x))+'</span><span class="sep">·</span>'+esc(cityOf(x.city)[0])
-      +   (FULL.has(x.id) ? '<span class="chip chip-warn">Complet</span>' : vBadge('tal', x.verified))+'</div>'
+      +   (FULL.has(x.id) ? '<span class="chip chip-warn">Complet</span>' : vBadge('tal', x.verified))+(x.founder ? founderBadge() : '')+'</div>'
       +   '<p class="ex">'+esc(x.bio)+'</p>'+chips(x.skills||[], 'chip-tal')+foot+'</div></article>';
   }
   const cv = projCover(x), pay = PAY.find(p => p.id === x.pay);
@@ -2916,7 +2995,7 @@ function card(x, s){
     +   favBtn+'<span class="chip chip-handle" style="position:absolute;bottom:8px;left:9px">'+esc(handleOf(x))+'</span></div>'
     + '<div class="body"><h3>'+esc(x.title)+'</h3>'
     +   '<div class="who">'+esc(cityOf(x.ownerCity)[0])+'<span class="sep">·</span>'+likeHTML(x)
-    +   vBadge('vis', x.ownerVerified)+'</div>'
+    +   vBadge('vis', x.ownerVerified)+(x.ownerFounder ? founderBadge() : '')+'</div>'
     +   '<p class="ex">'+esc(x.hook)+'</p>'
     +   (pay && pay.id !== 'equity' ? '<span class="pay-l">'+ic('coins')+esc(pay.l)+'</span>' : '')
     +   chips(x.seeking||[], '')+foot+'</div></article>';
@@ -3993,6 +4072,32 @@ function vBadge(role, ok){
 @media (prefers-reduced-motion:reduce){.tour-spot,.tour-card{transition:none;animation:none}}
 .tour-again{display:flex;align-items:center;gap:12px}
 .tour-again .ic{width:20px;height:20px;color:var(--a-700)}
+/* Lancement : badge fondateur, encart d'ouverture, fiche d'exemple */
+.fbadge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;white-space:nowrap;line-height:1;padding:4px 8px;border-radius:999px;background:var(--vis-50);color:var(--vis-800);border:1px solid var(--vis-200);vertical-align:middle;margin-left:4px}
+.fbadge svg{width:12px;height:12px}
+.fbadge.big{font-size:12.5px;padding:5px 10px;margin-left:0}
+[data-theme="dark"] .fbadge{background:rgba(255,215,65,.12);color:var(--vis-300);border-color:rgba(255,215,65,.3)}
+.launch-p{margin-top:18px;padding:18px 18px 16px;border-radius:16px;background:var(--surface);border:1px dashed var(--line-strong)}
+.launch-p.compact{margin-top:0;border-style:solid}
+.lp-h{display:flex;gap:14px;align-items:flex-start}
+.lp-g{font-size:28px;line-height:1}
+.lp-h h3{margin:0 0 4px;font-size:17px}
+.lp-h p{margin:0;color:var(--ink-2);font-size:14px;line-height:1.5}
+.lp-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.lp-acts .soc-ic{width:16px;height:16px}
+.lp-acts a.btn{text-decoration:none}
+.ex-zone{margin-top:22px}
+.ex-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:10px}
+.ex-h h3{margin:0;font-size:16px}
+.ex-card{border-style:dashed;opacity:.92}
+.ex-cover{background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface-3) 10px 20px)}
+.ex-cover .glyph{font-size:40px}
+.ex-tag{position:absolute;top:8px;left:9px;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line-strong);color:var(--ink-2)}
+.ex-tag svg{width:13px;height:13px}
+.ex-av{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:var(--surface);font-size:30px;border:1px solid var(--line)}
+.ex-tips{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--surface-2)}
+.ex-tips ul{margin:6px 0 0;padding-left:18px}
+@media (max-width:560px){.lp-acts .btn{flex:1 1 100%}}
 `;
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 })();
