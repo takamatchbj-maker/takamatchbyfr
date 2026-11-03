@@ -108,6 +108,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
   var q = new URLSearchParams(location.search);
   var H = (q.get('h') || '').replace(/^@/, '').trim(), R = q.get('r') || '', PID = q.get('p') || '', CODE = '';
   /* Adresse courte : s = « username » (tal_) ou « username_p<code> » (vis_). */
+  /* Servie directement sous /vis_… ou /tal_… (Cloudflare) : on lit l'adresse elle-même. */
+  var PM = location.pathname.match(/^\/(vis|tal)_([A-Za-z0-9_]{3,40})\/?$/i);
+  if(PM && !q.get('s') && !q.get('h')){ q.set('s', PM[2]); if(!R) R = PM[1].toLowerCase(); }
   var SLUG = (q.get('s') || '').toLowerCase(), SPLIT = R === 'vis' && SLUG.match(/^([a-z0-9_]{3,20})_p([a-z0-9]{3,})$/);
   if(SLUG && !H){ H = SPLIT ? SPLIT[1] : SLUG; CODE = SPLIT ? SPLIT[2] : ''; }
   var box = document.getElementById('pf');
