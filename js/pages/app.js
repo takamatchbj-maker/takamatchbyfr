@@ -1371,12 +1371,9 @@ if(window.matchMedia) try{ matchMedia('(prefers-color-scheme: dark)').addEventLi
    Le lien ouvre profil.html : la fiche visible sans compte (nom et photo masqués).
    Une personne déjà connectée sur son navigateur est envoyée vers la même fiche dans l'outil. */
 function publicLink(){
-  /* Adresse courte : takamatch.com/vis_pseudo (fiche projet) ou /tal_pseudo (fiche talent). */
-  const role = isTalMode() ? 'tal' : 'vis';
-  const u = new URL('/' + role + '_' + String(S.me.handle || '').toLowerCase(), location.href); u.search = ''; u.hash = '';
-  const p = S.me.project;
-  if(role === 'vis' && p && /^[0-9a-f-]{36}$/i.test(p.id) && (S.me.projects || []).length > 1) u.searchParams.set('p', p.id);
-  return u.href;
+  /* Format unique des fiches, partout (lien, QR code, partage) :
+     https://takamatch.com/vis_username (Visionnaire) · https://takamatch.com/tal_username (Talent). */
+  return 'https://takamatch.com/' + (isTalMode() ? 'tal' : 'vis') + '_' + String(S.me.handle || '').toLowerCase();
 }
 let QR_LIB = null;
 function loadQrLib(){
