@@ -1556,11 +1556,12 @@ function coverField(){
     ? '<div class="ph-prev" style="background-image:url('+p.photo+')" role="img" aria-label="Ta photo de couverture"></div>'
       + '<div class="row" style="gap:8px;margin-top:8px"><label class="btn btn-ghost btn-sm" for="coverIn">'+ic('image')+'Remplacer</label>'
       + '<button type="button" class="btn btn-quiet btn-sm" data-act="photo-rm">'+ic('trash')+'Retirer</button></div>'
-    : '<label class="ph-drop" for="coverIn">'+ic('image')+'<b>Ajouter une photo</b><span>JPG ou PNG, de préférence en paysage</span></label>';
+    : '<label class="ph-drop" for="coverIn">'+ic('image')+'<b>Ajouter une photo</b><span>Paysage · 1600 × 900 px recommandé</span></label>';
   return '<div class="cover-grid">'
     + '<div><div class="lbl" style="margin-bottom:8px">Ta photo de couverture</div>'+photo
     +   '<input type="file" id="coverIn" accept="image/png,image/jpeg,image/webp" class="sr">'
-    +   '<p class="hint" style="margin-top:8px">Une vraie photo (ton équipe, ton terrain, ton produit) rend ta fiche plus visible dans la mosaïque et plus crédible aux yeux des talents.</p></div>'
+    +   '<p class="hint" style="margin-top:8px"><b>Taille recommandée : 1600 × 900 px</b> (format paysage 16:9), JPG, PNG ou WebP. Garde l\'essentiel au centre : les bords peuvent être rognés sur les cartes.</p>'
+    +   '<p class="hint" style="margin-top:6px">Une vraie photo (ton équipe, ton terrain, ton produit) rend ta fiche plus visible dans la mosaïque et plus crédible aux yeux des talents.</p></div>'
     + '<div><div class="lbl" style="margin-bottom:8px">Ou une icône</div>'
     +   '<div class="glyphs" role="group" aria-label="Icône de couverture">'+SECTORS.map(s => {
           const ok = p.sectors.includes(s.id);

@@ -966,11 +966,12 @@ function coverBlock(){
   return '<div class="cov2">'
     + '<div class="cov-ph"><div class="lbl">Ta photo de couverture</div>'
     +   '<label class="cov-zone'+(src ? ' has' : '')+'" for="f_cover"'+(src ? ' style="background-image:url('+src+')"' : '')+'>'
-    +     (src ? '<span class="sr">Couverture ajoutée</span>' : '<span class="up-in">'+ic('camera')+'<span>Format paysage</span></span>')
+    +     (src ? '<span class="sr">Couverture ajoutée</span>' : '<span class="up-in">'+ic('camera')+'<span>Paysage · 1600 × 900 px</span></span>')
     +   '</label>'
     +   '<input type="file" class="sr" id="f_cover" accept="image/png,image/jpeg,image/webp" data-up="cover" aria-label="Ta photo de couverture">'
     +   '<div class="row"><label class="btn btn-ghost btn-sm" for="f_cover">'+ic('image')+(src ? 'Remplacer' : 'Choisir une image')+'</label>'
-    +   (src ? '<button class="btn btn-quiet btn-sm" data-act="up-clear" data-k="cover">Retirer</button>' : '')+'</div></div>'
+    +   (src ? '<button class="btn btn-quiet btn-sm" data-act="up-clear" data-k="cover">Retirer</button>' : '')+'</div>'
+    +   '<p class="hint" style="margin-top:6px">Taille recommandée : 1600 × 900 px (16:9). JPG, PNG ou WebP, 5 Mo maximum.</p></div>'
     + '<div><div class="lbl" id="covIcL">Ou une icône</div>'
     +   '<div class="cov-ic" role="group" aria-labelledby="covIcL">'
     +   SECTORS.map(s => '<button type="button" data-act="f-icon" data-v="'+s.id+'" aria-label="'+esc(s.l)+'"></button>').join('')
@@ -1253,8 +1254,8 @@ function uploader(kind){
   const cover = kind === 'cover', src = cover ? ME.project.cover : ME.photo;
   const title = cover ? 'Couverture du projet' : 'Photo de profil';
   const help = cover
-    ? "Format paysage, idéalement 1600 × 900 px. Elle s'affiche en tête de ta fiche projet."
-    : "JPG, PNG ou WebP, 5 Mo maximum. Elle reste floutée pour les autres jusqu'au match.";
+    ? "Taille recommandée : 1600 × 900 px (format paysage 16:9). JPG, PNG ou WebP, 5 Mo maximum. Garde l'essentiel au centre : les bords peuvent être rognés."
+    : "Taille recommandée : 800 × 800 px minimum (format carré), visage bien centré. JPG, PNG ou WebP, 5 Mo maximum. Elle reste floutée pour les autres jusqu'au match.";
   return '<div class="up up-'+kind+(src ? ' has' : '')+'" data-drop="'+kind+'">'
     + '<label class="up-zone" for="f_'+kind+'"'+(src ? ' style="background-image:url('+src+')"' : '')+'>'
     +   (src ? '<span class="sr">'+title+' ajoutée</span>' : '<span class="up-in">'+ic('camera')+'<span>'+(cover ? 'Glisse une image ici' : 'Ta photo')+'</span></span>')
