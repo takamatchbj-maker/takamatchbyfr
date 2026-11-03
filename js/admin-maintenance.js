@@ -349,7 +349,8 @@
       starts_at:liveOn ? cur.starts_at : (later ? new Date(d.startAt).toISOString() : null),
       started_at:liveOn ? cur.started_at : new Date(Math.max(d.startAt, Date.now())).toISOString(),
       ends_at:d.endAt ? new Date(d.endAt).toISOString() : null,
-      by:liveOn ? cur.by : (A.me && A.me.email) || null});
+      /* Réglage lisible publiquement : on n'y met que le nom affiché, jamais l'e-mail (il reste dans le journal privé). */
+      by:liveOn ? cur.by : (A.me && A.me.name) || 'Équipe TakaMatch'});
     const b = $('#mtGo'); if(b){ b.disabled = true; b.innerHTML = 'Un instant…'; }
     const ok = await save(v, d.edit ? 'Maintenance mise à jour.' : later ? 'Maintenance programmée à ' + hhmm(d.startAt) + '. Les membres voient le préavis.' : 'Le site est en maintenance. Les visiteurs voient la page d\'attente.');
     if(!ok && b){ b.disabled = false; refreshForm(); }
