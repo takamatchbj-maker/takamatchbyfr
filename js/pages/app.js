@@ -1334,6 +1334,7 @@ document.addEventListener('change', e => {
   else if(el.id === 'sortBy'){ S.sortBy = el.value; S.focusIdx = 0; render(); }
   else if(el.id === 'fSkill'){ S.filterSkill = el.value; S.focusIdx = 0; render(); }
   else if(el.id === 'coverIn'){ loadCover(el.files[0]); el.value = ''; }
+  else if(el.id === 'avatarIn'){ loadAvatar(el.files[0]); el.value = ''; }
   else if(el.id === 'idF' || el.id === 'idS'){ const n = $('#'+el.id+'N'); if(n && el.files[0]) n.textContent = el.files[0].name; }
 });
 
@@ -1574,6 +1575,43 @@ function coverField(){
 
 
 /* Photo de couverture : lue sur l'appareil, réduite, gardée en mémoire. */
+/* ---------- Photo de profil : modifiable dans l'outil ----------
+   Ta photo s'affiche en clair pour toi ; les autres la voient floutée jusqu'au match.
+   Recadrée au carré (800 × 800 px) avant l'envoi. */
+function myAvatarH(kind, size){
+  const m = S.me; size = size || 56;
+  if(m.photo) return '<span class="av av-'+size+' ph" aria-hidden="true"><span class="inner" style="background-image:url('+m.photo+')"></span></span>';
+  return '<span class="av av-'+size+' '+tintCls(kind, m.avatarHue)+'" style="'+tintAng(m.avatarHue)+'" aria-hidden="true">'+esc(initials(myName()))+'</span>';
+}
+function avatarEdit(kind){
+  return '<div class="av-edit"><label class="av-pick" for="avatarIn" title="Changer ma photo de profil">'+myAvatarH(kind)
+    + '<span class="av-cam" aria-hidden="true">'+ic('image')+'</span><span class="sr">Changer ma photo de profil</span></label>'
+    + '<input type="file" id="avatarIn" accept="image/png,image/jpeg,image/webp" class="sr">'
+    + '<label class="lnk av-l" for="avatarIn">'+(S.me.photo ? 'Changer la photo' : 'Ajouter une photo')+'</label>'
+    + '<span class="av-hint">Carré, 800 × 800 px min.</span></div>';
+}
+function loadAvatar(file){
+  if(!file) return;
+  if(!/^image\/(png|jpe?g|webp)$/.test(file.type)) return toast('Choisis une image JPG, PNG ou WebP.', 'bad');
+  if(file.size > 5 * 1024 * 1024) return toast('Cette image dépasse 5 Mo. Choisis-en une plus légère.', 'bad');
+  const rd = new FileReader();
+  rd.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const side = Math.min(img.width, img.height), out = Math.min(800, side), cv = document.createElement('canvas');
+      cv.width = cv.height = out;
+      cv.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, out, out);
+      try{ S.me.photo = cv.toDataURL('image/jpeg', .85); }catch(e){ return toast('Cette image ne peut pas être lue.', 'bad'); }
+      if(side < 400) toast('Photo ajoutée, mais elle est petite : une image d\'au moins 800 × 800 px sera plus nette.', 'ok');
+      else toast('Photo de profil mise à jour.', 'ok');
+      render();
+      document.dispatchEvent(new CustomEvent('tm-persist'));
+    };
+    img.onerror = () => toast('Cette image ne peut pas être lue.', 'bad');
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(file);
+}
 function loadCover(file){
   if(!file || !/^image\//.test(file.type)) return toast('Choisis une image JPG ou PNG.', 'bad');
   const rd = new FileReader();
@@ -2394,7 +2432,7 @@ function vFiche(){
     + (tal ? '' : slotsHTML())
     + '<div class="card" style="margin-bottom:16px;overflow:hidden">'
     +   '<div class="fiche-id">'
-    +     '<span class="av av-56 '+tintCls(kind, m.avatarHue)+'" style="'+tintAng(m.avatarHue)+'" aria-hidden="true">'+esc(initials(myName()))+'</span>'
+    +     avatarEdit(kind)
     +     '<div class="fiche-id-c"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip-user">'+esc(myHandle())+'</span>'
     +       vBadge(isTalMode() ? 'tal' : 'vis', m.verifiedId)+'</div>'
     +       '<div class="fiche-kv"><b>Nom et prénoms</b> · '+esc(myName())+' <span class="dim" style="font-size:12.5px">(visible après un match)</span></div>'
@@ -2847,7 +2885,7 @@ function vParams(){
   return '<div class="page-h"><div><h1><span class="acc">Paramètres</span></h1><p class="sub">Ton compte, ta confiance, tes préférences. Communs à tes deux profils.</p></div></div>'
     + '<div class="cols cols-side"><div class="col" style="gap:16px">'
     +   '<section class="card card-pad"><div class="lbl" style="margin-bottom:12px">Compte</div>'
-    +     '<div class="row" style="gap:14px;flex-wrap:wrap"><span class="av av-56 '+tintCls(m.role, m.avatarHue)+'" style="'+tintAng(m.avatarHue)+'" aria-hidden="true">'+esc(initials(myName()))+'</span>'
+    +     '<div class="row" style="gap:14px;flex-wrap:wrap">'+avatarEdit(m.role)
     +       '<div style="flex:1;min-width:180px"><div style="font-weight:600;font-size:15px">'+esc(myName())+' <span class="handle">'+esc(myHandle())+'</span></div>'
     +         '<div class="row" style="gap:6px;font-size:13.5px;color:var(--ink-2);margin-top:3px">'+ic('mail')+esc(m.email)+'</div>'
     +         '<div class="row acct-tel" style="gap:6px;font-size:13.5px;color:var(--ink-2)">'+ic('phone')+'<span class="mono">'+esc(m.phone || '—')+'</span>'
@@ -2900,7 +2938,7 @@ function vSupport(){
     + '<div class="cols cols-side"><div class="col" style="gap:16px">'
     +   '<section class="card card-pad"><h3 style="font-size:18px;margin-bottom:12px">Écris-nous</h3>'
     +     '<div class="row" style="padding:11px 13px;gap:11px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:14px">'
-    +       '<span class="av av-36 '+tintCls(S.me.role, S.me.avatarHue)+'" style="'+tintAng(S.me.avatarHue)+'" aria-hidden="true">'+esc(initials(myName()))+'</span>'
+    +       myAvatarH(S.me.role, 36)
     +       '<div><div style="font-weight:600;font-size:13.5px">'+esc(myName())+'</div><div style="font-size:12.5px;color:var(--ink-3)">Réponse envoyée à '+esc(S.me.email)+'</div></div></div>'
     +     '<form class="col" style="gap:12px" data-form="support">'
     +       field('supTopic','Sujet','<select class="inp" id="supTopic"><option>Une question sur mon compte</option><option>Un problème technique</option><option>Un paiement mobile money</option><option>Signaler un comportement</option><option>Une idée d\'amélioration</option></select>')
@@ -3520,7 +3558,7 @@ function vFiche(){
     + tabs
     + '<div class="card" style="margin-bottom:16px;overflow:hidden">'
     +   '<div class="fiche-id">'
-    +     '<span class="av av-56 '+tintCls(tal ? 'tal' : 'vis', m.avatarHue)+'" style="'+tintAng(m.avatarHue)+'" aria-hidden="true">'+esc(initials(myName()))+'</span>'
+    +     avatarEdit(tal ? 'tal' : 'vis')
     +     '<div class="fiche-id-c"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip-user">'+esc(myHandle())+'</span>'
     +       vBadge(isTalMode() ? 'tal' : 'vis', m.verifiedId)+'</div>'
     +       '<div class="fiche-kv"><b>Nom et prénoms</b> · '+esc(myName())+' <span class="dim" style="font-size:12.5px">(visible après un match)</span></div>'
@@ -4073,6 +4111,15 @@ function vBadge(role, ok){
 @media (prefers-reduced-motion:reduce){.tour-spot,.tour-card{transition:none;animation:none}}
 .tour-again{display:flex;align-items:center;gap:12px}
 .tour-again .ic{width:20px;height:20px;color:var(--a-700)}
+/* Photo de profil modifiable */
+.av-edit{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto}
+.av-pick{position:relative;cursor:pointer;border-radius:50%;display:block}
+.av-pick:focus-within{outline:2px solid var(--a-500);outline-offset:3px}
+.av-cam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line-strong);color:var(--ink-2)}
+.av-cam svg{width:13px;height:13px}
+.av-pick:hover .av-cam{color:var(--ink)}
+.av-l{font-size:12.5px;font-weight:600;cursor:pointer;margin-top:4px}
+.av-hint{font-size:11px;color:var(--ink-3);white-space:nowrap}
 /* Lancement : badge fondateur, encart d'ouverture, fiche d'exemple */
 .fbadge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;white-space:nowrap;line-height:1;padding:4px 8px;border-radius:999px;background:var(--vis-50);color:var(--vis-800);border:1px solid var(--vis-200);vertical-align:middle;margin-left:4px}
 .fbadge svg{width:12px;height:12px}

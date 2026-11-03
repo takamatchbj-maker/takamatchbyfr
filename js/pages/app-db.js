@@ -627,6 +627,8 @@
       link:p.link || '', no_link:false, pace:p.pace || 'serieux', offer:p.pay || 'equity', online:!!p.online};
   }
   let saveT = null, saving = null;
+  /* Photo de profil changée dans l'outil (app.js) : on l'envoie et on l'enregistre. */
+  document.addEventListener('tm-persist', () => schedulePersist());
   function schedulePersist(){ if(!D.on) return; clearTimeout(saveT); saveT = setTimeout(() => { saving = persist().finally(() => { saving = null; }); }, 700); }
   async function upImg(bucket, dataUrl, name){
     const blob = DB.dataUrlToBlob(dataUrl); if(!blob) return '';
