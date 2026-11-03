@@ -550,6 +550,7 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 </script>
 <!-- Espace équipe en ligne : comptes, rôles, prix et journal dans Supabase. -->
 <script src="js/morph.js?v=20261020a"></script>
+<script>if(window.top !== window.self){ try{ window.top.location = window.self.location.href; }catch(e){ document.documentElement.style.display = 'none'; } }</script>
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
 <script src="js/supabase.js?v=20261101a"></script>
 <script src="js/geo.js?v=20261010a"></script>
@@ -731,7 +732,8 @@ function log(act, target, d){ D.audit.unshift({at:Date.now(), by:staffName(), ro
 /* ---------- Avatar, visuels de pièces ---------- */
 function av(u, lg){ if(!u) return '<span class="av">?</span>';
   const vis = u.primary === 'vis';
-  if(u.photo) return '<span class="av'+(lg?' av-lg':'')+'" style="background-image:url('+u.photo+')"></span>';
+  const ph = /^https:\/\/[^\s"'()<>\\]+$/.test(u.photo || '') ? u.photo : '';
+  if(ph) return '<span class="av'+(lg?' av-lg':'')+'" style="background-image:url('+ph+')"></span>';
   return '<span class="av'+(vis?' vis':'')+(lg?' av-lg':'')+'">'+esc(initials(u.legal))+'</span>'; }
 function whoCell(u){ if(!u) return '—'; return '<span class="who">'+av(u)+'<span style="min-width:0"><b>'+esc(u.legal)+'</b><small>@'+esc(u.handle)+'</small></span></span>'; }
 function roleChips(u){ return u.roles.map(r => '<span class="chip '+(r === 'vis' ? 'c-vis' : 'c-tal')+'">'+(r === 'vis' ? '💡 Visionnaire' : '🛠️ Talent')+'</span>').join(' '); }

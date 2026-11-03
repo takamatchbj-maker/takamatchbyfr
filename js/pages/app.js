@@ -344,6 +344,11 @@ function field(id, label, control, req){
   return '<div class="field"><label for="'+id+'">'+esc(label)+(req?'<span class="req">*</span>':'')+'</label>'+control+'</div>';
 }
 function note(kind, icon, html){ return '<div class="note '+(kind||'')+'">'+ic(icon)+'<span>'+html+'</span></div>'; }
+/* Adresse d'image sûre pour un style CSS : https sans caractère spécial, ou image locale en base64. */
+const safeImg = u => (typeof u === 'string' && /^(https:\/\/[^\s"'()<>\\]+|data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+\/=]+)$/.test(u)) ? u : '';
+/* Lien externe saisi par un membre : toujours en https, sans doubler le préfixe. */
+const extHref = u => 'https://' + String(u || '').trim().replace(/^https?:\/\//i, '');
+const extLabel = u => String(u || '').trim().replace(/^https?:\/\//i, '');
 function emptyBox(g, h, p, cta){
   return '<div class="empty"><div class="glyph" aria-hidden="true">'+g+'</div><h4>'+esc(h)+'</h4><p>'+esc(p)+'</p>'+(cta||'')+'</div>';
 }
@@ -2101,7 +2106,7 @@ function completion(kind){
 function avatarOf(t, size, un, role){
   t = t || {}; role = role || t.role || 'tal';
   if(un === undefined) un = isUnlocked(t.id);
-  const ph = faceOf(t.id);
+  const ph = safeImg(faceOf(t.id));
   if(ph) return '<span class="av av-'+size+' ph'+(un ? '' : ' locked')+'" aria-hidden="true"><span class="inner" style="background-image:url('+ph+')"></span>'+(un ? '' : LOCKPIN)+'</span>';
   const tc = tintCls(role === 'vis' ? 'vis' : 'tal', (t.hue || 0) + 2), bg = tintAng(t.hue);
   if(un) return '<span class="av av-'+size+' '+tc+'" style="'+bg+'" aria-hidden="true">'+esc(initials(t.name))+'</span>';
@@ -2256,8 +2261,8 @@ function detailHTML(x, kind, o){
     : [['Sa signature', x.bio, ''], ['Les secteurs qui l\'attirent', (x.sectors||[]).map(id => sector(id).g+' '+sector(id).l).join(' · '), ''],
        ['Profil', refL(LEVEL, x.level) !== '—' ? refL(LEVEL, x.level) : '', '']];
   let secs = defs.filter(d => d[1]).map(d => '<div><span class="sec-l">'+esc(d[0])+'</span>'+(d[2]?'<div class="sec-help">'+esc(d[2])+'</div>':'')+'<div class="sec-b">'+esc(d[1])+'</div></div>').join('');
-  if(proj && x.link) secs += '<div><span class="sec-l">Lien externe</span><div class="sec-b"><a href="https://'+esc(x.link)+'" target="_blank" rel="noopener">'+esc(x.link)+'</a></div></div>';
-  if(!proj && x.portfolio) secs += '<div><span class="sec-l">Portfolio</span><div class="sec-b">'+(un ? '<a href="https://'+esc(x.portfolio)+'" target="_blank" rel="noopener">'+esc(x.portfolio)+'</a>' : '<span class="row" style="gap:6px;color:var(--ink-3)">'+ic('lock')+'Visible après le match</span>')+'</div></div>';
+  if(proj && x.link) secs += '<div><span class="sec-l">Lien externe</span><div class="sec-b"><a href="'+esc(extHref(x.link))+'" target="_blank" rel="noopener nofollow">'+esc(extLabel(x.link))+'</a></div></div>';
+  if(!proj && x.portfolio) secs += '<div><span class="sec-l">Portfolio</span><div class="sec-b">'+(un ? '<a href="'+esc(extHref(x.portfolio))+'" target="_blank" rel="noopener nofollow">'+esc(extLabel(x.portfolio))+'</a>' : '<span class="row" style="gap:6px;color:var(--ink-3)">'+ic('lock')+'Visible après le match</span>')+'</div></div>';
   if(!secs) secs = '<p class="hint">Aucune section rédigée pour l\'instant.</p>';
   return '<div class="hero '+heroCls+'" style="'+heroStyle+'">'+heroIn
     + (handle ? '<span class="chip chip-handle" style="position:absolute;top:12px;left:14px">@'+esc(handle)+'</span>' : '')

@@ -73,7 +73,7 @@
       city:p.city || '', skills:p.skills || [], sectors:p.sectors || [], level:p.level || '', pace:p.pace || 'serieux',
       verified:!!p.verified_id, founder:TMPrix.isFounder(p.onboarded_at), seen:daysOld(p.updated_at), bio:p.bio || '', portfolio:p.portfolio_url || '',
       portfolioTitle:p.portfolio_title || '', hue:p.avatar_hue || (hashN(p.id) % 360), sex:sexOf(p.id),
-      photo:p.photo_url || '', rate:'',
+      photo:safeImg(p.photo_url), rate:'',
       hidden:!p.talent_online || !active(p)};
   }
   function toProject(pr){
@@ -84,11 +84,11 @@
       hue:hashN(pr.id) % 360, seeking:pr.seeking || [], pace:pr.pace || 'serieux', pay:pr.offer || 'equity',
       likes:0, seen:daysOld(pr.updated_at), hook:pr.hook || '', vision:pr.vision || '',
       traction:pr.traction || '', assets:pr.assets || '', challenges:pr.challenges || '', link:pr.link || '',
-      noLink:!!pr.no_link, photo:pr.cover_url || '',
+      noLink:!!pr.no_link, photo:safeImg(pr.cover_url),
       hidden:!pr.online || !active(o)};
   }
   function myProject(pr){
-    return {id:pr.id, title:pr.title || '', glyph:pr.glyph || '💡', photo:pr.cover_url || '', likes:0,
+    return {id:pr.id, title:pr.title || '', glyph:pr.glyph || '💡', photo:safeImg(pr.cover_url), likes:0,
       sectors:pr.sectors || [], seeking:pr.seeking || [], hook:pr.hook || '', vision:pr.vision || '', traction:pr.traction || '',
       assets:pr.assets || '', challenges:pr.challenges || '', link:pr.link || '', noLink:!!pr.no_link,
       pace:pr.pace || 'serieux', pay:pr.offer || 'equity', online:!!pr.online};
@@ -123,8 +123,8 @@
     if(!D.on) return null;
     if(id === 'me') return S.me.photo || null;
     const raw = String(id || '').replace(/^P-/, '');
-    if(String(id).startsWith('P-')){ const pr = D.proj.get(raw); const o = pr && D.prof.get(pr.owner_id); return (o && o.photo_url) || null; }
-    const p = D.prof.get(raw); return (p && p.photo_url) || null;
+    if(String(id).startsWith('P-')){ const pr = D.proj.get(raw); const o = pr && D.prof.get(pr.owner_id); return (o && safeImg(o.photo_url)) || null; }
+    const p = D.prof.get(raw); return (p && safeImg(p.photo_url)) || null;
   };
 
   /* ---------- Le compte connecté ---------- */
@@ -149,7 +149,7 @@
     m.founder = TMPrix.isFounder(p.onboarded_at);
     m.verifiedId = !!p.verified_id; m.verifiedPhone = !!p.verified_phone; m.verifiedEmail = true;
     m.verifyPending = !!(D.verif && D.verif.status === 'pending');
-    m.photo = p.photo_url || m.photo || '';
+    m.photo = safeImg(p.photo_url) || safeImg(m.photo) || '';
     m.sex = sexOf(D.uid) || m.sex;
     const mine = (me.projects || []).map(myProject);
     const cur = m.projects && m.projects[m.projIdx] ? m.projects[m.projIdx].id : null;
