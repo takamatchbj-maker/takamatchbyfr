@@ -143,7 +143,7 @@
 <body>
 <div class="ribbon" id="ribbon" hidden>Aperçu · ce que verront les visiteurs pendant la maintenance</div>
 <header class="top">
-  <a href="index.html" aria-label="Accueil TakaMatch"><img src="assets/images/logo-principal.svg" alt="TakaMatch" width="113" height="30"></a>
+  <a href="/" aria-label="Accueil TakaMatch"><img src="assets/images/logo-principal.svg" alt="TakaMatch" width="113" height="30"></a>
   <button class="theme" id="theme" type="button" aria-label="Changer de thème"></button>
 </header>
 
@@ -212,7 +212,7 @@
   /* Adresse de retour : seulement une page de ce site. */
   var back = q.get('retour') || '';
   if(!/^\/?[A-Za-z0-9._\-\/?=&%#]*$/.test(back) || back.indexOf('//') > -1 || /maintenance\.html/.test(back)) back = '';
-  var home = back || 'index.html';
+  var home = back || '/';
 
   var S = null, done = false, timer = 0;
   var ms = function(s){ var t = s ? Date.parse(s) : NaN; return isNaN(t) ? 0 : t; };
@@ -237,7 +237,7 @@
     document.title = 'TakaMatch — ' + (S.title || 'Maintenance en cours');
     tick();
     var acts = $('acts'); acts.innerHTML = '';
-    if(S.scope === 'app') acts.appendChild(btn('Visiter le site en attendant', 'index.html', 'home', true));
+    if(S.scope === 'app') acts.appendChild(btn('Visiter le site en attendant', '/', 'home', true));
     acts.appendChild(btn('Communauté WhatsApp', 'https://chat.whatsapp.com/IsCXiO0V7AF27BI5eqgvR4', 'wa', S.scope !== 'app'));
   }
 

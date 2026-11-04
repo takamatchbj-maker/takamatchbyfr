@@ -157,7 +157,7 @@ window.TM_SHELL = true;
 (function(){
   'use strict';
   var PAGE = document.documentElement.getAttribute('data-page') || 'site';
-  var URL_OF = {site:'index.html', onb:'inscription.html', app:'app.html'};
+  var URL_OF = {site:'/', onb:'inscription.html', app:'app.html'};
 
   var SS = (function(){ try{ return window.sessionStorage; }catch(e){ return null; } })();
   var mem = {};

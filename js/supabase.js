@@ -30,7 +30,7 @@
       var had = !!session;
       try{ session = e.newValue ? JSON.parse(e.newValue) : null; }catch(err){ session = null; }
       if(had && !session){
-        if(/\/app(\.html)?$/.test(location.pathname)) location.replace('index.html');
+        if(/\/app(\.html)?$/.test(location.pathname)) location.replace('/');
         else if(/\/admin(\.html)?$/.test(location.pathname)) location.reload();
       }
     });

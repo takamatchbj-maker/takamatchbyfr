@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="css/variables.css?v=20261009b">
 <link rel="stylesheet" href="css/base.css?v=20261009b">
 <link rel="stylesheet" href="css/components.css?v=20261016a">
-<script src="js/supabase.js?v=20261101a"></script>
+<script src="js/supabase.js?v=20261104a"></script>
 <script src="js/maintenance.js?v=20261020-lucide"></script>
 <style>
 body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system-ui, sans-serif);margin:0;min-height:100vh}
@@ -98,7 +98,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
 </head>
 <body>
 <header class="pf-top">
-  <a href="index.html" aria-label="TakaMatch, accueil"><img src="assets/images/logo-principal.svg" alt="TakaMatch"></a>
+  <a href="/" aria-label="TakaMatch, accueil"><img src="assets/images/logo-principal.svg" alt="TakaMatch"></a>
   <div class="row"><a class="pf-btn g" style="width:auto;height:38px;padding:0 14px" href="inscription.html?mode=login">Se connecter</a></div>
 </header>
 <main class="pf" id="pf"><div class="pf-load">Chargement de la fiche…</div></main>
@@ -190,7 +190,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans, Inter, system
       + '<span>Nom, photo et coordonnées restent masqués jusqu\'au match. Même règle pour tous.</span></div></div></div></aside>';
   }
   function empty(title, text){
-    box.innerHTML = '<div class="pf-empty"><h1>' + esc(title) + '</h1><p>' + esc(text) + '</p><a class="pf-btn a" href="index.html">Découvrir TakaMatch</a></div>';
+    box.innerHTML = '<div class="pf-empty"><h1>' + esc(title) + '</h1><p>' + esc(text) + '</p><a class="pf-btn a" href="/">Découvrir TakaMatch</a></div>';
   }
 
   function render(d){
