@@ -945,8 +945,6 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 .backed-t{line-height:1.4;text-align:left}
 .backed b{font-weight:700;letter-spacing:.01em;white-space:nowrap;color:#3a3833}
 .bk-next{color:#912D8B}
-.bk-seme{color:#79C4B0}
-.bk-city{color:#0F447F}
 .bk-sep{margin:0 6px;opacity:.55}
 :root[data-theme="dark"] .backed{background:rgba(250,249,245,.95);border-color:rgba(227,194,88,.55)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .backed{background:rgba(250,249,245,.95);border-color:rgba(227,194,88,.55)}}

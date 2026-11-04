@@ -332,7 +332,7 @@ function siteHero(){
     + '</div>'
     + '</div></div></section>';
 }
-/* Soutien : NEXT IMPACT (Sèmè City, Banque mondiale), couleurs officielles des noms. */
+/* Soutien : NEXT IMPACT (Sèmè City, Banque Mondiale) ; « NEXT » à la couleur du programme. */
 function backedBy(){
   const seal = '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="bkG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6D365"/><stop offset="1" stop-color="#C9941A"/></linearGradient></defs>'
     + '<path fill="url(#bkG)" d="M12 1.6l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 19.6l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z"/>'
@@ -340,8 +340,8 @@ function backedBy(){
     + '<path fill="#C9941A" d="M8.6 18.6 7.4 23l2.7-1.3 1.9 2.1.4-4.7zM15.4 18.6l1.2 4.4-2.7-1.3-1.9 2.1-.4-4.7z" opacity=".85"/></svg>';
   return '<div class="backed"><span class="backed-ic">'+seal+'</span><span class="backed-t">Projet accompagné par '
     + '<b class="bk-ni"><span class="bk-next">NEXT</span> IMPACT</b><span class="bk-sep">·</span>'
-    + '<b class="bk-sc"><span class="bk-seme">Sèmè</span> <span class="bk-city">City</span></b><span class="bk-sep">·</span>'
-    + 'avec le soutien de la Banque mondiale</span></div>';
+    + '<b class="bk-sc">Sèmè City</b><span class="bk-sep">·</span>'
+    + 'avec le soutien de la Banque Mondiale</span></div>';
 }
 function fig(v,l){ return '<div class="fig"><b class="tnum">'+v+'</b><span>'+esc(l)+'</span></div>'; }
 
