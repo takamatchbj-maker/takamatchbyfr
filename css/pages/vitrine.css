@@ -933,6 +933,25 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 
 .stack{display:inline-flex}
 
+/* Soutien NEXT IMPACT · Sèmè City · Banque mondiale */
+.backed{
+  display:inline-flex;align-items:center;gap:10px;margin:18px auto 0;padding:8px 16px 8px 9px;max-width:100%;
+  border-radius:999px;background:rgba(255,255,255,.72);border:1px solid rgba(201,148,26,.35);
+  box-shadow:0 1px 2px rgba(31,30,27,.06),0 6px 18px -10px rgba(201,148,26,.45);
+  font-size:13px;color:#5D5A52;animation:rise .8s .85s var(--ease) both;backdrop-filter:blur(6px);
+}
+.backed-ic{flex:0 0 auto;width:26px;height:26px;display:grid;place-items:center}
+.backed-ic svg{width:24px;height:24px;filter:drop-shadow(0 1px 1px rgba(138,96,8,.25))}
+.backed-t{line-height:1.4;text-align:left}
+.backed b{font-weight:700;letter-spacing:.01em;white-space:nowrap;color:#3a3833}
+.bk-next{color:#912D8B}
+.bk-seme{color:#79C4B0}
+.bk-city{color:#0F447F}
+.bk-sep{margin:0 6px;opacity:.55}
+:root[data-theme="dark"] .backed{background:rgba(250,249,245,.95);border-color:rgba(227,194,88,.55)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .backed{background:rgba(250,249,245,.95);border-color:rgba(227,194,88,.55)}}
+@media (max-width:560px){.backed{border-radius:16px;padding:9px 12px;font-size:12.5px;align-items:flex-start}.backed-ic{margin-top:1px}}
+
 .stack i{
   width:30px;height:30px;border-radius:50%;margin-left:-9px;display:grid;place-items:center;
   font-style:normal;font-family:var(--mono);font-weight:600;font-size:12px;

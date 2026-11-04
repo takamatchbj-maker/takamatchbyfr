@@ -325,11 +325,23 @@ function siteHero(){
     + '</div>'
     + '<div class="trust-l"><span class="stack" aria-hidden="true"><i class="sv">V</i><i class="st">T</i><i class="sp">+</i></span>'
     +   '<span>Inscription en 4 minutes · '+(creditsSoon() ? 'Aucun paiement demandé' : 'Paiement '+sitePayList('carte'))+'</span></div>'
+    + backedBy()
     + '<div class="figs">'
     +   fig('0 FCFA','pour s\'inscrire et explorer') + fig(String(monthlyCredits()),'invitations offertes chaque mois')
     +   fig('100 %','des identités vérifiables') + fig('OHADA','pacte d\'associés prêt à signer')
     + '</div>'
     + '</div></div></section>';
+}
+/* Soutien : NEXT IMPACT (Sèmè City, Banque mondiale), couleurs officielles des noms. */
+function backedBy(){
+  const seal = '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="bkG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6D365"/><stop offset="1" stop-color="#C9941A"/></linearGradient></defs>'
+    + '<path fill="url(#bkG)" d="M12 1.6l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 19.6l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z"/>'
+    + '<path d="M8.3 10.6l2.5 2.5 4.9-4.9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '<path fill="#C9941A" d="M8.6 18.6 7.4 23l2.7-1.3 1.9 2.1.4-4.7zM15.4 18.6l1.2 4.4-2.7-1.3-1.9 2.1-.4-4.7z" opacity=".85"/></svg>';
+  return '<div class="backed"><span class="backed-ic">'+seal+'</span><span class="backed-t">Projet accompagné par '
+    + '<b class="bk-ni"><span class="bk-next">NEXT</span> IMPACT</b><span class="bk-sep">·</span>'
+    + '<b class="bk-sc"><span class="bk-seme">Sèmè</span> <span class="bk-city">City</span></b><span class="bk-sep">·</span>'
+    + 'avec le soutien de la Banque mondiale</span></div>';
 }
 function fig(v,l){ return '<div class="fig"><b class="tnum">'+v+'</b><span>'+esc(l)+'</span></div>'; }
 
