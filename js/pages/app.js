@@ -2945,10 +2945,10 @@ function vSupport(){
     + '<div class="cols cols-side"><div class="col" style="gap:16px">'
     +   '<section class="card card-pad"><h3 style="font-size:18px;margin-bottom:12px">Écris-nous</h3>'
     +     '<div class="row" style="padding:11px 13px;gap:11px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:14px">'
-    +       myAvatarH(S.me.role, 36)
-    +       '<div><div style="font-weight:600;font-size:13.5px">'+esc(myName())+'</div><div style="font-size:12.5px;color:var(--ink-3)">Réponse envoyée à '+esc(S.me.email)+'</div></div></div>'
+    +       staffAv(36)
+    +       '<div><div style="font-weight:600;font-size:13.5px">Équipe TakaMatch</div><div style="font-size:12.5px;color:var(--ink-3)"><a href="mailto:contact@takamatch.com" style="color:inherit">contact@takamatch.com</a></div></div></div>'
     +     '<form class="col" style="gap:12px" data-form="support">'
-    +       field('supTopic','Sujet','<select class="inp" id="supTopic"><option>Une question sur mon compte</option><option>Un problème technique</option><option>Un paiement mobile money</option><option>Signaler un comportement</option><option>Une idée d\'amélioration</option></select>')
+    +       field('supTopic','Sujet','<select class="inp" id="supTopic"><option>Une question sur mon compte</option><option>Un problème technique</option><option>Un paiement mobile money</option><option>Signaler un comportement</option><option>Une idée d\'amélioration</option><option>Autre</option></select>')
     +       field('supportMsg','Ton message','<textarea class="inp" id="supportMsg" placeholder="Décris ce qui se passe. Si c\'est un bug, dis-nous sur quel écran."></textarea>', true)
     +       '<div><button class="btn btn-a" type="submit">'+ic('send')+'Envoyer le message</button></div></form></section>'
     +   '<section class="card card-pad"><h3 style="font-size:18px;margin-bottom:6px">Questions fréquentes</h3>'
