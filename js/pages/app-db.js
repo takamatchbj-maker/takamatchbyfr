@@ -413,6 +413,22 @@
       '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-a" data-act="goto-thread" data-id="'+id+'">'+ic('chat')+'Ouvrir la discussion</button>');
   }
 
+  /* Invitations et candidatures : réservées aux profils vérifiés (anti faux comptes). */
+  const _invite = invite;
+  invite = function(id){
+    if(!D.on || S.me.verifiedId) return _invite(id);
+    const what = isTalMode() ? 'candidater à un projet' : 'envoyer des invitations';
+    if(S.me.verifyPending) return modal('Vérification en cours',
+      '<p>Ton dossier est entre les mains de l\'équipe TakaMatch. Tu pourras ' + what + ' dès qu\'il sera validé, en général sous <b>48 h</b>.</p>'
+      + (isTalMode() ? '' : note('a', 'zap', 'Tes crédits t\'attendent : ils ne sont pas touchés en attendant.')),
+      '<button class="btn btn-a" data-act="close">Compris</button>');
+    modal('Fais vérifier ton profil',
+      '<p>Pour protéger la communauté des faux comptes, seuls les <b>profils vérifiés</b> peuvent ' + what + '.</p>'
+      + '<p>Il suffit d\'une photo de ta pièce d\'identité et d\'un selfie. L\'équipe TakaMatch les examine sous 48 h, puis le badge de confiance s\'affiche sur ta fiche.</p>'
+      + (isTalMode() ? '' : note('a', 'zap', 'Tes crédits t\'attendent : tu pourras les utiliser dès la validation.')),
+      '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-a" data-act="verify-id">' + ic('verif', isTalMode() ? 'tal' : 'vis') + 'Faire vérifier mon profil</button>');
+  };
+
   /* Envoyer une invitation (ou une candidature, côté Talent). */
   const _inviteSend = inviteSend;
   inviteSend = async function(id){

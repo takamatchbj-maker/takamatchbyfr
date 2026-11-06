@@ -16,6 +16,62 @@
   /* L'admin garde sa propre session (window.TM_SB_SKEY), séparée de celle des membres. */
   var SKEY = window.TM_SB_SKEY || 'tm-sb-session';
 
+  /* ---------- Contrôle anti-robot (Cloudflare Turnstile) ----------
+     Clé de SITE Turnstile (publique, faite pour être visible ici).
+     Vide = contrôle désactivé. Mise en route :
+       1. Cloudflare → Turnstile → ajouter le site takamatch.com → copier la clé de site ici ;
+       2. publier le site ;
+       3. Supabase → Authentication → Attack Protection → activer le captcha
+          « Turnstile » et coller la clé SECRÈTE (jamais ici).
+     Le contrôle est le plus souvent invisible ; une case n'apparaît en bas
+     de l'écran que si Cloudflare a un doute. */
+  var TURNSTILE_SITE_KEY = '0x4AAAAAAF2ArQhIiPS2kqIe';
+  var ts = {load:null, id:null, box:null};
+  function tsLoad(){
+    if(window.turnstile) return Promise.resolve();
+    if(!ts.load) ts.load = new Promise(function(res, rej){
+      var s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; s.async = true;
+      s.onload = function(){ res(); };
+      s.onerror = function(){ ts.load = null; rej(new Error('Le contrôle anti-robot n\'a pas pu se charger. Vérifie ta connexion puis réessaie.')); };
+      document.head.appendChild(s);
+    });
+    return ts.load;
+  }
+  /* Renvoie un jeton à usage unique (ou null si le contrôle est désactivé). */
+  async function captcha(){
+    /* Le widget n'est autorisé que sur takamatch.com : ailleurs (copie locale…), pas de contrôle. */
+    if(!TURNSTILE_SITE_KEY || !/(^|\.)takamatch\.com$/.test(location.hostname)) return null;
+    await tsLoad();
+    return new Promise(function(res, rej){
+      if(!ts.box){
+        ts.box = document.createElement('div');
+        ts.box.className = 'tm-captcha';
+        ts.box.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2147483000';
+        document.body.appendChild(ts.box);
+      }
+      var done = false, tm = setTimeout(function(){ end(null, 'Le contrôle anti-robot prend trop de temps. Réessaie.'); }, 120000);
+      function end(tok, msg){
+        if(done) return; done = true; clearTimeout(tm);
+        try{ if(ts.id !== null) window.turnstile.remove(ts.id); }catch(e){} ts.id = null;
+        if(msg) rej(new Error(msg)); else res(tok);
+      }
+      try{
+        ts.id = window.turnstile.render(ts.box, {
+          sitekey:TURNSTILE_SITE_KEY, action:'auth', language:'fr', appearance:'interaction-only',
+          callback:function(t){ end(t); },
+          'error-callback':function(){ end(null, 'Le contrôle anti-robot a échoué. Recharge la page puis réessaie.'); return true; },
+          'timeout-callback':function(){ end(null, 'Le contrôle anti-robot a expiré. Réessaie.'); }
+        });
+      }catch(e){ end(null, 'Le contrôle anti-robot n\'a pas pu démarrer. Recharge la page puis réessaie.'); }
+    });
+  }
+  function withCaptcha(body, tok){
+    if(tok) body.gotrue_meta_security = {captcha_token:tok};
+    return body;
+  }
+  var DISPOSABLE = 'Les adresses e-mail temporaires ne sont pas acceptées. Utilise ton adresse personnelle ou professionnelle.';
+
   /* ---------- Session (gardée dans ce navigateur) ---------- */
   var session = null;
   try{ session = JSON.parse(localStorage.getItem(SKEY)); }catch(e){}
@@ -68,6 +124,8 @@
     if(raw && /[éèàçêù]|^(Tu |Ta |Ce |Cette |Il |Une |Vous |Action |Connecte)/.test(raw)) return raw;
     if(/Signups not allowed/i.test(raw || '')) return MSG.otp_disabled;
     if(/banned/i.test(raw || '')) return MSG.user_banned;
+    if(/captcha/i.test(raw || '')) return 'Le contrôle anti-robot n\'a pas abouti. Recharge la page puis réessaie.';
+    if(/Database error saving new user/i.test(raw || '')) return DISPOSABLE;
     /* Fichiers (photos, couvertures) */
     if(status === 413 || /too large|exceeded the maximum/i.test(raw || '')) return 'Cette image est trop lourde. Choisis-en une plus légère (2 Mo maximum pour la photo, 3 Mo pour la couverture).';
     if(/mime type|invalid_mime/i.test(raw || '')) return 'Ce format d\'image n\'est pas accepté. Utilise une image JPG, PNG ou WebP.';
@@ -137,8 +195,15 @@
     email: function(){ return (session && session.user && session.user.email) || ''; },
 
     /* Comptes */
-    sendCode: function(email, create){
-      return raw('/auth/v1/otp', {method:'POST', auth:false, body:{email:email, create_user:!!create}});
+    sendCode: async function(email, create){
+      /* Nouvelle inscription : les adresses jetables sont refusées avant même d'envoyer le code. */
+      if(create){
+        var ok = true;
+        try{ ok = await raw('/rest/v1/rpc/email_domain_allowed', {method:'POST', auth:false, body:{p_email:email}}); }catch(e){}
+        if(ok === false){ var d = new Error(DISPOSABLE); d.code = 'disposable_email'; throw d; }
+      }
+      var tok = await captcha();
+      return raw('/auth/v1/otp', {method:'POST', auth:false, body:withCaptcha({email:email, create_user:!!create}, tok)});
     },
     verifyCode: async function(email, token){
       var t = await raw('/auth/v1/verify', {method:'POST', auth:false, body:{type:'email', email:email, token:token}});
@@ -146,7 +211,8 @@
     },
     /* Connexion par identifiant + mot de passe (espace équipe). */
     signInPassword: async function(email, password){
-      var t = await raw('/auth/v1/token?grant_type=password', {method:'POST', auth:false, body:{email:email, password:password}});
+      var tok = await captcha();
+      var t = await raw('/auth/v1/token?grant_type=password', {method:'POST', auth:false, body:withCaptcha({email:email, password:password}, tok)});
       setSession(fromTokens(t, t.user)); return session;
     },
     /* Nouveau mot de passe pour le compte connecté ; « pwd_ok » note qu'il a été choisi. */
