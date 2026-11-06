@@ -47,6 +47,7 @@
       sel('verifications', 'select=status,created_at&order=created_at.desc&limit=1'),
       sel('pactes', 'select=project_id,status,version,doc_hash,updated_at'),
       sel('pacte_signatures', 'select=project_id,user_id,version,signed_at'),
+      sel('staff_messages', 'select=id,kind,title,body,created_at,read_at&order=created_at.asc,id.asc&limit=500'),
     ]);
     const me = r[0];
     D.uid = DB.uid(); D.me = me; D.acc = (me && me.account) || {};
@@ -61,6 +62,7 @@
     D.verif = (r[14] || [])[0] || null;
     D.pactes = new Map((r[15] || []).map(x => [x.project_id, x]));
     D.pacteSigs = r[16] || [];
+    D.staff = r[17] || [];
   }
 
   /* ---------- Conversion vers le format de l'outil ---------- */
@@ -287,7 +289,9 @@
     /* Équipes et Ateliers. */
     if(tal) S.matches.forEach(m => { const t = buildTeam(m.id); if(t) S.teams[m.id] = t; });
     else if(pid){ const t = buildTeam(pid); if(t) S.teams[pid] = t; }
-    S.activeThread = S.threads.some(z => z.id === keepThread) || (String(keepThread).startsWith('G:') && S.teams[String(keepThread).slice(2)]) ? keepThread : (S.threads[0] ? S.threads[0].id : null);
+    /* Messages de l'équipe TakaMatch (discussion à sens unique). */
+    S.staffMsgs = (D.staff || []).map(m => ({id:m.id, kind:m.kind, title:m.title || '', body:m.body, d:new Date(m.created_at), read:!!m.read_at}));
+    S.activeThread = (keepThread === 'STAFF' && S.staffMsgs.length) || S.threads.some(z => z.id === keepThread) || (String(keepThread).startsWith('G:') && S.teams[String(keepThread).slice(2)]) ? keepThread : (S.threads[0] ? S.threads[0].id : null);
     S.atelierId = S.teams[keepAt] ? keepAt : (Object.keys(S.teams)[0] || null);
     /* Profil entier : notifications, favoris. */
     let cleared = 0; try{ cleared = +localStorage.getItem(CLEARED_KEY) || 0; }catch(e){}
@@ -303,11 +307,20 @@
   const _seed = seedCtx;
   seedCtx = function(){ if(!D.on) return _seed(); buildCtx(); };
 
+  /* La discussion « Équipe TakaMatch » a été lue. */
+  document.addEventListener('tm-staff-read', () => {
+    if(!D.on) return;
+    const now = new Date().toISOString(); (D.staff || []).forEach(m => { if(!m.read_at) m.read_at = now; });
+    DB.rpc('staff_messages_read').catch(() => {});
+    if(typeof renderTop === 'function') renderTop(); if(typeof syncSide === 'function') syncSide();
+  });
+
   /* ---------- Rechargement ---------- */
   function signature(){
     return [D.inv.length, D.inv.map(i => i.status).join(''), D.matches.length, D.matches.filter(m => m.ended_at).length,
       D.msgs.length, D.notifs.length, D.notifs.filter(n => !n.read).length, D.team.length, D.acc && D.acc.credits,
-      Array.from((D.pactes || new Map()).values()).map(x => x.status + x.version + x.updated_at).join(','), (D.pacteSigs || []).length].join('|');
+      Array.from((D.pactes || new Map()).values()).map(x => x.status + x.version + x.updated_at).join(','), (D.pacteSigs || []).length,
+      (D.staff || []).length].join('|');
   }
   async function refresh(force){
     if(D.busy) return; D.busy = true;

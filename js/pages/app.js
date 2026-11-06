@@ -2679,7 +2679,8 @@ function fitMarquee(box){
 }
 addEventListener('resize', () => { const b = $('#sbPct'); if(b) fitMarquee(b); });
 function navCount(id){
-  if(id === 'messages') return S.threads.filter(t => t.unread && !t.archived).length + groupTeams().filter(t => !t.groupClosed && t.unreadGroup).length;
+  if(id === 'messages') return S.threads.filter(t => t.unread && !t.archived).length + groupTeams().filter(t => !t.groupClosed && t.unreadGroup).length
+    + ((S.staffMsgs || []).some(m => !m.read) ? 1 : 0);
   if(id === 'connexions') return S.invitesRecv.filter(i => i.status === 'new').length + S.matches.filter(m => m.fresh).length;
   if(id === 'atelier') return takamMeCount();
   return 0;
@@ -3233,23 +3234,32 @@ function groupBubbles(t, grew){
       + '<span class="tm">'+hhmm(m.d)+'</span></div>';
   }).join('');
 }
+/* Discussion « Équipe TakaMatch » : à sens unique, épinglée en tête de la messagerie. */
+const STAFF_THREAD = 'STAFF';
+function staffAv(n){ return '<span aria-hidden="true" style="width:'+n+'px;height:'+n+'px;flex:0 0 auto;border-radius:50%;background:#000;display:grid;place-items:center">'
+  + '<img src="assets/icons/favicon.svg" alt="" style="width:62%;height:auto"></span>'; }
 function backBtn(){ return '<button class="iconbtn show-t" data-act="thread-back" aria-label="Retour à la liste">'+ic('back')+'</button>'; }
 function vMessages(){
   const vis = S.threads.filter(t => !t.archived), arch = S.threads.filter(t => t.archived), groups = groupTeams();
-  if(!S.threads.length && !groups.length){
+  const staff = S.staffMsgs || [], hasStaff = staff.length > 0;
+  if(!S.threads.length && !groups.length && !hasStaff){
     return '<div class="page-h"><div><h1>Tes <span class="acc">conversations</span></h1></div></div>'
       + '<div class="card">'+emptyBox('💬','Aucune conversation',"La messagerie s'ouvre au moment d'un match : personne ne te contacte sans que tu aies dit oui.",
         '<button class="btn btn-ghost btn-sm" style="margin-top:8px" data-act="go" data-v="explorer">'+ic('compass')+'Explorer</button>')+'</div>';
   }
-  const isG = String(S.activeThread).startsWith('G:');
+  let isS = hasStaff && S.activeThread === STAFF_THREAD;
+  const isG = !isS && String(S.activeThread).startsWith('G:');
   let gt = isG ? S.teams[S.activeThread.slice(2)] : null;
   if(gt && !groups.includes(gt)) gt = null;
-  let th = !gt ? (S.threads.find(t => t.id === S.activeThread) || vis[0] || S.threads[0]) : null;
-  if(!gt && !th && groups.length) gt = groups[0];
-  if(gt){ S.activeThread = 'G:'+gt.id; if(S.mobileThread || innerWidth > 1024) gt.unreadGroup = 0; } else S.activeThread = th.id;
+  let th = !gt && !isS ? (S.threads.find(t => t.id === S.activeThread) || vis[0] || S.threads[0]) : null;
+  if(!gt && !th && !isS && groups.length) gt = groups[0];
+  if(!gt && !th && !isS) isS = true;
+  if(isS){ S.activeThread = STAFF_THREAD;
+    if((S.mobileThread || innerWidth > 1024) && staff.some(m => !m.read)){ staff.forEach(m => m.read = true); setTimeout(() => document.dispatchEvent(new Event('tm-staff-read')), 0); } }
+  else if(gt){ S.activeThread = 'G:'+gt.id; if(S.mobileThread || innerWidth > 1024) gt.unreadGroup = 0; } else S.activeThread = th.id;
   const tal = isTalMode();
   const row = t => { const y = itemById(t.id), last = t.msgs[t.msgs.length-1];
-    return '<button class="tl'+(!gt && t.id===th.id?' on':'')+(t.archived?' arch':'')+'" data-act="thread" data-id="'+t.id+'">'+thumb(y,44)
+    return '<button class="tl'+(th && t.id===th.id?' on':'')+(t.archived?' arch':'')+'" data-act="thread" data-id="'+t.id+'">'+thumb(y,44)
       + '<span class="grow"><span class="n">'+esc(tal ? y.title : y.name)+(t.ro ? ' <span class="chip" style="height:18px;font-size:11px">Lecture seule</span>' : '')+'</span>'
       + '<span class="p">'+esc(last ? (last.me?'Toi : ':'')+last.txt : 'Nouvelle discussion')+'</span></span>'
       + '<span class="col" style="gap:5px;align-items:flex-end;flex:0 0 auto"><span class="mono" style="font-size:11px;color:var(--ink-3)">'+(last?hhmm(last.d):'')+'</span>'
@@ -3260,8 +3270,26 @@ function vMessages(){
       + '<span class="grow"><span class="n">'+esc(t.title)+' <span class="chip" style="height:18px;font-size:11px">'+(t.groupClosed ? 'Groupe fermé' : 'Groupe')+'</span></span>'
       + '<span class="p">'+esc(last ? (last.from==='me'?'Toi : ':who.first+' : ')+last.txt : 'Le groupe est ouvert')+'</span></span>'
       + (t.unreadGroup && !t.groupClosed && !(gt && gt.id===t.id && (S.mobileThread || innerWidth > 1024)) ? '<span class="unread" aria-label="non lu"></span>' : '')+'</button>'; };
+  const srow = () => { const last = staff[staff.length-1], un = staff.some(m => !m.read);
+    return '<button class="tl'+(isS?' on':'')+'" data-act="thread" data-id="'+STAFF_THREAD+'">'+staffAv(44)
+      + '<span class="grow"><span class="n">Équipe TakaMatch <span class="chip" style="height:18px;font-size:11px">Officiel</span></span>'
+      + '<span class="p">'+esc(last.title ? last.title+' · '+last.body : last.body)+'</span></span>'
+      + '<span class="col" style="gap:5px;align-items:flex-end;flex:0 0 auto"><span class="mono" style="font-size:11px;color:var(--ink-3)">'+hhmm(last.d)+'</span>'
+      + (un ? '<span class="unread" aria-label="non lu"></span>' : '')+'</span></button>'; };
   let chat;
-  if(gt){
+  if(isS){
+    const grew = (S._bubT === STAFF_THREAD && S._bubN < staff.length); S._bubT = STAFF_THREAD; S._bubN = staff.length;
+    let lastDay = '';
+    const bubbles = staff.map((m,i) => { const dl = dayLabel(m.d); const sep = dl !== lastDay ? '<div class="day">'+dl+'</div>' : ''; lastDay = dl;
+      return sep + '<div class="bub them'+(grew && i === staff.length-1 ? ' fresh' : '')+'">'
+        + (m.kind === 'annonce' ? '<span class="chip" style="height:18px;font-size:11px;margin-bottom:6px">'+ic('spark')+'Actualité</span><br>' : '')
+        + (m.title ? '<b>'+esc(m.title)+'</b><br>' : '')
+        + esc(m.body).replace(/\n/g, '<br>')+'<span class="tm">'+hhmm(m.d)+'</span></div>'; }).join('');
+    chat = '<div class="chat"><div class="chat-h">'+backBtn()+staffAv(36)
+      + '<div class="who"><b>Équipe TakaMatch</b><span>Messages et actualités de l\'équipe</span></div></div>'
+      + '<div class="chat-b scroll" id="chatBody" aria-live="polite"><div class="bub sys">'+ic('info')+'Ici, l\'équipe TakaMatch t\'écrit : messages personnels et actualités de la plateforme.</div>'+bubbles+'</div>'
+      + '<div class="ro-note">'+ic('lock')+'<span>Discussion à sens unique : tu ne peux pas répondre ici. Pour nous écrire, passe par <button class="lnk" data-act="go" data-v="support">Aide et support</button>.</span></div></div>';
+  } else if(gt){
     S._gGrew = S._gT === gt.id && S._gN < gt.group.length; S._gT = gt.id; S._gN = gt.group.length;
     chat = '<div class="chat"><div class="chat-h">'+backBtn()
       + '<span class="stack-av">'+gt.members.map(m => memAv(m, 28)).join('')+'</span>'
@@ -3298,6 +3326,7 @@ function vMessages(){
     + '<p class="sub">'+(tal ? 'Les conversations privées après un match, et les groupes de tes équipes.' : 'Les conversations de '+esc(projName(S.me.project))+' : privées après un match, et le groupe de l\'équipe.')+'</p></div></div>'
     + '<div class="msg-l'+(S.mobileThread?' viewing':'')+'" id="msgLayout">'
     + '<div class="thread-list scroll">'
+    +   (hasStaff ? srow() : '')
     +   (arch.length ? '<button class="tl-sep tl-arch" data-act="toggle-arch" aria-expanded="'+S.showArch+'">'+ic('chev')+'Discussions archivées <span class="mono">('+arch.length+')</span></button>'
           + (S.showArch ? '<div class="arch-l">'+arch.map(row).join('')+'</div>' : '') : '')
     +   (groups.length ? '<div class="tl-sep" style="cursor:default">Groupes d\'équipe</div>'+groups.map(grow).join('')+'<div class="tl-sep" style="cursor:default">Conversations privées</div>' : '')
