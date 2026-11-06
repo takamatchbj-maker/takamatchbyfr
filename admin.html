@@ -554,11 +554,11 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
 <script src="js/supabase.js?v=20261106a"></script>
 <script src="js/tm-select.js?v=20261106b"></script>
-<script src="js/geo.js?v=20261010a"></script>
-<script src="js/prix.js?v=20261103a"></script>
+<script src="js/geo.js?v=20261106z"></script>
+<script src="js/prix.js?v=20261106z"></script>
 <script src="js/pay-icons.js?v=20261014a"></script>
 <link rel="stylesheet" href="css/pacte.css?v=20261020b">
-<script src="js/pacte.js?v=20261010a"></script>
+<script src="js/pacte.js?v=20261106z"></script>
 <script src="js/pacte-pdf.js?v=20261010a"></script>
 <script src="js/pacte-editor.js?v=20261029a"></script>
 </head>
@@ -698,7 +698,7 @@ const PRICES = {second:3000, slot:5000, pacte:15000, essai:2000, elan:5000, camp
 const PAY_CC = {BJ:{n:'Bénin', ops:['MTN MoMo','Moov Money','Celtiis Cash']}, TG:{n:'Togo', ops:['Mixx by Yas','Moov Money']},
   CI:{n:"Côte d'Ivoire", ops:['Wave','Orange Money','MTN MoMo','Moov Money']}, SN:{n:'Sénégal', ops:['Wave','Orange Money','Free Money']},
   BF:{n:'Burkina Faso', ops:['Orange Money','Moov Money']}, ML:{n:'Mali', ops:['Orange Money']}, NE:{n:'Niger', ops:['Airtel Money']},
-  GH:{n:'Ghana', ops:[]}, NG:{n:'Nigeria', ops:[]}, CM:{n:'Cameroun', ops:[]}, FR:{n:'France', ops:[]}};
+  GN:{n:'Guinée', ops:[]}, CM:{n:'Cameroun', ops:[]}};
 const OP_COLOR = {'MTN MoMo':'#FFCC00', 'Moov':'#0077A8', 'Moov Money':'#0077A8', 'Celtiis':'#E4002B', 'Celtiis Cash':'#E4002B', 'Wave':'#1DC8FF',
   'Orange Money':'#FF7900', 'Free Money':'#CD0F14', 'Mixx by Yas':'#2B1C6E', 'Airtel Money':'#ED1C24', 'Carte bancaire':'#6B6459'};
 /* Moyen de paiement : logo(s) + libellé (js/pay-icons.js) */
@@ -1351,11 +1351,11 @@ function prixSection(){
   const sup = A.me.role === 'super', dis = sup ? '' : ' disabled', geo = window.TMGeo ? TMGeo.COUNTRIES : [];
   const countriesOf = cur => CC_OF_CUR(cur).map(c => (geo.find(g => g.id === c) || {n:c}).n).join(', ');
   return '<section class="card card-pad"><div class="row" style="align-items:flex-start;gap:12px;margin-bottom:12px"><div class="grow"><h3 style="font-size:17px;margin-bottom:4px">Prix de référence (FCFA)</h3>'
-    + '<p class="hint" style="margin:0">Le prix que paient les pays du FCFA. Pour les autres pays, il est converti avec les taux ci-dessous puis arrondi. Le paiement est toujours encaissé en FCFA.</p></div>'
+    + '<p class="hint" style="margin:0">Le prix que paient les pays du FCFA (Afrique de l\'Ouest et Cameroun). Pour la Guinée, il est converti avec les taux ci-dessous puis arrondi. Le paiement est toujours encaissé en FCFA.</p></div>'
     + (sup ? '<button class="btn btn-a" data-act="save-prix">'+ic('check')+'Enregistrer les prix et taux</button>' : '<span class="chip">Lecture seule · super admin</span>')+'</div>'
     + '<div class="grid g3">'+A.pricing.pr.map(r => '<div class="field"><label for="pr_'+r.key+'">'+esc(r.label)+'</label><div class="row"><input class="inp mono" id="pr_'+r.key+'" data-pr="'+r.key+'" type="number" min="0" step="50" value="'+r.fcfa+'"'+dis+'><span class="hint">FCFA</span></div></div>').join('')+'</div></section>'
     + '<section class="card card-pad" style="margin-top:14px"><h3 style="font-size:17px;margin-bottom:4px">Taux de conversion</h3>'
-    + '<p class="hint" style="margin:0 0 12px">« 1 unité = … FCFA » et le pas d\'arrondi des prix affichés (ex. 1 € → prix ronds en euros ; 10 DH → prix en dizaines de dirhams). L\'aperçu se met à jour pendant que tu tapes.</p>'
+    + '<p class="hint" style="margin:0 0 12px">« 1 unité = … FCFA » et le pas d\'arrondi des prix affichés (ex. pour la Guinée : 1 FG = 0,0657 FCFA, prix arrondis aux 5 000 FG). L\'aperçu se met à jour pendant que tu tapes.</p>'
     + '<div class="tbl-w"><table><thead><tr><th>Devise</th><th>Pays</th><th>1 unité = … FCFA</th><th>Arrondi</th><th>Aperçu des prix ('+A.pricing.pr.map(r => esc(r.label.split(' · ')[0])).join(' · ')+')</th></tr></thead><tbody>'
     + A.pricing.fx.map(r => { const fixed = r.currency === 'XOF' || r.currency === 'XAF';
         return '<tr><td><b>'+esc(r.name)+'</b><br><span class="hint mono">'+esc(r.currency)+' · '+esc(r.symbol)+'</span></td><td style="font-size:12.5px;color:var(--ink-2);max-width:220px">'+esc(countriesOf(r.currency))+'</td>'
@@ -1877,8 +1877,8 @@ addEventListener('popstate', () => {
 </script>
 <script src="js/admin-live.js?v=20261029a"></script>
 <script src="js/admin-suspects.js?v=20261106a"></script>
-<script src="js/admin-messages.js?v=20261106a"></script>
-<script src="js/partenaires-data.js?v=20261012a"></script>
+<script src="js/admin-messages.js?v=20261106z"></script>
+<script src="js/partenaires-data.js?v=20261106z"></script>
 <script src="js/admin-partenaires.js?v=20261020-lucide"></script>
 <script src="js/admin-maintenance.js?v=20261103a"></script>
 </body>

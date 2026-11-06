@@ -197,7 +197,7 @@ const country = id => TMGeo.country(id);
    moins, ni plus. La saisie est bloquée au-delà et mise en forme par
    groupes, sur le modèle de l'exemple affiché. */
 const phoneDigits = v => (v||'').replace(/\D/g,'');
-/* Numéro national : on retire le 0 (ou le 1 au Canada) que les gens tapent souvent en tête. */
+/* Numéro national : on retire le chiffre de tête que les gens tapent parfois en national (si le pays en a un). */
 const phoneNsn = (v, cc) => { const c = country(cc), d = phoneDigits(v); return c.trunk && d.charAt(0) === c.trunk ? d.slice(1) : d; };
 const phoneMax = cc => Math.max.apply(null, country(cc).len);
 function phoneOk(v, cc){ return country(cc).len.includes(phoneNsn(v, cc).length); }
@@ -222,10 +222,8 @@ function flag(id){
     BF:'<rect width="20" height="7" fill="#EF2B2D"/><rect y="7" width="20" height="7" fill="#009E49"/>'+star(10,7,2.6,'#FCD116'),
     ML:V('#14B53A','#FCD116','#CE1126'),
     NE:H('#E05206','#fff','#0DB02B')+'<circle cx="10" cy="7" r="1.8" fill="#E05206"/>',
-    GH:H('#CE1126','#FCD116','#006B3F')+star(10,7,2.2,'#000'),
-    NG:V('#008751','#fff','#008751'),
+    GN:V('#CE1126','#FCD116','#009460'),
     CM:V('#007A5E','#CE1126','#FCD116')+star(10,7,2.2,'#FCD116'),
-    FR:V('#002395','#fff','#ED2939'),
   };
   if(!F[id]) return TMGeo.flagImg(id);
   return '<svg class="flag" viewBox="0 0 20 14" aria-hidden="true">'+F[id]+'</svg>';

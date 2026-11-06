@@ -7,7 +7,7 @@ const SITE_PAY = {
   BF:[['Orange Money','orange'],['Moov Money','moov']], ML:[['Orange Money','orange']], NE:[['Airtel Money','airtel']],
 };
 const SITE_TZ = {'Africa/Porto-Novo':'BJ','Africa/Lome':'TG','Africa/Abidjan':'CI','Africa/Dakar':'SN','Africa/Ouagadougou':'BF','Africa/Bamako':'ML','Africa/Niamey':'NE',
-  'Africa/Accra':'GH','Africa/Lagos':'NG','Africa/Douala':'CM','Europe/Paris':'FR'};
+  'Africa/Conakry':'GN','Africa/Douala':'CM'};
 const SITE_CC = (() => {
   if(window.TMPrix) return TMPrix.cc();
   try{ const z = SITE_TZ[Intl.DateTimeFormat().resolvedOptions().timeZone]; if(z) return z; }catch(e){}

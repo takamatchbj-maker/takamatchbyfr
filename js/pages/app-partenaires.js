@@ -35,12 +35,9 @@
     const sp = TMGeo.split(S.me.city || ''), cc = sp.cc || S.me.country || 'BJ';
     return {cc, city:sp.city || '', name:TMGeo.country(cc).n};
   }
-  /* « au Bénin », « en Côte d'Ivoire », « aux Comores », « à Maurice »… */
-  const EN = ['CI','GN','GQ','CF','DZ','TN','MR','BE','CH','FR','CD'], AUX = ['KM','SC'], A = ['MG','DJ','MU'];
-  function inCountry(cc){
-    const n = TMGeo.country(cc).n;
-    return (EN.includes(cc) ? 'en ' : AUX.includes(cc) ? 'aux ' : A.includes(cc) ? 'à ' : 'au ') + n.replace(/^(Comores|Seychelles)$/, '$1');
-  }
+  /* « au Bénin », « en Côte d'Ivoire », « en Guinée »… */
+  const EN = ['CI','GN'];
+  function inCountry(cc){ return (EN.includes(cc) ? 'en ' : 'au ') + TMGeo.country(cc).n; }
   const same = (a, b) => TMGeo.norm(a) === TMGeo.norm(b);
 
   /* ---------- Données : base si elle répond, sinon catalogue ---------- */

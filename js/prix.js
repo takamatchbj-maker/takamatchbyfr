@@ -25,31 +25,12 @@
   var DEFAULT_FX = {
     XOF:{name:'Franc CFA (Ouest)', symbol:'FCFA', r:1, step:1},
     XAF:{name:'Franc CFA (Centre)', symbol:'FCFA', r:1, step:1},
-    EUR:{name:'Euro', symbol:'€', r:655.957, step:1},
-    CHF:{name:'Franc suisse', symbol:'CHF', r:655, step:1},
-    CAD:{name:'Dollar canadien', symbol:'$ CA', r:440, step:1},
-    MAD:{name:'Dirham marocain', symbol:'DH', r:60.7, step:10},
-    DZD:{name:'Dinar algérien', symbol:'DA', r:4.4, step:50},
-    TND:{name:'Dinar tunisien', symbol:'DT', r:193, step:5},
-    MRU:{name:'Ouguiya', symbol:'UM', r:15.3, step:10},
-    GNF:{name:'Franc guinéen', symbol:'FG', r:0.0657, step:5000},
-    CDF:{name:'Franc congolais', symbol:'FC', r:0.213, step:5000},
-    BIF:{name:'Franc burundais', symbol:'FBu', r:0.208, step:5000},
-    RWF:{name:'Franc rwandais', symbol:'FRw', r:0.423, step:500},
-    DJF:{name:'Franc djiboutien', symbol:'Fdj', r:3.4, step:100},
-    KMF:{name:'Franc comorien', symbol:'KMF', r:1.3333, step:250},
-    MGA:{name:'Ariary', symbol:'Ar', r:0.131, step:1000},
-    MUR:{name:'Roupie mauricienne', symbol:'Rs', r:12.6, step:10},
-    SCR:{name:'Roupie seychelloise', symbol:'SR', r:42.3, step:5},
-    GHS:{name:'Cedi', symbol:'GH₵', r:41, step:5},
-    NGN:{name:'Naira', symbol:'₦', r:0.375, step:500}
+    GNF:{name:'Franc guinéen', symbol:'FG', r:0.0657, step:5000}
   };
   /* Pays → devise. Un pays absent paie en FCFA de l'Ouest. */
   var CUR_OF = {
     BJ:'XOF', TG:'XOF', CI:'XOF', SN:'XOF', BF:'XOF', ML:'XOF', NE:'XOF',
-    CM:'XAF', GA:'XAF', CG:'XAF', CF:'XAF', TD:'XAF', GQ:'XAF',
-    BE:'EUR', FR:'EUR', CH:'CHF', CA:'CAD', MA:'MAD', DZ:'DZD', TN:'TND', MR:'MRU',
-    GN:'GNF', CD:'CDF', BI:'BIF', RW:'RWF', DJ:'DJF', KM:'KMF', MG:'MGA', MU:'MUR', SC:'SCR', GH:'GHS', NG:'NGN'
+    CM:'XAF', GN:'GNF'
   };
   var FCFA = {XOF:1, XAF:1};
   /* Lancement : aucun paiement demandé.
@@ -113,12 +94,7 @@
   function setLaunch(l){ if(l){ LAUNCH.free = l.free !== false; LAUNCH.monthly = Number(l.monthly) || 5; } }
   try{ var c = JSON.parse(localStorage.getItem(KEY)); if(c && c.prices && c.fx){ state = c; setLaunch(c.launch); } }catch(e){}
   var TZ = {'Africa/Porto-Novo':'BJ','Africa/Lome':'TG','Africa/Abidjan':'CI','Africa/Dakar':'SN','Africa/Ouagadougou':'BF','Africa/Bamako':'ML',
-    'Africa/Niamey':'NE','Africa/Conakry':'GN','Africa/Douala':'CM','Africa/Libreville':'GA','Africa/Brazzaville':'CG','Africa/Kinshasa':'CD',
-    'Africa/Lubumbashi':'CD','Africa/Bangui':'CF','Africa/Ndjamena':'TD','Africa/Malabo':'GQ','Africa/Bujumbura':'BI','Africa/Kigali':'RW',
-    'Africa/Djibouti':'DJ','Indian/Comoro':'KM','Indian/Antananarivo':'MG','Indian/Mahe':'SC','Indian/Mauritius':'MU','Africa/Nouakchott':'MR',
-    'Africa/Casablanca':'MA','Africa/Algiers':'DZ','Africa/Tunis':'TN','Europe/Brussels':'BE','Europe/Zurich':'CH','Europe/Paris':'FR',
-    'America/Toronto':'CA','America/Montreal':'CA','America/Vancouver':'CA','America/Edmonton':'CA','America/Winnipeg':'CA','America/Halifax':'CA',
-    'Africa/Accra':'GH','Africa/Lagos':'NG'};
+    'Africa/Niamey':'NE','Africa/Conakry':'GN','Africa/Douala':'CM'};
   var forced = null;
 
   api.data = function(){ return state; };

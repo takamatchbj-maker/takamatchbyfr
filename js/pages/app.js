@@ -882,17 +882,15 @@ const PAY_COUNTRIES = {
   BF:{n:'Burkina Faso',   dial:'+226', len:8,  provider:'fedapay', methods:['orange','moov']},
   ML:{n:'Mali',           dial:'+223', len:8,  provider:'fedapay', methods:['orange']},
   NE:{n:'Niger',          dial:'+227', len:8,  provider:'fedapay', methods:['airtel']},
-  /* Hors zone FedaPay mobile money : carte seulement, en attendant Flutterwave. */
-  GH:{n:'Ghana',          dial:'+233', len:9,  provider:'fedapay', methods:[], later:'flutterwave'},
-  NG:{n:'Nigeria',        dial:'+234', len:10, provider:'fedapay', methods:[], later:'flutterwave'},
+  /* Hors zone FedaPay mobile money : carte seulement, en attendant CinetPay. */
+  GN:{n:'Guinée',         dial:'+224', len:9,  provider:'fedapay', methods:[], later:'cinetpay'},
   CM:{n:'Cameroun',       dial:'+237', len:9,  provider:'fedapay', methods:[], later:'cinetpay'},
-  FR:{n:'France',         dial:'+33',  len:9,  provider:'fedapay', methods:[]},
 };
-/* Les autres pays couverts (js/geo.js) : carte bancaire en attendant leurs moyens locaux. */
+/* Filet de sécurité : un pays de js/geo.js absent ci-dessus → carte bancaire. */
 TMGeo.COUNTRIES.forEach(c => { if(!PAY_COUNTRIES[c.id]) PAY_COUNTRIES[c.id] = {n:c.n, dial:c.c, len:c.len[0], provider:'fedapay', methods:[]}; });
 const PAY_DEFAULT_CC = 'BJ';
 const PAY_TZ = {'Africa/Porto-Novo':'BJ','Africa/Lome':'TG','Africa/Abidjan':'CI','Africa/Dakar':'SN','Africa/Ouagadougou':'BF',
-  'Africa/Bamako':'ML','Africa/Niamey':'NE','Africa/Accra':'GH','Africa/Lagos':'NG','Africa/Douala':'CM','Europe/Paris':'FR'};
+  'Africa/Bamako':'ML','Africa/Niamey':'NE','Africa/Conakry':'GN','Africa/Douala':'CM'};
 
 function payCountry(cc){ return PAY_COUNTRIES[cc] || PAY_COUNTRIES[PAY_DEFAULT_CC]; }
 function payMethodsOf(cc){ return payCountry(cc).methods.concat(TM_PAY.card === false ? [] : ['card']); }
@@ -2343,7 +2341,7 @@ function founderBadge(big){
 }
 const SITE_URL = 'https://takamatch.com/';
 function inviteText(){
-  return 'Je suis sur TakaMatch, la plateforme qui réunit porteurs de projet et talents pour cofonder en Afrique francophone. '
+  return 'Je suis sur TakaMatch, la plateforme qui réunit porteurs de projet et talents pour cofonder en Afrique de l\'Ouest francophone et au Cameroun. '
     + 'Tu as une idée ou des compétences à mettre dans une aventure ? Inscris-toi, c\'est gratuit : ' + SITE_URL;
 }
 function launchPanel(compact){

@@ -49,14 +49,8 @@
 
   /* ---------- Pays (siège) — les États membres de l'OHADA d'abord ---------- */
   const OHADA = ['BJ','BF','CM','CF','KM','CG','CI','GA','GN','GW','GQ','ML','NE','CD','SN','TD','TG'];
-  const COUNTRIES = {BJ:'Bénin', BF:'Burkina Faso', CM:'Cameroun', CF:'Centrafrique', KM:'Comores', CG:'Congo', CI:'Côte d\'Ivoire',
-    GA:'Gabon', GN:'Guinée', GW:'Guinée-Bissau', GQ:'Guinée équatoriale', ML:'Mali', NE:'Niger', CD:'République démocratique du Congo',
-    SN:'Sénégal', TD:'Tchad', TG:'Togo', BI:'Burundi', DJ:'Djibouti', MG:'Madagascar', MR:'Mauritanie', RW:'Rwanda', SC:'Seychelles',
-    MU:'Maurice', BE:'Belgique', CH:'Suisse', CA:'Canada', FR:'France'};
-  const DU = {BJ:'du Bénin', BF:'du Burkina Faso', CM:'du Cameroun', CF:'de Centrafrique', KM:'des Comores', CG:'du Congo', CI:'de Côte d\'Ivoire',
-    GA:'du Gabon', GN:'de Guinée', GW:'de Guinée-Bissau', GQ:'de Guinée équatoriale', ML:'du Mali', NE:'du Niger', CD:'de la République démocratique du Congo',
-    SN:'du Sénégal', TD:'du Tchad', TG:'du Togo', BI:'du Burundi', DJ:'de Djibouti', MG:'de Madagascar', MR:'de Mauritanie', RW:'du Rwanda',
-    SC:'des Seychelles', MU:'de Maurice', BE:'de Belgique', CH:'de Suisse', CA:'du Canada', FR:'de France'};
+  const COUNTRIES = {BJ:'Bénin', BF:'Burkina Faso', CM:'Cameroun', CI:'Côte d\'Ivoire', GN:'Guinée', ML:'Mali', NE:'Niger', SN:'Sénégal', TG:'Togo'};
+  const DU = {BJ:'du Bénin', BF:'du Burkina Faso', CM:'du Cameroun', CI:'de Côte d\'Ivoire', GN:'de Guinée', ML:'du Mali', NE:'du Niger', SN:'du Sénégal', TG:'du Togo'};
   const isOhada = cc => OHADA.includes(cc);
 
   /* ---------- Vesting choisi dans l'Atelier ---------- */
