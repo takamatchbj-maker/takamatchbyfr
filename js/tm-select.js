@@ -111,7 +111,7 @@ select.tm-sel-open{border-color:var(--ink-3,#8A8578) !important;box-shadow:0 0 0
     place();
     const s = Math.max(0, sel.selectedIndex >= 0 ? cur.items.findIndex(x => x.opt === sel.options[sel.selectedIndex]) : 0);
     setAct(s, true);
-    requestAnimationFrame(() => { if(cur) cur.pop.classList.add('in'); });
+    const show = () => { if(cur) cur.pop.classList.add('in'); }; requestAnimationFrame(show); setTimeout(show, 40);
     cur.pop.addEventListener('mousedown', e => e.preventDefault());   /* le focus reste sur le <select> */
     cur.pop.addEventListener('mousemove', e => { const o = e.target.closest('.tm-opt'); if(o && enabled(+o.dataset.i) && +o.dataset.i !== cur.act) setAct(+o.dataset.i, false); });
     cur.pop.addEventListener('click', e => { const o = e.target.closest('.tm-opt'); if(o && enabled(+o.dataset.i)) choose(+o.dataset.i); });
