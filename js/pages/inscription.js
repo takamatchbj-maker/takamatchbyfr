@@ -1279,7 +1279,7 @@ function takeFile(kind, file){
       const k = kind === 'cover' ? Math.min(1, 1200 / img.width) : Math.min(1, 600 / Math.max(img.width, img.height));
       const c = document.createElement('canvas'); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      setPhoto(kind, c.toDataURL('image/jpeg', .86));
+      setPhoto(kind, c.toDataURL(window.TMDB ? TMDB.imgType() : 'image/jpeg', .86));
     };
     img.onerror = () => toast("Impossible de lire cette image.", 'bad');
     img.src = r.result;

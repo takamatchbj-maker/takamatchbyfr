@@ -279,6 +279,15 @@
     removeFiles: function(bucket, names){
       return api('/storage/v1/object/' + bucket, {method:'DELETE', body:{prefixes:names || []}});
     },
+    /* Format d'image le plus léger que le navigateur sait produire : WebP (≈ 30 % plus léger), sinon JPEG. */
+    imgType: function(){
+      if(DB._imgType) return DB._imgType;
+      try{ var c = document.createElement('canvas'); c.width = c.height = 1;
+        DB._imgType = c.toDataURL('image/webp').indexOf('data:image/webp') === 0 ? 'image/webp' : 'image/jpeg'; }
+      catch(e){ DB._imgType = 'image/jpeg'; }
+      return DB._imgType;
+    },
+    imgExt: function(blob){ var t = (blob && blob.type) || ''; return /webp/.test(t) ? 'webp' : /png/.test(t) ? 'png' : 'jpg'; },
     dataUrlToBlob: function(u){
       var m = /^data:([^;,]+)?(;base64)?,(.*)$/.exec(u || ''); if(!m) return null;
       var bin = m[2] ? atob(m[3]) : decodeURIComponent(m[3]), arr = new Uint8Array(bin.length);

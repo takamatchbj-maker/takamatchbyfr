@@ -193,7 +193,7 @@
     if(!dataUrl) return '';
     if(!/^data:/.test(dataUrl)) return /^https?:/.test(dataUrl) ? dataUrl : '';
     const blob = DB.dataUrlToBlob(dataUrl); if(!blob) return '';
-    try{ return await DB.upload(bucket, DB.uid() + '/' + name + '-' + Date.now() + '.jpg', blob); }
+    try{ return await DB.upload(bucket, DB.uid() + '/' + name + '-' + Date.now() + '.' + DB.imgExt(blob), blob); }
     catch(e){ e.message = (bucket === 'covers' ? 'Image de couverture : ' : 'Photo de profil : ') + e.message; throw e; }
   }
   async function saveAll(){

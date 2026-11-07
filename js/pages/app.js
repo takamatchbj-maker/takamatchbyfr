@@ -1320,7 +1320,8 @@ document.addEventListener('input', e => {
     syncFiche(); markRequired(); return;
   }
   if(el.dataset && el.dataset.k && el.closest('#ficheForm')){ setPath(el.dataset.k, el.value); syncFiche(); return; }
-  if(el.id === 'q'){ S.q = el.value; S.focusIdx = 0; repaintExplorer(); return; }
+  /* Recherche : on attend une courte pause dans la frappe avant de recalculer la liste (debounce). */
+  if(el.id === 'q'){ S.q = el.value; S.focusIdx = 0; clearTimeout(S._qT); S._qT = setTimeout(repaintExplorer, 160); return; }
   if(el.id === 'invMsg'){ syncCounters(); return; }
   if(el.id === 'delC'){ $('#delGo').disabled = el.value.trim() !== 'SUPPRIMER'; return; }
 
@@ -1399,7 +1400,7 @@ function qrSvg(){
   return '<svg viewBox="-14 -14 '+(n*cell+28)+' '+(n*cell+28)+'" width="210" height="210" role="img" aria-label="Code QR de ta fiche publique" style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg)">'+r+finder(0,0)+finder(n-7,0)+finder(0,n-7)+'</svg>';
 }
 
-const COVER = 'assets/images/couverture-projet.jpg';
+const COVER = 'assets/images/couverture-projet.webp';
 
 /* ============================================================
    v3 — fiches en fenêtre, profils des porteurs, J'aime,
@@ -1599,7 +1600,7 @@ function loadAvatar(file){
       const side = Math.min(img.width, img.height), out = Math.min(800, side), cv = document.createElement('canvas');
       cv.width = cv.height = out;
       cv.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, out, out);
-      try{ S.me.photo = cv.toDataURL('image/jpeg', .85); }catch(e){ return toast('Cette image ne peut pas être lue.', 'bad'); }
+      try{ S.me.photo = cv.toDataURL(window.TMDB ? TMDB.imgType() : 'image/jpeg', .85); }catch(e){ return toast('Cette image ne peut pas être lue.', 'bad'); }
       if(side < 400) toast('Photo ajoutée, mais elle est petite : une image d\'au moins 800 × 800 px sera plus nette.', 'ok');
       else toast('Photo de profil mise à jour.', 'ok');
       render();
@@ -1619,7 +1620,7 @@ function loadCover(file){
       const k = Math.min(1, 1200 / img.width), cv = document.createElement('canvas');
       cv.width = Math.round(img.width*k); cv.height = Math.round(img.height*k);
       cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-      try{ S.me.project.photo = cv.toDataURL('image/jpeg', .8); }catch(e){ S.me.project.photo = rd.result; }
+      try{ S.me.project.photo = cv.toDataURL(window.TMDB ? TMDB.imgType() : 'image/jpeg', .8); }catch(e){ S.me.project.photo = rd.result; }
       render(); if(S.view === 'fiche' && typeof syncFiche === 'function') syncFiche();   /* active « Enregistrer » */
       toast('Photo ajoutée. Enregistre pour la publier.', 'ok');
     };
@@ -1721,12 +1722,18 @@ function takamMeCount(){ return Object.values(S.teams).reduce((a, t) => a + taka
 function takamReply(q){ return window.TakamRules ? TakamRules.reply(q) : "Bien noté. Transforme ça en tâche dans le plan d'action, avec un responsable et une date."; }
 /* Question à Takam : l'IA du serveur quand l'outil est branché sur la base, sinon une réponse de secours. */
 async function takamAsk(t, q){
-  t.takChat.push({me:true, txt:q});
+  t.takChat.push({me:true, txt:q}); t._tkBusy = Date.now();
   const wait = {me:false, txt:'…', wait:Date.now()}; t.takChat.push(wait); render();
   let txt = '';
-  try{ if(window.TMTakam && TMTakam.ready(t)) txt = await TMTakam.ask(t, q); }catch(e){ console.warn('[Takam]', e); }
+  /* La bulle se remplit pendant que Takam écrit (réponse en flux), sans redessiner tout l'écran. */
+  const onTok = part => {
+    wait.txt = part; delete wait.wait;
+    const bs = document.querySelectorAll('.tk-chat .tk-b'), b = bs[bs.length - 1];
+    if(b && !b.classList.contains('me')){ b.classList.remove('wait'); b.removeAttribute('aria-label'); b.textContent = part; }
+  };
+  try{ if(window.TMTakam && TMTakam.ready(t)) txt = await TMTakam.ask(t, q, onTok); }catch(e){ console.warn('[Takam]', e); }
   if(!txt) txt = takamReply(q);
-  delete wait.wait; wait.txt = txt;
+  delete wait.wait; wait.txt = txt; t._tkBusy = 0;
   if(S.view === 'atelier' && !S.layer) render(); else syncSide();
   const i = $('#tkIn'); if(i) i.focus();
 }
@@ -1932,7 +1939,7 @@ document.addEventListener('submit', e => {
   if(!['gsend','takam','obj','task'].includes(k)) return;
   e.preventDefault(); if(!t) return;
   if(k === 'gsend') sendGroup(t, $('#gIn').value, 'gIn');
-  else if(k === 'takam'){ const q = $('#tkIn').value.trim(); if(!q || t.takChat.some(m => m.wait && Date.now() - m.wait < 30000)) return;
+  else if(k === 'takam'){ const q = $('#tkIn').value.trim(); if(!q || (t._tkBusy && Date.now() - t._tkBusy < 40000) || t.takChat.some(m => m.wait && Date.now() - m.wait < 30000)) return;
     $('#tkIn').value = ''; takamAsk(t, q.slice(0, 500)); }
   else if(k === 'obj'){ const v = $('#objIn').value.trim(); if(!v) return;
     t.objectives.push({id:uid(), t:v, tasks:[]}); S.objForm = false; teamLog(t, 'Nouvel objectif : '+v); render(); toast('Objectif ajouté. Takam le suivra.', 'ok'); }
@@ -3378,7 +3385,7 @@ function takamPanel(t){
     + (x.act === 'at-pacte' ? ' <button class="lnk" data-act="at-pacte">Ouvrir le pacte</button>' : '')
     + (x.act === 'at-plan' && isAdmin(t) && !t.objectives.length ? ' <button class="lnk" data-act="at-obj-new">Fixer un objectif</button>' : '')+'</span></li>';
   return '<section class="panel takam"><div class="tk-h">'
-    + '<div class="tk-mascot"><img class="tk-head" src="'+TAKAM_HEAD[isTalMode() ? 'tal' : 'vis']+'" alt="" width="84" height="84" decoding="async"></div>'
+    + '<div class="tk-mascot"><img class="tk-head" src="'+TAKAM_HEAD[isTalMode() ? 'tal' : 'vis']+'" alt="" width="84" height="84" loading="lazy" decoding="async"></div>'
     + '<div><h3>Takam</h3><p class="hint">Veille sur l\'équipe, relance et encourage.</p></div></div>'
     + '<div class="seg-sm" role="group" aria-label="Alertes de Takam" style="margin:12px 0 10px">'
     +   '<button class="'+(tab==='team'?'on':'')+'" data-act="tk-tab" data-v="team" aria-pressed="'+(tab==='team')+'">Équipe<span class="n">'+a.team.length+'</span></button>'

@@ -322,11 +322,21 @@
       Array.from((D.pactes || new Map()).values()).map(x => x.status + x.version + x.updated_at).join(','), (D.pacteSigs || []).length,
       (D.staff || []).length].join('|');
   }
+  /* Pouls : une seule petite requête (app_pulse, migration 33). Les 18 tables ne sont
+     rechargées que si quelque chose a changé, ou au moins toutes les 2 minutes. */
+  async function pulseChanged(){
+    try{
+      const p = await DB.rpc('app_pulse');
+      const changed = p !== D.pulse || Date.now() - (D.fullAt || 0) > 120e3;
+      D.pulse = p; return changed;
+    }catch(e){ return true; }
+  }
   async function refresh(force){
     if(D.busy) return; D.busy = true;
     try{
+      if(!force && !(await pulseChanged())) return;
       const before = signature();
-      await loadAll();
+      await loadAll(); D.fullAt = Date.now();
       if(!force && before === signature()) return;
       if(S.view === 'fiche' && isDirty()) return;   /* jamais pendant une saisie de fiche */
       const view = S.view;
@@ -348,7 +358,8 @@
   async function boot(){
     const top = $('#topbar'); if(top) top.classList.add('busy');
     try{
-      await loadAll();
+      const pulse = DB.rpc('app_pulse').catch(() => null);   /* lu avant les données : aucun changement ne peut passer entre les deux */
+      await loadAll(); D.fullAt = Date.now(); D.pulse = await pulse;
       /* Compte suspendu ou banni par l'équipe : on ferme la session et on explique. */
       const pf = (D.me && D.me.profile) || {}, st = pf.account_status || 'active';
       if(st === 'banned' || (st === 'suspended' && (!pf.suspended_until || Date.parse(pf.suspended_until) > Date.now()))){
@@ -662,7 +673,7 @@
   function schedulePersist(){ if(!D.on) return; clearTimeout(saveT); saveT = setTimeout(() => { saving = persist().finally(() => { saving = null; }); }, 700); }
   async function upImg(bucket, dataUrl, name){
     const blob = DB.dataUrlToBlob(dataUrl); if(!blob) return '';
-    return DB.upload(bucket, D.uid + '/' + name + '-' + Date.now() + '.jpg', blob);
+    return DB.upload(bucket, D.uid + '/' + name + '-' + Date.now() + '.' + DB.imgExt(blob), blob);
   }
   async function persist(){
     const m = S.me, uid = D.uid;
@@ -853,14 +864,34 @@
      ============================================================ */
   window.TMTakam = {
     ready: t => D.on && !!t && isUuid(t.id),
-    ask: async (t, q) => {
+    /* onTok(texte) : appelé à chaque morceau quand la réponse arrive en flux (mot par mot). */
+    ask: async (t, q, onTok) => {
       const s = await DB.ensure(); if(!s) return '';
       const history = (t.takChat || []).filter(m => !m.wait).slice(-7, -1).map(m => ({me:!!m.me, txt:String(m.txt || '').slice(0, 600)}));
-      const ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(() => ctl.abort(), 30000) : 0;
+      const ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(() => ctl.abort(), 35000) : 0;
+      const stream = !!(onTok && window.ReadableStream && window.TextDecoder);
+      const clean = x => x.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*\*/g, '').replace(/^#+\s*/gm, '');
       try{
         const r = await fetch(DB.url + '/functions/v1/takam', {method:'POST', signal:ctl ? ctl.signal : undefined,
           headers:{'Content-Type':'application/json', apikey:DB.key, Authorization:'Bearer ' + s.access_token},
-          body:JSON.stringify({mode:'ask', project_id:t.id, question:q, history})});
+          body:JSON.stringify({mode:'ask', project_id:t.id, question:q, history, stream})});
+        if(r.ok && r.body && /ndjson/.test(r.headers.get('content-type') || '')){
+          const rd = r.body.getReader(), dec = new TextDecoder();
+          let buf = '', txt = '', fb = '';
+          for(;;){
+            const {value, done} = await rd.read(); if(done) break;
+            buf += dec.decode(value, {stream:true});
+            let i;
+            while((i = buf.indexOf('\n')) >= 0){
+              const line = buf.slice(0, i); buf = buf.slice(i + 1);
+              let o = null; try{ o = JSON.parse(line); }catch(e){}
+              if(!o) continue;
+              if(o.t){ txt += o.t; onTok(clean(txt)); }
+              if(o.fallback) fb = o.fallback;
+            }
+          }
+          return clean(txt).trim() || fb;
+        }
         const d = await r.json().catch(() => ({}));
         if(!r.ok || !d.reply) return '';
         if(d.note === 'quota') return d.reply + ' (Tu as posé toutes tes questions du jour à Takam : réponse courte en attendant demain.)';

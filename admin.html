@@ -7,7 +7,7 @@
 <title>TakaMatch — Espace équipe</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgcng9IjY0IiBmaWxsPSIjMDAwIi8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNDYuMjUgNjIuMTUpIHNjYWxlKDAuNzgpIj48cGF0aCBmaWxsPSIjZmZkNzQxIiBkPSJNODQuMTUsMTc2Ljg2Yy0zLjQxLTEuNzMtNS45NS00LjY4LTcuMTQtOC4zMi0xLjE5LTMuNjQtLjktNy41Mi44My0xMC45M2w1OC45NS0xMTYuNDgtMTAuMzMtMzEuMjhjLTEuOTQtNS44OC03LjQxLTkuODQtMTMuNi05Ljg0LTEuNTIsMC0zLjAzLjI0LTQuNDkuNzNMOS44NCwzMy4yNUMyLjM0LDM1LjczLTEuNzUsNDMuODUuNzIsNTEuMzVsNDcuNTUsMTQ0LjA1YzEuOTQsNS44OSw3LjQxLDkuODQsMTMuNiw5Ljg0LDEuNTIsMCwzLjA0LS4yNCw0LjQ5LS43M2w0My44My0xNC40Ny0yNi4wNS0xMy4xOFoiLz48cGF0aCBmaWxsPSIjMDA3Y2Q4IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0yNjUuMzEsNzEuMWMtMS4xOS0zLjY0LTMuNzMtNi41OS03LjE0LTguMzJMMTY1LjU5LDE1Ljk0Yy0yLjAzLTEuMDMtNC4yLTEuNTUtNi40Ni0xLjU1LTUuNDQsMC0xMC4zNCwzLjAxLTEyLjc5LDcuODZsLTY4LjUsMTM1LjM1Yy0xLjczLDMuNDItMi4wMiw3LjMtLjgzLDEwLjkzLDEuMTksMy42NCwzLjczLDYuNTksNy4xNCw4LjMybDkyLjU4LDQ2Ljg1YzIsMS4wMSw0LjIzLDEuNTUsNi40NiwxLjU1LDUuNDQsMCwxMC4zNC0zLjAxLDEyLjc5LTcuODZsNjguNDktMTM1LjM1YzEuNzMtMy40MSwyLjAyLTcuMy44My0xMC45M1oiLz48L2c+PC9zdmc+">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"></noscript>
 <style>
 :root{
   /* Neutres chauds — DESIGN.md §3 */
@@ -552,7 +552,7 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 <script src="js/morph.js?v=20261020a"></script>
 <script>if(window.top !== window.self){ try{ window.top.location = window.self.location.href; }catch(e){ document.documentElement.style.display = 'none'; } }</script>
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
-<script src="js/supabase.js?v=20261107a"></script>
+<script src="js/supabase.js?v=20261107b"></script>
 <script src="js/tm-select.js?v=20261106b"></script>
 <script src="js/geo.js?v=20261106z"></script>
 <script src="js/prix.js?v=20261106z"></script>
@@ -1772,7 +1772,9 @@ document.addEventListener('input', e => {
     const res = D.users.filter(u => [u.legal, u.handle, u.email, u.phone].join(' ').toLowerCase().includes(q)).slice(0, 8);
     g.innerHTML = res.length ? res.map(u => '<button data-act="gres" data-id="'+u.id+'">'+av(u)+'<span class="grow"><b style="display:block">'+esc(u.legal)+'</b><small class="hint">@'+esc(u.handle)+' · '+esc(u.email)+'</small></span>'+statusChip(u)+'</button>').join('') : '<p class="hint" style="padding:10px;margin:0">Aucun utilisateur.</p>';
     g.hidden = false; return; }
-  const keep = (k, v) => { const pos = t.selectionStart; A.q[k] = v; render(); const n = $('[data-act="'+t.dataset.act+'"]'); if(n){ n.focus(); try{ n.setSelectionRange(pos, pos); }catch(err){} } };
+  /* Filtres des tableaux : la liste est recalculée après une courte pause dans la frappe (debounce). */
+  const keep = (k, v) => { A.q[k] = v; clearTimeout(A._qT); const act = t.dataset.act;
+    A._qT = setTimeout(() => { const f = $('[data-act="'+act+'"]'), pos = f ? f.selectionStart : null; render(); const n = $('[data-act="'+act+'"]'); if(n){ n.focus(); try{ n.setSelectionRange(pos, pos); }catch(err){} } }, 180); };
   if(t.dataset.act === 'uq') return keep('users', t.value);
   if(t.dataset.act === 'payq') return keep('pay', t.value);
   if(t.dataset.act === 'auditq') return keep('audit', t.value);
@@ -1881,6 +1883,7 @@ addEventListener('popstate', () => {
 <script src="js/admin-suspects.js?v=20261106a"></script>
 <script src="js/admin-messages.js?v=20261106z"></script>
 <script src="js/admin-compte.js?v=20261107a"></script>
+<script src="js/admin-perf.js?v=20261107a"></script>
 <script src="js/partenaires-data.js?v=20261106z"></script>
 <script src="js/admin-partenaires.js?v=20261020-lucide"></script>
 <script src="js/admin-maintenance.js?v=20261103a"></script>
