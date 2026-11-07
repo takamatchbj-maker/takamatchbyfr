@@ -3103,7 +3103,7 @@ function createMatch(id, celebrate){
     confetti();
     modal('', '<div class="ov-ok"><div style="position:relative;margin-bottom:12px">'+revealAv(x)+'</div>'
       + '<h2 class="ov-t" id="ovT" style="margin:0 0 8px">Vous avez matché</h2>'
-      + '<p style="max-width:40ch"><b>'+esc(partner)+'</b> a accepté. Vos noms, photos et coordonnées sont maintenant visibles, la messagerie est ouverte et l\'Atelier vous attend.</p></div>'
+      + '<p style="max-width:40ch">Toi et <b>'+esc(partner)+'</b> faites désormais équipe. Vos noms, photos et coordonnées sont maintenant visibles, la messagerie est ouverte et l\'Atelier vous attend.</p></div>'
       + note('a','target','Première étape recommandée : <b>une visio de 45 minutes</b>, avant tout engagement.')
       + (isTalMode() ? note('', 'users', 'Tu es maintenant sur <span class="mono">'+engagedN()+'/3</span> projets.') : ''),
       '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-a" data-act="goto-thread" data-id="'+id+'">'+ic('chat')+'Ouvrir la discussion</button>');

@@ -332,7 +332,10 @@
     }catch(e){ return true; }
   }
   async function refresh(force){
-    if(D.busy) return; D.busy = true;
+    /* Un rechargement est déjà en cours : une demande forcée (après une action) attend sa fin puis relit tout. */
+    if(D.busy){ if(force){ try{ await D.running; }catch(e){} return refresh(true); } return; }
+    D.busy = true;
+    let done; D.running = new Promise(r => { done = r; });
     try{
       if(!force && !(await pulseChanged())) return;
       const before = signature();
@@ -344,13 +347,20 @@
       S.ctxs = {}; S.prof = {};
       loadCtx();
       if(S.saved) saveBaseline(true);
-      const typing = document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
-      if(!typing && !S.layer){ S.view = view; render(); if(view === 'messages') scrollChat(); }
+      const ae = document.activeElement, typing = ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);
+      /* Dans la messagerie, la zone de saisie a presque toujours le focus : on affiche quand même
+         les nouveaux messages, en gardant le texte en cours et la position du curseur. */
+      const chatTyping = typing && view === 'messages' && ae.id === 'msgIn';
+      if((!typing || chatTyping) && !S.layer){
+        const keep = chatTyping ? {v:ae.value, a:ae.selectionStart, b:ae.selectionEnd} : null;
+        S.view = view; render(); if(view === 'messages') scrollChat();
+        if(keep){ const n = document.getElementById('msgIn'); if(n){ n.value = keep.v; try{ n.focus({preventScroll:true}); n.setSelectionRange(keep.a, keep.b); }catch(e){} } }
+      }
       else { renderTop(); syncSide(); }
       /* Une signature ou une publication arrive pendant que le pacte est ouvert : on le met à jour. */
       if(typeof PACTE_ED !== 'undefined' && PACTE_ED && S.teams[PACTE_ED.tid]) pacteRefresh(S.teams[PACTE_ED.tid]);
     }catch(e){ console.warn('[TakaMatch] rechargement', e); }
-    finally{ D.busy = false; }
+    finally{ D.busy = false; done(); }
   }
   D.refresh = refresh;
 
@@ -431,7 +441,7 @@
     confetti();
     modal('', '<div class="ov-ok"><div style="position:relative;margin-bottom:12px">'+revealAv(x)+'</div>'
       + '<h2 class="ov-t" id="ovT" style="margin:0 0 8px">Vous avez matché</h2>'
-      + '<p style="max-width:40ch"><b>'+esc(partner)+'</b> a accepté. Vos noms, photos et coordonnées sont maintenant visibles, la messagerie est ouverte et l\'Atelier vous attend.</p></div>'
+      + '<p style="max-width:40ch">Toi et <b>'+esc(partner)+'</b> faites désormais équipe. Vos noms, photos et coordonnées sont maintenant visibles, la messagerie est ouverte et l\'Atelier vous attend.</p></div>'
       + note('a','target','Première étape recommandée : <b>une visio de 45 minutes</b>, avant tout engagement.')
       + (isTalMode() ? note('', 'users', 'Tu es maintenant sur <span class="mono">'+engagedN()+'/3</span> projets.') : ''),
       '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-a" data-act="goto-thread" data-id="'+id+'">'+ic('chat')+'Ouvrir la discussion</button>');

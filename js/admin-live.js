@@ -87,7 +87,11 @@
   /* ---------- Chargement ---------- */
   async function safe(p, def){ try{ return (await p) || def; }catch(e){ console.warn('[admin-live]', e && e.message); return def; } }
   LIVE.load = async function(quiet){
-    if(LIVE.loading) return; LIVE.loading = true;
+    /* Un chargement est déjà en cours (rafraîchissement automatique) : on attend sa fin puis on relit,
+       pour qu'une action qui vient d'être faite (suppression, décision…) s'affiche tout de suite. */
+    if(LIVE.loading){ try{ await LIVE.running; }catch(e){} return LIVE.load(quiet); }
+    LIVE.loading = true;
+    let done; LIVE.running = new Promise(r => { done = r; });
     try{
       const [users, verifs, reports, tickets, smsgs, projects, team, ateliers, pactes, pays, logs, invs] = await Promise.all([
         TMDB.rpc('admin_users'),
@@ -131,7 +135,7 @@
       LIVE.on = true; LIVE.at = Date.now();
     }catch(e){
       toast('Les données de la plateforme n\'ont pas pu être chargées : ' + (e.message || e), 'bad');
-    }finally{ LIVE.loading = false; }
+    }finally{ LIVE.loading = false; done(); }
     if(A.me && !A.modal){ const keep = A.drawer; render(); if(keep){ A.drawer = keep; paintOverlay(); } }
   };
   async function after(msg, kind){ A.modal = null; await LIVE.load(true); if(msg) toast(msg, kind); }
