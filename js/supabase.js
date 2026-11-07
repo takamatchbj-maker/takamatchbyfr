@@ -275,6 +275,10 @@
         headers:{'Content-Type':blob.type || 'application/octet-stream', 'x-upsert':'true', 'cache-control':'3600'}});
       return SB_URL + '/storage/v1/object/public/' + bucket + '/' + path;
     },
+    /* Retire des fichiers d'un espace de stockage (selon les droits de la personne connectée). */
+    removeFiles: function(bucket, names){
+      return api('/storage/v1/object/' + bucket, {method:'DELETE', body:{prefixes:names || []}});
+    },
     dataUrlToBlob: function(u){
       var m = /^data:([^;,]+)?(;base64)?,(.*)$/.exec(u || ''); if(!m) return null;
       var bin = m[2] ? atob(m[3]) : decodeURIComponent(m[3]), arr = new Uint8Array(bin.length);

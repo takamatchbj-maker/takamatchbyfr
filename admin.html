@@ -552,7 +552,7 @@ tr.fresh td{background:color-mix(in srgb,var(--tal-50) 70%,transparent)}
 <script src="js/morph.js?v=20261020a"></script>
 <script>if(window.top !== window.self){ try{ window.top.location = window.self.location.href; }catch(e){ document.documentElement.style.display = 'none'; } }</script>
 <script>window.TM_SB_SKEY = 'tm-sb-admin';</script>
-<script src="js/supabase.js?v=20261106a"></script>
+<script src="js/supabase.js?v=20261107a"></script>
 <script src="js/tm-select.js?v=20261106b"></script>
 <script src="js/geo.js?v=20261106z"></script>
 <script src="js/prix.js?v=20261106z"></script>
@@ -1012,13 +1012,15 @@ function verifDrawer(v){
   const u = userBy(v.uid), open = v.status === 'pending' || v.status === 'more';
   const doc = v.doc || docSvg(u, 'doc', v), selfie = v.selfie || docSvg(u, 'selfie', v);
   const checks = [['name','Le nom sur la pièce correspond au nom légal du compte ('+esc(u.legal)+')'], ['face','Le visage du selfie correspond à la photo de la pièce'],
-    ['valid','La pièce est valide et non expirée'], ['read','Les deux photos sont nettes et lisibles']];
+    ['valid','La pièce est valide et non expirée'], ['read','Les deux photos sont nettes et lisibles']].concat(v.code ? [['code','Le code <b class="mono">'+esc(v.code)+'</b> est écrit à la main et lisible sur le selfie']] : []);
   return drawer('Dossier '+esc(v.id), '<span class="chip '+VST[v.status][1]+'">'+VST[v.status][0]+'</span>',
     (v.mismatch ? '<div class="note-box bad" style="margin-bottom:14px">'+ic('alert')+' Le nom lu sur la pièce (<b>'+esc(v.mismatch)+'</b>) ne correspond pas au nom légal déclaré à l\'inscription (<b>'+esc(u.legal)+'</b>).</div>' : '')
     + (v.blurry ? '<div class="note-box warn" style="margin-bottom:14px">'+ic('alert')+' La photo de la pièce est floue.</div>' : '')
+    + (v.code ? '<div class="note-box" style="margin-bottom:14px">'+ic('shield')+' Code attendu sur le selfie : <b class="mono" style="font-size:15px;letter-spacing:.06em">'+esc(v.code)+'</b>. Le selfie a été pris en direct avec la caméra. Refuse si le code est absent, différent ou ajouté par retouche.</div>'
+       : (v.docPath ? '<div class="note-box warn" style="margin-bottom:14px">'+ic('alert')+' Dossier envoyé avant le selfie avec code : redemande un complément si tu as un doute.</div>' : ''))
     + '<div class="dsec"><span class="lbl">Pièces soumises · '+fmt(v.at)+(v.live ? ' · envoyées depuis la plateforme' : '')+'</span><div class="docs">'
     +   '<div class="doc"><img src="'+doc+'" alt="Pièce d\'identité" data-act="zoom"><div class="cap"><span>Pièce d\'identité</span><span class="hint">cliquer pour agrandir</span></div></div>'
-    +   '<div class="doc"><img src="'+selfie+'" alt="Selfie" data-act="zoom"><div class="cap"><span>Selfie avec la pièce</span></div></div></div></div>'
+    +   '<div class="doc"><img src="'+selfie+'" alt="Selfie" data-act="zoom"><div class="cap"><span>Selfie'+(v.code ? ' avec le code '+esc(v.code) : ' avec la pièce')+'</span></div></div></div></div>'
     + '<div class="dsec"><span class="lbl">Ce que dit le compte</span><dl class="kv">'
     +   '<dt>Nom légal</dt><dd><b>'+esc(u.legal)+'</b> <span class="hint">non modifiable depuis l\'inscription</span></dd><dt>Pseudo</dt><dd><span class="handle">@'+esc(u.handle)+'</span></dd>'
     +   '<dt>Profils</dt><dd>'+roleChips(u)+'</dd><dt>Sexe</dt><dd>'+(u.sex === 'f' ? 'Féminin' : u.sex === 'm' ? 'Masculin' : 'Non précisé')+'</dd><dt>Ville</dt><dd>'+esc(u.city)+'</dd>'
@@ -1875,9 +1877,10 @@ addEventListener('popstate', () => {
   A.view = v; A.drawer = null; A.modal = null; A.sideOpen = false; render(); window.scrollTo(0, 0);
 });
 </script>
-<script src="js/admin-live.js?v=20261029a"></script>
+<script src="js/admin-live.js?v=20261107a"></script>
 <script src="js/admin-suspects.js?v=20261106a"></script>
 <script src="js/admin-messages.js?v=20261106z"></script>
+<script src="js/admin-compte.js?v=20261107a"></script>
 <script src="js/partenaires-data.js?v=20261106z"></script>
 <script src="js/admin-partenaires.js?v=20261020-lucide"></script>
 <script src="js/admin-maintenance.js?v=20261103a"></script>

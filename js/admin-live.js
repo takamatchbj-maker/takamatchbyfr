@@ -56,7 +56,7 @@
     return {id:short('V', v.id), uuid:v.id, uid:v.user_id, at:ms(v.created_at), status:VSTATUS[v.status] || 'pending',
       mismatch:null, blurry:flags.includes('blurry') || flags.includes('floue'), live:false, doc:'', selfie:'',
       docPath:v.doc_path, selfiePath:v.selfie_path, history:[], decidedAt:v.status === 'more_info' ? null : ms(v.reviewed_at) || null,
-      decidedBy:staffBy(v.reviewer_id), motif:v.note || ''};
+      decidedBy:staffBy(v.reviewer_id), motif:v.note || '', code:v.challenge_code || ''};
   }
   const RSTATUS = {open:'new', in_review:'progress', closed:'done'};
   const RKIND = {profile:'Profil', project:'Fiche projet', message:'Message'};

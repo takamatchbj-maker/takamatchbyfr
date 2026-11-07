@@ -1150,7 +1150,7 @@ document.addEventListener('click', e => {
       if(S.sideOpen) openLayer('<div class="scrim" data-act="side-close" style="z-index:91"></div>', 'side'); break;
     case 'side-close': S.sideOpen = false; $('#side').classList.remove('open'); closeLayer(); break;
     case 'focus-nav': S.focusIdx += parseInt(t.dataset.d, 10); render(); break;
-    case 'clear-filters': S.q=''; S.filterSkill=''; S.filterSector=''; S.focusIdx=0; render(); break;
+    case 'clear-filters': S.q=''; S.filterSkill=''; S.filterSector=''; S.fVer=''; S.focusIdx=0; render(); break;
     case 'theme': toggleTheme(); break;
     case 'notifs': drawer(); break;
     case 'cmdk': cmdk(); break;
@@ -1247,13 +1247,7 @@ document.addEventListener('click', e => {
         + '<p class="hint">On t\'envoie un code à 6 chiffres. Ton numéro n\'est jamais affiché publiquement.</p>',
         '<button class="btn btn-ghost" data-act="close">Annuler</button><button class="btn btn-a" data-act="verify-phone-go">Recevoir le code</button>'); break;
     case 'verify-phone-go': S.me.verifiedPhone = true; closeLayer(); render(); toast('Téléphone vérifié.', 'ok'); break;
-    case 'verify-id': modal('Vérifier ton identité',
-        '<p>Deux photos : ta pièce d\'identité et un selfie. Elles sont analysées puis supprimées sous 30 jours. Tu obtiens le badge <b>Profil vérifié</b>.</p>'
-        + '<div class="grid g2" style="gap:10px">'+[['Pièce d\'identité','idF'],['Selfie','idS']].map(l=>'<label class="card" for="'+l[1]+'" style="padding:22px 14px;text-align:center;border-style:dashed;cursor:pointer">'
-          + '<div style="color:var(--ink-3);display:flex;justify-content:center;margin-bottom:6px">'+ic('image')+'</div>'
-          + '<div style="font-size:13px;font-weight:600;color:var(--ink-2)">'+l[0]+'</div><div class="hint" id="'+l[1]+'N">Choisir une photo</div>'
-          + '<input type="file" accept="image/*" id="'+l[1]+'" class="sr"></label>').join('')+'</div>',
-        '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-a" data-act="verify-id-go">Envoyer</button>'); break;
+    case 'verify-id': selfieOpen(); break;
     case 'verify-id-go': S.me.verifiedId = true; closeLayer(); confetti(); render(); toast('Identité vérifiée. Badge obtenu.', 'ok'); pushNotif('verif','Profil vérifié','Le badge de confiance est actif.'); break;
     case 'ask-ref': if(window.TMData && TMData.on){ toast('Les références arrivent bientôt sur TakaMatch.'); break; } modal('Demander une référence',
         '<p>Une personne avec qui tu as réellement travaillé confirme en trois clics ce que vous avez fait ensemble. C\'est le signal le plus difficile à falsifier.</p>'
@@ -2297,9 +2291,10 @@ function filtered(){
   if(S.filterSector) list = list.filter(x => (x.sectors||[]).includes(S.filterSector));
   if(tal && S.fPay === 'remu') list = list.filter(x => x.pay === 'mixte' || x.pay === 'paye');
   if(tal && S.fPay === 'prevue') list = list.filter(x => x.pay === 'paye');
+  if(S.fVer === 'oui') list = list.filter(x => tal ? !!x.ownerVerified : !!x.verified);
   return list.map(x => ({x, s:scoreOf(x)})).sort((a,b) => b.s.total - a.s.total);
 }
-const anyFilter = () => !!(S.q || S.filterSkill || S.filterSector || (isTalMode() && S.fPay));
+const anyFilter = () => !!(S.q || S.filterSkill || S.filterSector || S.fVer || (isTalMode() && S.fPay));
 function toolbar(){
   const tal = isTalMode();
   return '<div class="toolbar">'
@@ -2314,6 +2309,8 @@ function toolbar(){
   +   SKILLS.map(s => '<option value="'+s.id+'"'+(S.filterSkill===s.id?' selected':'')+'>'+esc(s.l)+'</option>').join('')+'</select>'
   + (tal ? '<select class="inp" id="fPay" aria-label="Filtrer par rémunération">'
       + [['','Toutes rémunérations'],['remu','Avec rémunération'],['prevue','Rémunération prévue']].map(o => '<option value="'+o[0]+'"'+(S.fPay===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>' : '')
+  + '<select class="inp" id="fVer" aria-label="Filtrer par vérification">'
+  +   [['','Tous les profils'],['oui',tal ? 'Porteurs vérifiés' : 'Profils vérifiés']].map(o => '<option value="'+o[0]+'"'+((S.fVer||'')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>'
   + '<button class="btn btn-quiet btn-sm" id="clearF" data-act="clear-filters"'+(anyFilter()?'':' hidden')+'>'+ic('x')+'Réinitialiser</button>'
   + '</div>'
   + (tal ? '' : '<div class="privacy">'+ic('lock')+'<span><b>3 informations débloquées après un match</b> : le nom, la photo et les coordonnées d\'un talent s\'affichent quand il accepte ton invitation.</span></div>');
@@ -3492,6 +3489,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('change', e => {
   if(e.target.id === 'fPay'){ S.fPay = e.target.value; S.focusIdx = 0; render(); }
+  if(e.target.id === 'fVer'){ S.fVer = e.target.value; S.focusIdx = 0; render(); }
 });
 
 /* ============================================================
@@ -4453,14 +4451,95 @@ function shrinkImage(file){
     rd.onerror = () => res(''); rd.readAsDataURL(file);
   });
 }
+/* ---------- Vérification d'identité : pièce + selfie en direct avec un code à usage unique ----------
+   Le code (TAKA-1234) est généré par la base et valable 30 minutes. Le membre l'écrit à la main,
+   le tient à côté de son visage et se photographie avec la caméra : aucun import de fichier pour le selfie.
+   À l'envoi, la base rattache elle-même le code au dossier (supabase/32_suppression_et_selfie_code.sql). */
+const VS = {code:'', exp:0, stream:null, blob:null, url:'', err:''};
+function selfieStop(){ if(VS.stream){ VS.stream.getTracks().forEach(t => { try{ t.stop(); }catch(e){} }); VS.stream = null; } }
+function selfieBox(){
+  const code = VS.code ? '<b class="mono" style="font-size:22px;letter-spacing:.08em;color:var(--ink)">'+esc(VS.code)+'</b>' : '<span class="hint">Code en cours de génération…</span>';
+  let cam;
+  if(VS.url) cam = '<img src="'+VS.url+'" alt="Ton selfie" style="width:100%;border-radius:12px;display:block">'
+    + '<div class="row" style="justify-content:center;margin-top:8px"><button type="button" class="btn btn-ghost btn-sm" data-act="selfie-cam">Reprendre la photo</button></div>';
+  else if(VS.stream) cam = '<video id="vsV" autoplay playsinline muted style="width:100%;border-radius:12px;background:#000;display:block"></video>'
+    + '<div class="row" style="justify-content:center;margin-top:8px"><button type="button" class="btn btn-a btn-sm" data-act="selfie-shot">'+ic('image')+'Prendre la photo</button></div>';
+  else cam = '<div style="text-align:center;padding:10px 0">'
+    + (VS.err ? '<p class="hint" style="color:var(--bad);margin:0 0 10px">'+esc(VS.err)+'</p>' : '')
+    + '<button type="button" class="btn btn-ghost" data-act="selfie-cam"'+(VS.code ? '' : ' disabled')+'>'+ic('image')+'Ouvrir la caméra</button></div>';
+  return '<div class="card" style="padding:14px">'
+    + '<div style="font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px">2 · Selfie en direct</div>'
+    + '<p style="margin:0 0 10px;font-size:13.5px">Écris ce code à la main sur une feuille, tiens-la à côté de ton visage et prends la photo avec la caméra :</p>'
+    + '<div style="text-align:center;padding:10px;border:1.5px dashed var(--line);border-radius:10px;margin-bottom:10px">'+code
+    + (VS.code ? '<div class="hint" style="margin-top:4px">Valable 30 minutes, pour ce dossier uniquement.</div>' : '')+'</div>'
+    + '<div id="vsCam">'+cam+'</div></div>';
+}
+function selfiePaint(){
+  const b = $('#vsBox'); if(!b) return;
+  b.innerHTML = selfieBox();
+  const v = $('#vsV'); if(v && VS.stream){ v.srcObject = VS.stream; try{ v.play(); }catch(e){} }
+  const go = $('[data-act="verify-id-go"]'); if(go) go.disabled = !VS.blob;
+}
+async function selfieCode(){
+  if(VS.code && Date.now() < VS.exp - 60e3) return;
+  VS.code = ''; selfiePaint();
+  try{
+    if(window.TMData && TMData.on){ const r = await TMDB.rpc('verif_challenge'); VS.code = r.code; VS.exp = Date.parse(r.expires_at) || Date.now() + 30*60e3; }
+    else { VS.code = 'TAKA-' + (1000 + Math.floor(Math.random() * 9000)); VS.exp = Date.now() + 30*60e3; }
+  }catch(e){ VS.err = 'Code indisponible : ' + e.message; }
+  selfiePaint();
+}
+function selfieOpen(){
+  selfieStop(); if(VS.url) URL.revokeObjectURL(VS.url);
+  VS.blob = null; VS.url = ''; VS.err = '';
+  modal('Vérifier ton identité',
+    '<p>Ta pièce d\'identité et un selfie pris en direct. L\'équipe TakaMatch les examine puis les supprime sous 30 jours. Tu obtiens le badge <b>Profil vérifié</b>.</p>'
+    + '<label class="card" for="idF" style="display:block;padding:16px 14px;text-align:center;border-style:dashed;cursor:pointer;margin-bottom:10px">'
+    +   '<div style="color:var(--ink-3);display:flex;justify-content:center;margin-bottom:6px">'+ic('image')+'</div>'
+    +   '<div style="font-size:13px;font-weight:600;color:var(--ink-2)">1 · Pièce d\'identité</div><div class="hint" id="idFN">Choisir une photo nette, recto</div>'
+    +   '<input type="file" accept="image/*" id="idF" class="sr"></label>'
+    + '<div id="vsBox">'+selfieBox()+'</div>',
+    '<button class="btn btn-ghost" data-act="close">Plus tard</button><button class="btn btn-a" data-act="verify-id-go" disabled>Envoyer</button>');
+  selfieCode();
+  const l = $('#layer');
+  if(l && !l._vsObs){ l._vsObs = new MutationObserver(() => { if(!$('#vsBox')) selfieStop(); }); l._vsObs.observe(l, {childList:true}); }
+}
+async function selfieCam(){
+  selfieStop(); if(VS.url){ URL.revokeObjectURL(VS.url); VS.url = ''; } VS.blob = null; VS.err = '';
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    VS.err = 'Ton navigateur n\'a pas accès à la caméra. Ouvre TakaMatch sur ton téléphone pour prendre le selfie en direct.'; return selfiePaint(); }
+  try{
+    VS.stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user', width:{ideal:1280}, height:{ideal:960}}, audio:false});
+  }catch(e){
+    VS.err = /NotAllowed|Permission/i.test(e.name + e.message) ? 'Autorise l\'accès à la caméra dans ton navigateur, puis réessaie.'
+      : 'Aucune caméra disponible. Ouvre TakaMatch sur ton téléphone pour prendre le selfie en direct.';
+  }
+  selfiePaint();
+}
+function selfieShot(){
+  const v = $('#vsV'); if(!v || !v.videoWidth) return toast('La caméra démarre, réessaie dans une seconde.', 'bad');
+  const k = Math.min(1, 1280 / Math.max(v.videoWidth, v.videoHeight)), c = document.createElement('canvas');
+  c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k);
+  c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+  c.toBlob(b => { if(!b) return toast('Photo impossible, réessaie.', 'bad');
+    selfieStop(); VS.blob = new File([b], 'selfie.jpg', {type:'image/jpeg'}); VS.url = URL.createObjectURL(b); selfiePaint(); }, 'image/jpeg', .9);
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act="selfie-cam"],[data-act="selfie-shot"]'); if(!t) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(t.dataset.act === 'selfie-cam') selfieCam(); else selfieShot();
+}, true);
 /* Demande de vérification : le dossier part à l'équipe, le badge attend sa décision. */
 document.addEventListener('click', async e => {
   const t = e.target.closest('[data-act="verify-id-go"]'); if(!t) return;
   e.preventDefault(); e.stopImmediatePropagation();
-  const fi = $('#idF'), fs = $('#idS');
+  const fi = $('#idF');
+  if(!fi || !fi.files[0]) return toast('Ajoute la photo de ta pièce d\'identité.', 'bad');
+  if(!VS.blob) return toast('Prends ton selfie en direct avec le code.', 'bad');
+  if(Date.now() > VS.exp + 10*60e3) return toast('Ton code a expiré. Reprends le selfie avec le nouveau code.', 'bad'), selfieCode();
   S.me.verifyPending = true;
-  if(window.TMData && TMData.on) TMData.verify(fi && fi.files[0], fs && fs.files[0]);
-  closeLayer(); render();
+  if(window.TMData && TMData.on) TMData.verify(fi.files[0], VS.blob);
+  selfieStop(); closeLayer(); render();
   success('Dossier envoyé', 'L\'équipe TakaMatch vérifie que ta pièce d\'identité et ton selfie correspondent à ton nom légal. Réponse sous <b>48 h</b> ; le badge '+vBadge(isTalMode() ? 'tal' : 'vis', true)+' s\'affiche dès la validation.');
   pushNotif('verif', 'Vérification en cours', 'Ton dossier est entre les mains de l\'équipe TakaMatch.');
 }, true);
