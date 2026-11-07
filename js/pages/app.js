@@ -361,7 +361,9 @@ function scoreBar(n){
 function animateRings(){
   requestAnimationFrame(()=>{
     $$('.ring2 .fg').forEach(c=>{
-      const off = c.getAttribute('stroke-dashoffset'), dash = c.getAttribute('stroke-dasharray');
+      /* La valeur cible est gardée dans data-off : si l'animation est lancée deux fois de suite,
+         on ne reprend pas la position de départ (anneau vide) comme valeur finale. */
+      const off = c.dataset.off || c.getAttribute('stroke-dashoffset'), dash = c.getAttribute('stroke-dasharray');
       c.style.transition = 'none'; c.setAttribute('stroke-dashoffset', dash);
       requestAnimationFrame(()=>{ c.style.transition = ''; setTimeout(()=>c.setAttribute('stroke-dashoffset', off), 30); });
     });
@@ -1453,7 +1455,7 @@ function ringHTML(pct, size, kind){
   const fs = Math.round(size*(pct >= 100 ? .17 : .2));
   return '<div class="ring2" style="width:'+size+'px;height:'+size+'px" role="img" aria-label="Fiche complète à '+pct+' %">'
     + '<svg viewBox="0 0 '+size+' '+size+'"><circle class="bg" cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" stroke-width="'+sw+'"/>'
-    + '<circle class="fg" style="stroke:url(#'+(kind === 'vis' || kind === 'perso' ? 'tmRgVis' : 'tmRgTal')+')" cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" stroke-width="'+sw+'" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+(c*(1-pct/100)).toFixed(1)+'"/></svg>'
+    + '<circle class="fg" style="stroke:url(#'+(kind === 'vis' || kind === 'perso' ? 'tmRgVis' : 'tmRgTal')+')" cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" stroke-width="'+sw+'" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+(c*(1-pct/100)).toFixed(1)+'" data-off="'+(c*(1-pct/100)).toFixed(1)+'"/></svg>'
     + '<b style="font-size:'+fs+'px">'+pct+'<small>%</small></b></div>';
 }
 

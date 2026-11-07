@@ -11,6 +11,10 @@
      en cours, groupes, options grisées, recherche par lettre.
    · Sur téléphone et tablette tactile, la roue native du système
      est gardée (plus confortable au doigt), avec le même style fermé.
+   · Champs à suggestions (<input list="…"> + <datalist>, ex. la ville) :
+     la liste grise du navigateur est remplacée par la même liste
+     flottante, filtrée pendant la frappe (accents ignorés), partout,
+     y compris sur téléphone.
    ============================================================ */
 (function(){
   'use strict';
@@ -124,6 +128,15 @@ select.tm-sel-open{border-color:var(--ink-3,#8A8578) !important;box-shadow:0 0 0
   }
   function choose(i){
     if(!cur) return;
+    if(cur.kind === 'list'){
+      const inp = cur.sel, v = cur.items[i].val;
+      close();
+      inp.value = v;
+      inp.dispatchEvent(new Event('input', {bubbles:true}));
+      inp.dispatchEvent(new Event('change', {bubbles:true}));
+      try{ inp.focus({preventScroll:true}); inp.setSelectionRange(v.length, v.length); }catch(e){}
+      return;
+    }
     const sel = cur.sel, o = cur.items[i].opt;
     close();
     if(sel.isConnected) try{ sel.focus({preventScroll:true}); }catch(e){}
@@ -143,6 +156,15 @@ select.tm-sel-open{border-color:var(--ink-3,#8A8578) !important;box-shadow:0 0 0
     open(sel);
   }, true);
   document.addEventListener('keydown', e => {
+    if(cur && cur.kind === 'list'){
+      const k = e.key;
+      if(k === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); return; }
+      if(k === 'ArrowDown'){ e.preventDefault(); setAct(cur.act < 0 ? 0 : move(cur.act, 1), true); return; }
+      if(k === 'ArrowUp'){ e.preventDefault(); setAct(move(cur.act, -1), true); return; }
+      if(k === 'Enter' && cur.act >= 0){ e.preventDefault(); e.stopPropagation(); choose(cur.act); return; }
+      if(k === 'Tab'){ close(); }
+      return;
+    }
     if(cur){
       const k = e.key;
       if(k === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); return; }
@@ -173,6 +195,44 @@ select.tm-sel-open{border-color:var(--ink-3,#8A8578) !important;box-shadow:0 0 0
   /* La page se redessine et le <select> disparaît : on ferme. */
   setInterval(() => { if(cur && !cur.sel.isConnected) close(); }, 400);
   document.addEventListener('focusout', e => { if(cur && e.target === cur.sel) setTimeout(() => { if(cur && document.activeElement !== cur.sel) close(); }, 0); }, true);
+
+  /* ---------- Champs à suggestions : <input list> + <datalist> ---------- */
+  const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  function adopt(inp){
+    if(!inp || inp.tagName !== 'INPUT' || !inp.getAttribute('list')) return;
+    inp.dataset.tmList = inp.getAttribute('list'); inp.removeAttribute('list');   /* plus de liste grise du navigateur */
+    inp.setAttribute('autocomplete', 'off'); inp.setAttribute('role', 'combobox'); inp.setAttribute('aria-autocomplete', 'list');
+  }
+  function suggest(inp){
+    const dl = document.getElementById(inp.dataset.tmList || ''); if(!dl){ if(cur && cur.sel === inp) close(); return; }
+    const q = norm(inp.value);
+    let list = Array.from(dl.options).map(o => o.value || o.textContent).filter(Boolean);
+    if(q) list = list.filter(v => norm(v).includes(q)).sort((a, b) => (norm(b).startsWith(q) ? 1 : 0) - (norm(a).startsWith(q) ? 1 : 0));
+    list = list.slice(0, 8);
+    if(!list.length || (list.length === 1 && norm(list[0]) === q)){ if(cur && cur.sel === inp) close(); return; }
+    if(!cur || cur.sel !== inp){
+      close();
+      const pop = document.createElement('div'); pop.className = 'tm-pop'; pop.setAttribute('role', 'listbox');
+      cur = {sel:inp, pop, items:[], act:-1, kind:'list'};
+      document.body.appendChild(pop);
+      inp.setAttribute('aria-expanded', 'true');
+      pop.addEventListener('mousedown', e => e.preventDefault());
+      pop.addEventListener('mousemove', e => { const o = e.target.closest('.tm-opt'); if(o && cur && +o.dataset.i !== cur.act) setAct(+o.dataset.i, false); });
+      pop.addEventListener('click', e => { const o = e.target.closest('.tm-opt'); if(o) choose(+o.dataset.i); });
+      const show = () => { if(cur && cur.pop === pop) pop.classList.add('in'); }; requestAnimationFrame(show); setTimeout(show, 40);
+    }
+    cur.pop.innerHTML = list.map((v, i) => '<div class="tm-opt" role="option" data-i="' + i + '" aria-selected="' + (v === inp.value ? 'true' : 'false') + '"><span>' + esc(v) + '</span>' + CHECK + '</div>').join('');
+    const els = cur.pop.querySelectorAll('.tm-opt');
+    cur.items = list.map((v, i) => ({val:v, el:els[i]})); cur.act = -1;
+    place();
+  }
+  const listInput = t => t && t.tagName === 'INPUT' && (t.dataset.tmList || t.getAttribute('list'));
+  document.addEventListener('focusin', e => { const t = e.target; if(!listInput(t)) return; adopt(t); suggest(t); }, true);
+  document.addEventListener('input', e => { const t = e.target; if(!listInput(t) || document.activeElement !== t) return; adopt(t); suggest(t); }, true);
+  /* Les écrans sont redessinés souvent : chaque nouveau champ à suggestions est adopté dès qu'il apparaît. */
+  const sweep = root => { try{ (root || document).querySelectorAll('input[list]').forEach(adopt); }catch(e){} };
+  new MutationObserver(() => sweep()).observe(document.documentElement, {childList:true, subtree:true});
+  sweep();
 
   window.TMSelect = {open, close};
 })();
