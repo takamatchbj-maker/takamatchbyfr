@@ -506,10 +506,13 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 .iconbtn:hover{color:var(--ink);border-color:var(--line-strong);background:var(--surface-2)}
 
 .iconbtn.on{background:var(--bad-bg);border-color:transparent;color:var(--bad)}
-/* Favori : étoile pleine sur la couleur du profil (bleu Talent, doré Visionnaire). */
-.iconbtn[data-act="fav"].on{background:var(--a-600);border-color:transparent;color:var(--a-on,#fff);box-shadow:0 4px 12px -4px color-mix(in srgb,var(--a-600) 70%,transparent)}
-.iconbtn[data-act="fav"].on svg,.iconbtn[data-act="fav"].on .ic{fill:currentColor}
-.iconbtn[data-act="fav"].on:hover{background:var(--a-600);filter:brightness(.94);color:var(--a-on,#fff)}
+/* Favori : le carreau reste blanc, c'est l'étoile qui se remplit.
+   Étoile jaune sur une fiche projet (vue Talent), bleue sur une fiche talent (vue Visionnaire). */
+.iconbtn[data-act="fav"].on{background:var(--surface);border-color:var(--line);color:var(--vis-600)}
+.iconbtn[data-act="fav"].on svg,.iconbtn[data-act="fav"].on .ic{fill:var(--vis-500);stroke:var(--vis-600)}
+:root[data-role="vis"] .iconbtn[data-act="fav"].on{color:var(--tal-600)}
+:root[data-role="vis"] .iconbtn[data-act="fav"].on svg,:root[data-role="vis"] .iconbtn[data-act="fav"].on .ic{fill:var(--tal-500);stroke:var(--tal-600)}
+.iconbtn[data-act="fav"].on:hover{background:var(--surface-2);border-color:var(--line-strong)}
 .iconbtn[data-act="fav"]:active{transform:scale(.9)}
 
 .iconbtn .ic{width:15px;height:15px}
