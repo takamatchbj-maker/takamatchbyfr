@@ -157,7 +157,7 @@ const DEFAULT_ME = {
 const S = {
   booted:false, view:'accueil', tab:'decouvrir', mode:'mosaic', ficheTab:'projet',
   me:structuredClone(DEFAULT_ME),
-  q:'', filterSkill:'', filterSector:'', sortBy:'score',
+  q:'', filterSector:'', sortBy:'score',
   favs:new Set(), invitesSent:[], invitesRecv:[], matches:[], threads:[], notifs:[],
   activeThread:null, focusIdx:0, sideOpen:false, layer:null, typing:false,
   atelier:{
@@ -630,7 +630,7 @@ function skelDeck(){
 const EXP_PAGE = 12;   /* fiches affichées d'un coup ; les suivantes à la demande */
 function mosaic(list){
   if(!list.length) return launchMode() ? launchPanel() + exampleDeck() : emptyState();
-  const sig = [S.me.role, S.tab, S.q, S.filterSkill, S.filterSector, S.fPay].join('|');
+  const sig = [S.me.role, S.tab, S.q, S.filterSector].join('|');
   if(S._expSig !== sig){ S._expSig = sig; S.expShown = EXP_PAGE; }
   const n = Math.min(list.length, S.expShown || EXP_PAGE);
   return '<div class="deck">' + list.slice(0, n).map(r => card(r.x, r.s)).join('') + '</div>'
@@ -655,6 +655,15 @@ function invAll(){
   return S.invitesRecv.map(i => Object.assign({dir:'recv'}, i)).concat(S.invitesSent.map(i => Object.assign({dir:'sent'}, i)))
     .sort((a,b) => (a.status==='new'?-1:0) - (b.status==='new'?-1:0) || a.min - b.min);
 }
+/* Le rappel d'expiration dit les choses selon ce qui est affiché : un talent reçoit des invitations
+   et envoie des candidatures, un porteur l'inverse ; seul l'envoi d'une invitation coûte un crédit. */
+function invExpiryNote(){
+  const tal = isTalMode(), f = S.invFilter;
+  if(f === 'recv') return (tal ? 'Une invitation' : 'Une candidature') + ' sans réponse expire au bout de 10 jours.';
+  if(f === 'sent') return tal ? 'Une candidature sans réponse expire au bout de 10 jours.'
+    : 'Une invitation sans réponse expire au bout de 10 jours. Le crédit dépensé n\'est pas rendu.';
+  return 'Sans réponse, une invitation ou une candidature expire au bout de 10 jours.' + (tal ? '' : ' Le crédit dépensé pour une invitation n\'est pas rendu.');
+}
 function invitationsPanel(){
   const all = invAll();
   const list = all.filter(i => S.invFilter === 'all' || i.dir === S.invFilter);
@@ -662,7 +671,7 @@ function invitationsPanel(){
   const seg = '<div class="seg-sm" role="group" aria-label="Filtrer les invitations">'
     + [['all','Toutes'],['recv','Reçues'],['sent','Envoyées']].map(([k,l]) => '<button class="'+(S.invFilter===k?'on':'')+'" data-act="inv-filter" data-v="'+k+'" aria-pressed="'+(S.invFilter===k)+'">'+l+'<span class="n">'+n(k)+'</span></button>').join('')+'</div>';
   const head = '<div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">'+seg
-    + '<span class="hint row" style="gap:6px">'+ic('clock')+'Une invitation sans réponse expire au bout de 10 jours. '+(isTalMode()?'':'Le crédit dépensé n\'est pas rendu.')+'</span></div>';
+    + '<span class="hint row" style="gap:6px">'+ic('clock')+invExpiryNote()+'</span></div>';
   if(!list.length){
     return head + '<div class="card">'+emptyBox('✉️','Aucune invitation ici',
       isTalMode() ? "Explore les projets et envoie ta première invitation, ou attends qu'un porteur te repère." : "Explore les talents et envoie ta première invitation. Il te reste "+S.me.credits+" crédits.",
@@ -1147,12 +1156,11 @@ document.addEventListener('click', e => {
       S.tab = nt; S.focusIdx = 0; render(); break; }
     case 'exp-more': S.expShown = (S.expShown || EXP_PAGE) + EXP_PAGE; repaintExplorer(); break;
     case 'mode': S.mode = t.dataset.m; S.focusIdx = 0; render(); break;
-    case 'fskill': S.filterSkill = t.dataset.v; S.focusIdx = 0; render(); break;
     case 'side-toggle': S.sideOpen = !S.sideOpen; $('#side').classList.toggle('open', S.sideOpen);
       if(S.sideOpen) openLayer('<div class="scrim" data-act="side-close" style="z-index:91"></div>', 'side'); break;
     case 'side-close': S.sideOpen = false; $('#side').classList.remove('open'); closeLayer(); break;
     case 'focus-nav': S.focusIdx += parseInt(t.dataset.d, 10); render(); break;
-    case 'clear-filters': S.q=''; S.filterSkill=''; S.filterSector=''; S.fVer=''; S.focusIdx=0; render(); break;
+    case 'clear-filters': S.q=''; S.filterSector=''; S.focusIdx=0; render(); break;
     case 'theme': toggleTheme(); break;
     case 'notifs': drawer(); break;
     case 'cmdk': cmdk(); break;
@@ -1332,7 +1340,6 @@ document.addEventListener('change', e => {
   const el = e.target;
   if(el.id === 'fSector'){ S.filterSector = el.value; S.focusIdx = 0; render(); }
   else if(el.id === 'sortBy'){ S.sortBy = el.value; S.focusIdx = 0; render(); }
-  else if(el.id === 'fSkill'){ S.filterSkill = el.value; S.focusIdx = 0; render(); }
   else if(el.id === 'coverIn'){ loadCover(el.files[0]); el.value = ''; }
   else if(el.id === 'avatarIn'){ loadAvatar(el.files[0]); el.value = ''; }
   else if(el.id === 'idF' || el.id === 'idS'){ const n = $('#'+el.id+'N'); if(n && el.files[0]) n.textContent = el.files[0].name; }
@@ -1517,10 +1524,6 @@ function openTalentProject(id){ if(S.layer === 'fiche') { S.fv.sub = 'tproj'; re
 
 
 /* ---------- Cartes de l'annuaire ---------- */
-
-/* ---------- Barre d'outils d'Explorer : secteur et compétence en listes ---------- */
-
-
 
 /* ---------- Palette de commandes, avec son bouton de fermeture ---------- */
 function cmdk(){
@@ -2013,7 +2016,7 @@ function initAccount(){
   m.projects = [blankProject()]; m.projIdx = 0;
   attachProjectGetter(m);
   m.visUnlocked = false; m.visSince = null; m.slots = 1;
-  S.ctxs = {}; S.prof = {}; S.fPay = ''; S.pubView = 'membre';
+  S.ctxs = {}; S.prof = {}; S.pubView = 'membre';
 }
 initAccount();
 
@@ -2283,9 +2286,7 @@ function ficheWinInner(){
     + '<div class="col" style="gap:14px">'+scoreCard(scoreOf(x))+ctaCard(x)+'</div></div></div>';
 }
 
-/* ============================================================
-   Explorer : filtre de rémunération côté talent
-   ============================================================ */
+/* ---------- Explorer : recherche et secteur ---------- */
 function filtered(){
   const q = S.q.trim().toLowerCase(), tal = isTalMode();
   let list = pool().filter(x => !x.hidden);
@@ -2296,14 +2297,10 @@ function filtered(){
       : [isUnlocked(x.id) ? x.name : '', x.bio, handleOf(x), x.city, (x.skills||[]).map(skillL).join(' '), x.id];
     return hay.join(' ').toLowerCase().includes(q);
   });
-  if(S.filterSkill) list = list.filter(x => (tal ? (x.seeking||[]) : (x.skills||[])).includes(S.filterSkill));
   if(S.filterSector) list = list.filter(x => (x.sectors||[]).includes(S.filterSector));
-  if(tal && S.fPay === 'remu') list = list.filter(x => x.pay === 'mixte' || x.pay === 'paye');
-  if(tal && S.fPay === 'prevue') list = list.filter(x => x.pay === 'paye');
-  if(S.fVer === 'oui') list = list.filter(x => tal ? !!x.ownerVerified : !!x.verified);
   return list.map(x => ({x, s:scoreOf(x)})).sort((a,b) => b.s.total - a.s.total);
 }
-const anyFilter = () => !!(S.q || S.filterSkill || S.filterSector || S.fVer || (isTalMode() && S.fPay));
+const anyFilter = () => !!(S.q || S.filterSector);
 function toolbar(){
   const tal = isTalMode();
   return '<div class="toolbar">'
@@ -2311,23 +2308,16 @@ function toolbar(){
   +   '<button class="'+(S.mode==='mosaic'?'on':'')+'" data-act="mode" data-m="mosaic" aria-pressed="'+(S.mode==='mosaic')+'">'+ic('grid')+'Mosaïque</button>'
   +   '<button class="'+(S.mode==='focus'?'on':'')+'" data-act="mode" data-m="focus" aria-pressed="'+(S.mode==='focus')+'">'+ic('layers')+'Cartes</button></div>'
   + '<div class="search"><span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-4);display:flex">'+ic('search')+'</span>'
-  +   '<input class="inp" id="q" style="padding-left:39px" placeholder="'+(tal?'Projet, secteur, @pseudo…':'Compétence, ville, @pseudo, ID…')+'" value="'+esc(S.q)+'" aria-label="Rechercher" autocomplete="off"></div>'
+  +   '<input class="inp" id="q" style="padding-left:39px" placeholder="'+(tal?'Projet, compétence recherchée, ville, @pseudo…':'Compétence, ville, @pseudo, ID…')+'" value="'+esc(S.q)+'" aria-label="Rechercher" autocomplete="off"></div>'
   + '<select class="inp" id="fSector" aria-label="Filtrer par secteur"><option value="">Tous secteurs</option>'
   +   SECTORS.map(s => '<option value="'+s.id+'"'+(S.filterSector===s.id?' selected':'')+'>'+s.g+' '+esc(s.l)+'</option>').join('')+'</select>'
-  + '<select class="inp" id="fSkill" aria-label="'+(tal?'Filtrer par compétence recherchée':'Filtrer par compétence')+'"><option value="">'+(tal?'Toutes compétences recherchées':'Toutes compétences')+'</option>'
-  +   SKILLS.map(s => '<option value="'+s.id+'"'+(S.filterSkill===s.id?' selected':'')+'>'+esc(s.l)+'</option>').join('')+'</select>'
-  + (tal ? '<select class="inp" id="fPay" aria-label="Filtrer par rémunération">'
-      + [['','Toutes rémunérations'],['remu','Avec rémunération'],['prevue','Rémunération prévue']].map(o => '<option value="'+o[0]+'"'+(S.fPay===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>' : '')
-  + '<select class="inp" id="fVer" aria-label="Filtrer par vérification">'
-  +   [['','Tous les profils'],['oui',tal ? 'Porteurs vérifiés' : 'Profils vérifiés']].map(o => '<option value="'+o[0]+'"'+((S.fVer||'')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>'
   + '<button class="btn btn-quiet btn-sm" id="clearF" data-act="clear-filters"'+(anyFilter()?'':' hidden')+'>'+ic('x')+'Réinitialiser</button>'
   + '</div>'
   + (tal ? '' : '<div class="privacy">'+ic('lock')+'<span><b>3 informations débloquées après un match</b> : le nom, la photo et les coordonnées d\'un talent s\'affichent quand il accepte ton invitation.</span></div>');
 }
 function emptyState(){
   if(S.tab === 'favoris' && !S.favs.size) return '<div class="card">'+emptyBox('⭐','Aucun favori',"Mets de côté les fiches qui t'intéressent avec l'étoile : tu les retrouveras ici.")+'</div>';
-  const payTxt = isTalMode() && S.fPay;
-  return '<div class="card">'+emptyBox('🔍','Rien ne correspond', payTxt ? "Aucun projet ne propose de rémunération avec ces filtres. Élargis-les ou vide la recherche." : "Aucune fiche ne passe tous tes filtres. Élargis-les ou vide la recherche.",
+  return '<div class="card">'+emptyBox('🔍','Rien ne correspond', "Aucune fiche ne correspond à ta recherche. Essaie un autre mot ou un autre secteur.",
     '<button class="btn btn-ghost btn-sm" style="margin-top:6px" data-act="clear-filters">Réinitialiser les filtres</button>')+'</div>';
 }
 /* ============================================================
@@ -2790,7 +2780,7 @@ function go(v){
   render(); countUp();
   try{ $('#main').focus({preventScroll:true}); }catch(e){}
 }
-function resetUi(){ Object.assign(S, {tab:'decouvrir', focusIdx:0, q:'', filterSkill:'', filterSector:'', fPay:'', invFilter:'all', showArch:false, mobileThread:false, objForm:false, taskForm:null, ficheTab:'projet'}); scheduleReminder(); }
+function resetUi(){ Object.assign(S, {tab:'decouvrir', focusIdx:0, q:'', filterSector:'', invFilter:'all', showArch:false, mobileThread:false, objForm:false, taskForm:null, ficheTab:'projet'}); scheduleReminder(); }
 function switchRole(){
   const to = isTalMode() ? 'vis' : 'tal';
   if(!tmRoleOpen(to)) return unlockModal();
@@ -3497,8 +3487,6 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('change', e => {
-  if(e.target.id === 'fPay'){ S.fPay = e.target.value; S.focusIdx = 0; render(); }
-  if(e.target.id === 'fVer'){ S.fVer = e.target.value; S.focusIdx = 0; render(); }
 });
 
 /* ============================================================
@@ -4060,7 +4048,7 @@ function tmSecondTalHTML(){
       if(acc.tool){ S.me = acc.tool; S.me.projects = S.me.projects || [blankProject()]; }
       else S.me = fromOnb(acc.onb || {}, acc.email);
       attachProjectGetter(S.me);
-      S.ctxs = {}; S.prof = {}; S.payments = []; S.fPay = ''; S.pubView = 'membre';
+      S.ctxs = {}; S.prof = {}; S.payments = []; S.pubView = 'membre';
     } else if(acc.email){
       S.me.email = acc.email;
     }
@@ -4342,7 +4330,8 @@ function startWelcomeTour(again){
             : ['Les talents classés par compatibilité avec <b>'+esc(projName(S.me.project))+'</b>. Leur nom et leur photo restent masqués jusqu\'au match.',
                '<b>Inviter</b> coûte 1 crédit : il t\'en reste <b>'+S.me.credits+'</b> sur '+S.me.creditsMax+' ce mois.']},
     {sel:navSel('connexions'), t:'Connexions',
-      p:['Tes invitations envoyées et reçues. Sans réponse, une invitation expire au bout de <b>10 jours</b>'+(tal ? '.' : ', et le crédit dépensé n\'est pas rendu.'),
+      p:[(tal ? 'Les invitations que tu reçois et les candidatures que tu envoies. Sans réponse, elles expirent au bout de <b>10 jours</b>.'
+              : 'Les invitations que tu envoies et les candidatures que tu reçois. Sans réponse, elles expirent au bout de <b>10 jours</b>, et le crédit dépensé pour une invitation n\'est pas rendu.'),
          'Quand une invitation est acceptée, c\'est un <b>match</b> : il se range dans l\'onglet Matchs.']},
     {sel:navSel('messages'), t:'Messages',
       p:['La messagerie s\'ouvre avec ton premier match : d\'abord en privé, puis en groupe dès que l\'équipe compte 3 membres.',

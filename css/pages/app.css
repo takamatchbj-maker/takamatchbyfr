@@ -277,7 +277,7 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 
 .toolbar .btn{height:44px}
 
-.toolbar .search{position:relative;flex:1 1 190px;min-width:190px}
+.toolbar .search{position:relative;flex:1 1 360px;min-width:220px}
 
 .toolbar .search .inp{height:44px}
 
@@ -506,6 +506,11 @@ textarea.inp{height:auto;padding:12px 14px;resize:vertical;min-height:104px;line
 .iconbtn:hover{color:var(--ink);border-color:var(--line-strong);background:var(--surface-2)}
 
 .iconbtn.on{background:var(--bad-bg);border-color:transparent;color:var(--bad)}
+/* Favori : étoile pleine sur la couleur du profil (bleu Talent, doré Visionnaire). */
+.iconbtn[data-act="fav"].on{background:var(--a-600);border-color:transparent;color:var(--a-on,#fff);box-shadow:0 4px 12px -4px color-mix(in srgb,var(--a-600) 70%,transparent)}
+.iconbtn[data-act="fav"].on svg,.iconbtn[data-act="fav"].on .ic{fill:currentColor}
+.iconbtn[data-act="fav"].on:hover{background:var(--a-700)}
+.iconbtn[data-act="fav"]:active{transform:scale(.9)}
 
 .iconbtn .ic{width:15px;height:15px}
 

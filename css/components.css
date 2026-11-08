@@ -158,14 +158,45 @@ h1 svg.ic, h2 svg.ic, h3 svg.ic{width:18px;height:18px}
 .tmg-boot.dark{background:#1A1815;color:#EDE9E0}
 .tmg-boot.err{opacity:1;animation:none}
 .tmg-boot[hidden],.tmg-bar[hidden]{display:none}
-.tmg-boot.sk{display:grid;grid-template-columns:240px 1fr;place-items:stretch;padding:0;gap:0;text-align:left;opacity:1;animation:none}
-.sk-side{border-right:1px solid rgba(127,120,105,.18);padding:22px 16px;display:grid;align-content:start;gap:12px}
-.sk-main{padding:26px clamp(16px,4vw,40px);display:grid;align-content:start;gap:16px;min-width:0}
-.sk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
-.sk-b{display:block;border-radius:10px;background:linear-gradient(90deg,rgba(127,120,105,.10) 25%,rgba(127,120,105,.20) 37%,rgba(127,120,105,.10) 63%);background-size:400% 100%;animation:skSh 1.3s ease infinite}
-.sk-card{height:190px;border-radius:14px}
+.tmg-boot.sk{display:flex;flex-direction:column;place-items:stretch;padding:0;gap:0;text-align:left;opacity:1;animation:none;overflow:hidden}
+/* Squelette de l'outil : même plan que la page (barre du haut, menu latéral, compteurs, deux colonnes). */
+.sk-b{display:block;flex:0 0 auto;border-radius:8px;background:linear-gradient(90deg,rgba(127,120,105,.10) 25%,rgba(127,120,105,.19) 37%,rgba(127,120,105,.10) 63%);background-size:400% 100%;animation:skSh 1.3s ease infinite}
+.sk-r{border-radius:99px}
+.sk-top{flex:0 0 60px;display:flex;align-items:center;gap:12px;padding:0 16px 0 20px;border-bottom:1px solid rgba(127,120,105,.16)}
+.sk-top .sk-grow{flex:1}
+.sk-body{flex:1;display:flex;min-height:0}
+.sk-side{flex:0 0 252px;margin:16px 0 16px 16px;border:1px solid rgba(127,120,105,.18);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;background:rgba(255,255,255,.45)}
+.sk-hd{padding:16px;display:grid;gap:10px;border-bottom:1px solid rgba(127,120,105,.14);background:rgba(127,120,105,.04)}
+.sk-row{display:flex;align-items:center;gap:8px}
+.sk-nav{padding:10px;display:grid;gap:2px}
+.sk-nav .sk-row{height:40px;padding:0 12px;gap:14px}
+.sk-ft{margin-top:auto;padding:12px 22px 18px;display:grid;gap:12px;border-top:1px solid rgba(127,120,105,.14)}
+.sk-main{flex:1;min-width:0;overflow:hidden}
+.sk-wrap{max-width:1160px;margin:0 auto;padding:32px 24px;display:grid;gap:16px}
+.sk-ph{display:flex;align-items:flex-start;gap:16px;margin-bottom:8px}
+.sk-ph > div{flex:1;display:grid;gap:10px}
+.sk-g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sk-card{border:1px solid rgba(127,120,105,.18);border-radius:16px;background:rgba(255,255,255,.55);padding:20px;display:grid;gap:10px;align-content:start}
+.sk-cols{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.sk-col{display:grid;gap:16px}
+.sk-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.sk-mini{border:1px solid rgba(127,120,105,.16);border-radius:14px;overflow:hidden;display:grid;gap:10px;padding-bottom:14px}
+.sk-mini > .sk-b:first-child{height:118px;border-radius:0}
+.sk-mini > .sk-b:not(:first-child){margin:0 14px}
+.sk-tab{display:none}
+.tmg-boot.sk.dark .sk-card,.tmg-boot.sk.dark .sk-side{background:rgba(255,255,255,.03)}
 @keyframes skSh{0%{background-position:100% 50%}100%{background-position:0 50%}}
-@media (max-width:860px){.tmg-boot.sk{grid-template-columns:1fr}.sk-side{display:none}}
+@media (max-width:1000px){.sk-cols{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){
+  .sk-side,.sk-d{display:none}
+  .sk-top{padding:0 12px}
+  .sk-wrap{padding:18px 16px 100px}
+  .sk-g3{grid-template-columns:1fr}
+  .sk-two{grid-template-columns:1fr}
+  .sk-tab{display:flex;position:fixed;left:0;right:0;bottom:0;justify-content:space-around;padding:10px 4px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(127,120,105,.16);background:inherit}
+  .sk-tab > span{display:grid;justify-items:center;gap:6px}
+}
+@media (min-width:861px){.sk-m{display:none}}
 @media (prefers-reduced-motion:reduce){.sk-b{animation:none}}
 .tmg-in{max-width:380px;display:grid;justify-items:center;gap:12px;text-align:center}
 .tmg-spin{width:34px;height:34px;border-radius:50%;border:3px solid rgba(0,124,216,.18);border-top-color:#007CD8;border-right-color:#FFD741;animation:tmgSpin .8s linear infinite}

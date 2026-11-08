@@ -420,7 +420,8 @@ function actAttrs(a){ return a.finish ? 'data-act="onb-finish"' : 'data-act="onb
 function onbNav(a){
   const steps = onbSteps(), n = dispStep(O.step), i = n - 1;
   const first = O.step === 1 && O.sub === 'choose';
-  const mid = O.step < READY
+  /* Connexion : pas de parcours en 7 étapes à afficher, seulement le logo. */
+  const mid = O.step < READY && !(O.login && O.step === 1)
     ? '<div class="ob-steps"><span>Étape <span class="mono">'+n+'</span> sur <span class="mono">'+steps.length+'</span> · '+esc(steps[i])+'</span>'
       + '<div class="ob-g" role="progressbar" aria-label="Progression" aria-valuemin="1" aria-valuemax="'+steps.length+'" aria-valuenow="'+n+'">'
       + steps.map((_,k)=>'<i class="'+(k<i?'done':k===i?'cur':'')+'"></i>').join('') + '</div></div>'

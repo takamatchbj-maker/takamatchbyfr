@@ -1047,6 +1047,8 @@ b.req{color:var(--bad);font-weight:700}
   .onb-foot .note{flex:1 0 100%;text-align:center}
   .onb-legal{padding:0 20px calc(14px + env(safe-area-inset-bottom,0px))}
   .onb-h h2,.ready h2{font-size:23px}
+  /* En page plein écran, le contenu part du haut : pas de grand vide au-dessus du titre. */
+  .onb-inner{margin:clamp(12px,4vh,36px) 0 auto}
 }
 
 @media (max-width:420px){

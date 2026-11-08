@@ -185,7 +185,9 @@
     var H = helpers(team, now), me = H.byId(viewer);
     var lines = [];
     lines.push('Projet : ' + (team.title || 'sans titre') + (team.hook ? ' — ' + team.hook : ''));
-    lines.push('Équipe depuis ' + dAgo(team.since, now) + ' jours. Porteur : ' + H.porteur.first + '. Talents : ' + (H.talents.map(function(m){ return m.first; }).join(', ') || 'aucun') + '.');
+    var who = function(m){ return m.first + (m.city ? ' (' + m.city + ')' : ''); };
+    lines.push('Équipe depuis ' + dAgo(team.since, now) + ' jours. Porteur : ' + who(H.porteur) + '. Talents : ' + (H.talents.map(who).join(', ') || 'aucun') + '.');
+    lines.push('Pour une heure de rendez-vous, parle en heure locale des membres (leurs villes ci-dessus) ; ne cite jamais une autre ville.');
     lines.push('La personne qui te parle : ' + me.first + ' (' + (me.role === 'vis' ? 'porteur du projet, administrateur de l\'Atelier' : 'talent associé') + ').');
     lines.push('Jalons : ' + (team.milestones || []).map(function(m, i){ return (i + 1) + '. ' + m.t + (m.done ? ' [fait]' : ''); }).join(' ; '));
     var roles = DOMAINS.map(function(d){ var id = (team.roles || {})[d.id]; return d.l + ' : ' + (id ? H.byId(id).first : 'personne'); });
@@ -206,7 +208,7 @@
     return lines.join('\n');
   }
 
-  var api = {compute:compute, reply:reply, summary:summary, lastActivity:lastActivity, DOMAINS:DOMAINS, MILESTONES:MILESTONES, THRESHOLDS:T, version:'2026-10-11'};
+  var api = {compute:compute, reply:reply, summary:summary, lastActivity:lastActivity, DOMAINS:DOMAINS, MILESTONES:MILESTONES, THRESHOLDS:T, version:'2026-11-08'};
   if(typeof module !== 'undefined' && module.exports) module.exports = api;
   root.TakamRules = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
