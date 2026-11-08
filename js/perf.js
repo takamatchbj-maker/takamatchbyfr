@@ -18,7 +18,12 @@
   page = {site:'vitrine', index:'vitrine', onb:'inscription'}[page] || page;
   var M = {lcp:null, fcp:null, ttfb:null, inp:0, cls:0}, sent = false;
   function obs(type, fn){ try{ new PerformanceObserver(function(l){ l.getEntries().forEach(fn); }).observe({type:type, buffered:true}); }catch(e){} }
-  obs('largest-contentful-paint', function(e){ M.lcp = Math.round(e.startTime); });
+  /* LCP : comme Google, on fige la mesure au premier geste (clic, touche, défilement) ou quand
+     l'outil change d'écran ; sinon chaque nouvel écran ouvert gonflerait le chiffre. */
+  var lcpDone = false, stopLcp = function(){ lcpDone = true; };
+  ['pointerdown', 'keydown', 'scroll', 'hashchange'].forEach(function(t){ addEventListener(t, stopLcp, {once:true, capture:true, passive:true}); });
+  setTimeout(stopLcp, 20000);
+  obs('largest-contentful-paint', function(e){ if(!lcpDone) M.lcp = Math.round(e.startTime); });
   obs('paint', function(e){ if(e.name === 'first-contentful-paint') M.fcp = Math.round(e.startTime); });
   obs('layout-shift', function(e){ if(!e.hadRecentInput) M.cls += e.value; });
   obs('event', function(e){ if(e.interactionId && e.duration > M.inp) M.inp = Math.round(e.duration); });
