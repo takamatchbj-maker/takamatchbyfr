@@ -505,7 +505,7 @@ function vAccueil(){
   const ranked = pool().filter(x => !x.hidden && !isUnlocked(x.id)).map(x => ({x, s:scoreOf(x)})).sort((a,b)=>b.s.total-a.s.total).slice(0,4);
   const newInv = S.invitesRecv.filter(i=>i.status==='new').length;
   const unread = S.threads.filter(t=>t.unread && !t.archived).length;
-  const msgs = S.threads.reduce((a,t)=>a+t.msgs.length,0);
+  const convs = S.threads.filter(t => !t.archived).length;   /* les messages d'une discussion se chargent à l'ouverture : on compte les discussions */
 
   return '<div class="page-h"><div><h1>Bonjour <span class="acc">'+esc(me.first||'à toi')+'</span></h1>'
   +   (me.founder ? '<p style="margin:4px 0 0">'+founderBadge(true)+'</p>' : '')
@@ -515,8 +515,8 @@ function vAccueil(){
 
   + '<div class="grid g3" style="margin-bottom:16px">'
   +   stat('eye','Vues de ta fiche', 0, 'pas encore de vue comptée')
-  +   stat('link','Invitations reçues', S.invitesRecv.length, newInv ? newInv+' à traiter' : 'aucune en attente')
-  +   stat('chat','Messages', msgs, unread ? unread+' conversation'+(unread>1?'s':'')+' non lue'+(unread>1?'s':'') : 'tout est lu')
+  +   stat('link', tal ? 'Invitations reçues' : 'Candidatures reçues', S.invitesRecv.length, newInv ? newInv+' à traiter' : 'aucune en attente')
+  +   stat('chat','Conversations', convs, unread ? unread+' non lue'+(unread>1?'s':'') : convs ? 'tout est lu' : 'elles s\'ouvrent après un match')
   + '</div>'
 
   + '<div class="cols cols-main">'
@@ -647,7 +647,7 @@ function vConnexions(){
   const recvNew = S.invitesRecv.filter(i=>i.status==='new').length;
   const t = S.tab === 'matchs' ? 'matchs' : 'invitations';
   return '<div class="page-h"><div><h1>Tes <span class="acc">connexions</span></h1>'
-    + '<p class="sub">Les invitations que tu envoies et que tu reçois, et les équipes qui en sortent.</p></div></div>'
+    + '<p class="sub">'+(isTalMode() ? 'Les invitations que tu reçois, les candidatures que tu envoies' : 'Les invitations que tu envoies, les candidatures que tu reçois')+', et les équipes qui en sortent.</p></div></div>'
     + '<div class="tabs" role="tablist">'+tabBtn('invitations','Invitations','link', recvNew)+tabBtn('matchs','Matchs','spark', S.matches.length, true)+'</div>'
     + (t === 'matchs' ? matchesPanel() : invitationsPanel());
 }
@@ -2115,7 +2115,8 @@ function avatarOf(t, size, un, role){
   if(ph) return '<span class="av av-'+size+' ph'+(un ? '' : ' locked')+'" aria-hidden="true"><span class="inner" style="background-image:url('+ph+')"></span>'+(un ? '' : LOCKPIN)+'</span>';
   const tc = tintCls(role === 'vis' ? 'vis' : 'tal', (t.hue || 0) + 2), bg = tintAng(t.hue);
   if(un) return '<span class="av av-'+size+' '+tc+'" style="'+bg+'" aria-hidden="true">'+esc(initials(t.name))+'</span>';
-  return '<span class="av av-'+size+' '+tc+' locked" style="'+bg+'" aria-hidden="true"><span class="inner '+tc+'" style="width:100%;height:100%;display:grid;place-items:center">'+esc(initials(t.name))+'</span>'+LOCKPIN+'</span>';
+  /* Avant le match, même floues, les initiales ne sont pas écrites dans la page : le nom reste secret. */
+  return '<span class="av av-'+size+' '+tc+' locked" style="'+bg+'" aria-hidden="true"><span class="inner '+tc+'" style="width:100%;height:100%;display:grid;place-items:center">··</span>'+LOCKPIN+'</span>';
 }
 function memAv(m, size){
   const ph = faceOf(m.id);
@@ -3445,7 +3446,8 @@ function vAtelier(){
     + '<table class="roles-t"><tbody>'+DOMAINS.map(d => '<tr><td>'+esc(d.l)+'</td><td><select class="inp inp-sm" id="role-'+d.id+'" data-role="'+d.id+'" aria-label="Responsable '+esc(d.l)+'"'+lockAttr(t)+'>'
       + '<option value="">À décider</option>'+t.members.map(m => '<option value="'+m.id+'"'+(t.roles[d.id]===m.id?' selected':'')+'>'+esc(m.me?'Toi':m.first)+'</option>').join('')+'</select></td></tr>').join('')+'</tbody></table></section>';
   const cap = '<section class="panel"><div class="sec-t">'+ic('award')+'<h3>Répartition du capital</h3></div>'
-    + '<p class="hint" style="margin-bottom:12px">Décidez-la tôt, à froid. '+(adm ? 'Règle la part de chaque talent ; la tienne se calcule.' : 'Proposée par '+esc(P0.first)+'.')+'</p>'
+    + '<p class="hint" style="margin-bottom:12px">Décidez-la tôt, à froid. '+(adm ? 'Règle la part de chaque talent ; la tienne se calcule.'
+        : t.members.some(m => m.role === 'tal' && shareOf(t, m.id) > 0) ? 'Proposée par '+esc(P0.first)+'.' : esc(P0.first)+' n\'a pas encore proposé de répartition.')+'</p>'
     + '<div class="equity">'+t.members.map(m => { const v = shareOf(t, m.id);
         return '<div class="eq-row"><div class="eq-bar"><i style="width:'+v+'%;background:'+(m.role==='vis'?'var(--vis-200)':'var(--tal-200)')+'"></i><span>'+esc(m.me?'Toi':m.first)+'</span></div><div class="eq-val tnum" id="eqv-'+m.id+'">'+v+' %</div></div>'
           + (m.role === 'tal' ? '<label class="sr" for="eq-'+m.id+'">Part de '+esc(m.first)+'</label><input type="range" id="eq-'+m.id+'" data-eq="'+m.id+'" min="0" max="40" step="5" value="'+v+'" class="eq-range"'+lockAttr(t)+'>' : ''); }).join('')+'</div>'
@@ -3846,7 +3848,7 @@ function supportRail(){
   const nets = [['linkedin','LinkedIn'],['instagram','Instagram'],['facebook','Facebook'],['tiktok','TikTok'],['youtube','YouTube']];
   return '<div class="support-logo"><img src="'+LOGO2+'" alt="TakaMatch"></div>'
     + '<section class="card card-pad gb"><div class="lbl" style="margin-bottom:6px">Communauté WhatsApp</div>'
-    +   '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.55;margin-bottom:12px"><span class="mono">840</span> membres. Entraide, retours d\'expérience et annonces de projets.</p>'
+    +   '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.55;margin-bottom:12px">Entraide entre membres, retours d\'expérience et annonces de projets.</p>'
     +   '<a class="btn btn-block btn-wa" href="'+TM_LINKS.whatsapp+'" target="_blank" rel="noopener">'+socIc('whatsapp')+'Rejoindre le groupe</a></section>'
     + '<section class="card card-pad gb"><div class="lbl" style="margin-bottom:8px">Sécurité</div>'
     +   '<p style="font-size:13.5px;color:var(--ink-2);line-height:1.55">Personne de TakaMatch ne te demandera jamais ton code mobile money ni ton mot de passe.</p></section>'

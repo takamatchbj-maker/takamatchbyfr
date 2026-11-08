@@ -975,7 +975,7 @@ VIEWS.overview = () => {
     +   kpi('file', 'Fiches en ligne', u.filter(x => x.roles.includes('tal') && x.online && x.status === 'active').length + (D.liveProjects ? D.liveProjects.filter(p => p.online).length : DATA.PROJECTS.filter(p => (D.mod || {})[p.id] !== 'hidden').length), 'talents et projets visibles')
     +   (D.inv30 ? kpi('link', 'Invitations (30 j)', nf(D.inv30.n), D.inv30.n ? Math.round(D.inv30.answered/D.inv30.n*100)+' % de réponses' : 'aucune ce mois-ci') : kpi('link', 'Invitations envoyées', nf(u.reduce((a, x) => a + x.invitesSent, 0)), ''))
     +   kpi('check', 'Matchs', D.teams.reduce((a, t) => a + t.talents.length, 0), D.teams.length+' Ateliers ouverts')
-    +   kpi('flag', 'Comptes sanctionnés', u.filter(x => x.status !== 'active').length, u.filter(x => x.status === 'banned').length+' banni · '+u.filter(x => x.status === 'suspended').length+' suspendu')
+    +   kpi('flag', 'Comptes sanctionnés', u.filter(x => x.status === 'banned' || x.status === 'suspended').length, u.filter(x => x.status === 'banned').length+' banni · '+u.filter(x => x.status === 'suspended').length+' suspendu')
     + '</div>'
     + '<div class="grid g-split" style="margin-bottom:14px">'
     +   '<section class="card card-pad"><div class="sec-t"><h3>À traiter</h3><span class="hint">Mis à jour en direct</span></div><div class="col" style="gap:8px">'
@@ -1062,7 +1062,7 @@ VIEWS.users = () => {
     + '<div class="bar"><input class="inp q" data-act="uq" placeholder="Nom, @pseudo, e-mail, téléphone, ville" value="'+esc(A.q.users || '')+'">'
     + sel('role', [['','Tous les profils'],['tal','Talents'],['vis','Visionnaires'],['both','Les deux profils']])
     + sel('ver', [['','Vérifiés ou non'],['yes','Vérifiés'],['no','Non vérifiés']])
-    + sel('st', [['','Tous les statuts'],['active','Actifs'],['suspended','Suspendus'],['banned','Bannis']]) + '</div>'
+    + sel('st', [['','Tous les statuts'],['active','Actifs'],['suspended','Suspendus'],['banned','Bannis'],['deleted','Anonymisés']]) + '</div>'
     + '<p class="hint" style="margin:0 0 8px">'+list.length+' résultat'+(list.length > 1 ? 's' : '')+'</p>'
     + table(['Utilisateur', 'E-mail', 'Téléphone', 'Ville', 'Profils', 'Vérification', 'Statut', 'Inscrit'], list.map(u =>
       '<tr class="click'+(u.live ? ' fresh' : '')+'" data-act="open-user" data-id="'+u.id+'"><td>'+whoCell(u)+'</td><td>'+esc(u.email)+'</td><td class="mono" style="white-space:nowrap">'+esc(u.phone)+'</td><td>'+esc(u.city.split(',')[0])+'</td>'
